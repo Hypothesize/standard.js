@@ -1,4 +1,4 @@
-declare module Hypothesize {
+export declare module StandardTypes {
 
     type Primitive = number | string /*| boolean*/ | Date
     
