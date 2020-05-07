@@ -1355,3 +1355,16 @@ export function getComparer<T>(projector: Projector<T, any>, tryNumeric: boolean
 }
 //#endregion
 
+
+// Unit tests
+
+export const testSuite = () => {
+	// to-do
+	describe("String", () => {
+		it ("should check whether is a whitespace or not", () => {
+			const inputString = "";
+
+			assert.equal(new String__(inputString).isWhiteSpace(), true);
+		});
+	})
+}
