@@ -551,7 +551,7 @@ export class Dictionary<V, K extends string = string> implements Enumerable<[K, 
 	}
 
 	// to-do
-	[Symbol.iterator]() { return Object__.entries(this._obj)[Symbol.iterator]() }
+	[Symbol.iterator]() { return Object__.entries<V, K>(this._obj)[Symbol.iterator]() }
 
 	materialize() { return this.entries() }
 
