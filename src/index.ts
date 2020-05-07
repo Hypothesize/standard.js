@@ -1,24 +1,24 @@
 import { cloneDeep, mergeWith } from "lodash"
-import { StandardTypes } from "./types"
+import { Types } from "./types"
 import * as assert from 'assert'
 
-type Tuple<X, Y> = StandardTypes.Tuple<X, Y>
+type Tuple<X, Y> = Types.Tuple<X, Y>
 export const Tuple = class <X, Y>  { constructor(x: X, y: Y) { return [x, y] as Tuple<X, Y> } } as { new <X, Y>(x: X, y: Y): [X, Y] }
 
-type Enumerable<T> = StandardTypes.Collection.Enumerable<T>
-type Material<T> = StandardTypes.Collection.Material<T>
-type Ordered<T> = StandardTypes.Collection.Ordered<T>
-type IndexedExtended<K, V> = StandardTypes.Collection.IndexedExtended<K, V>
+type Enumerable<T> = Types.Collection.Enumerable<T>
+type Material<T> = Types.Collection.Material<T>
+type Ordered<T> = Types.Collection.Ordered<T>
+type IndexedExtended<K, V> = Types.Collection.IndexedExtended<K, V>
 
-type Ranker<T> = StandardTypes.Ranker<T>
-type Comparer<T> = StandardTypes.Comparer<T>
-type Reducer<X, Y> = StandardTypes.Reducer<X, Y>
-type Predicate<X = any> = StandardTypes.Predicate<X>
-type Projector<X = any, Y = any> = StandardTypes.Projector<X, Y>
+type Ranker<T> = Types.Ranker<T>
+type Comparer<T> = Types.Comparer<T>
+type Reducer<X, Y> = Types.Reducer<X, Y>
+type Predicate<X = any> = Types.Predicate<X>
+type Projector<X = any, Y = any> = Types.Projector<X, Y>
 
-type ArrayElementType<T> = StandardTypes.ArrayElementType<T>
-type Primitive = StandardTypes.Primitive
-type Obj<T, K extends string = string> = StandardTypes.Obj<T, K>
+type ArrayElementType<T> = Types.ArrayElementType<T>
+type Primitive = Types.Primitive
+type Obj<T, K extends string = string> = Types.Obj<T, K>
 
 
 /** Enumerable readonly sequence of values, lazy by default */
@@ -105,11 +105,11 @@ export class Set__<T> implements Material<T> {
 	}
 	some(predicate: Predicate<T>): boolean { return [...this].some(predicate) }
 	every(predicate: Predicate<T>): boolean { return [...this].every(predicate) }
-	unique(): Set__<T> { return new Set__(([...this] as any as StandardTypes.Collection.Material<T>)) }
+	unique(): Set__<T> { return new Set__(([...this] as any as Types.Collection.Material<T>)) }
 	contains(value: T): boolean { return this._set.has(value) }
-	union(...collections: StandardTypes.Collection.Material<T>[]): Set__<T> { throw new Error('Not implemented') }
-	intersection(...collections: StandardTypes.Collection.Material<T>[]): Set__<T> { throw new Error('Not implemented') }
-	except(...collections: StandardTypes.Collection.Material<T>[]): Set__<T> { throw new Error('Not implemented') }
+	union(...collections: Types.Collection.Material<T>[]): Set__<T> { throw new Error('Not implemented') }
+	intersection(...collections: Types.Collection.Material<T>[]): Set__<T> { throw new Error('Not implemented') }
+	except(...collections: Types.Collection.Material<T>[]): Set__<T> { throw new Error('Not implemented') }
 	complement(universe: Iterable<T>): Set__<T> { throw new Error('Not implemented') }
 
 	toSequence() { return new Sequence([...this]) }
@@ -315,9 +315,9 @@ export class Array__<T> implements Ordered<T> {
 	reduce<Y>(initial: Y, reducer: Reducer<T, Y>): Array__<Y> { return new Array__(reduce(this, initial, reducer)) }
 	forEach(action: Projector<T>) { return forEach(this, action) }
 
-	union(...collections: StandardTypes.Collection.Material<T>[]): Array__<T> { return new Array__([]) }
-	intersection(...collections: StandardTypes.Collection.Material<T>[]): Array__<T> { return new Array__([]) }
-	except(...collections: StandardTypes.Collection.Material<T>[]): Array__<T> { return new Array__([]) }
+	union(...collections: Types.Collection.Material<T>[]): Array__<T> { return new Array__([]) }
+	intersection(...collections: Types.Collection.Material<T>[]): Array__<T> { return new Array__([]) }
+	except(...collections: Types.Collection.Material<T>[]): Array__<T> { return new Array__([]) }
 	complement(universe: Iterable<T>): Array__<T> { return new Array__([]) }
 
 	isDuplicated(value: T): boolean {
@@ -815,8 +815,8 @@ export class Object__ extends global.Object {
 		}
 	}
 
-	static fromKeyValues<T, K extends string = string>(keyValues: StandardTypes.Tuple<K, T>[]) {
-		let obj = {} as StandardTypes.Obj<T, K>
+	static fromKeyValues<T, K extends string = string>(keyValues: Types.Tuple<K, T>[]) {
+		let obj = {} as Types.Obj<T, K>
 		keyValues.forEach(kvp => {
 			obj[kvp[0]] = kvp[1]
 		})
@@ -824,11 +824,11 @@ export class Object__ extends global.Object {
 		return obj
 	}
 
-	static entries<V, K extends string = string>(obj: StandardTypes.Obj<V, K>) {
+	static entries<V, K extends string = string>(obj: Types.Obj<V, K>) {
 		return Object__.keys(obj).map((key, index) => new Tuple(key, obj[key]))
 	}
 
-	static merge<X>(target: X, source: StandardTypes.RecursivePartial<X> | undefined | null): X
+	static merge<X>(target: X, source: Types.RecursivePartial<X> | undefined | null): X
 	static merge<X>(target: X, source: Partial<X> | undefined | null): X
 	static merge<X>(target: Partial<X> | undefined | null, source: X): X
 	static merge<X>(target: X, source: undefined | null): X
@@ -1278,7 +1278,7 @@ function reduce<X, Y>(iterable: Iterable<X>, initial: Y, reducer: Reducer<X, Y>)
 /** Turns n iterables into an iterable of n-tuples (encoded as arrays of length n).
  * The shortest iterable determines the length of the result
  */
-function zip<A, B>(iter1: Iterable<A>, iter2: Iterable<B>): IterableIterator<StandardTypes.Tuple<A, B>>
+function zip<A, B>(iter1: Iterable<A>, iter2: Iterable<B>): IterableIterator<Types.Tuple<A, B>>
 function zip<T extends any[]>(...iterables: Iterable<ArrayElementType<T>>[]): IterableIterator<T> {
 	let iterators = iterables.map(i => i[Symbol.iterator]());
 	let done = false;

@@ -1,4 +1,4 @@
-export declare module StandardTypes {
+export declare module Types {
 
     type Primitive = number | string /*| boolean*/ | Date
     
