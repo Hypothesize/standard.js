@@ -5,21 +5,13 @@ import * as assert from 'assert'
 export const Tuple = class <X, Y>  { constructor(x: X, y: Y) { return [x, y] as Tuple<X, Y> } } as { new <X, Y>(x: X, y: Y): [X, Y] }
 
 
-import X = Collection
-export { X }
-
-// declare namespace Collection extends StandardX.Collection {
-
-// }
-
-// let y: StandardX.Collection.Enumerable<number>
-
 export type Enumerable<T> = Collection.Enumerable<T>
 export type Material<T> = Collection.Material<T>
 export type MaterialExtended<T> = Collection.MaterialExtended<T>
 export type Ordered<T> = Collection.Ordered<T>
 export type Indexed<K, V> = Collection.Indexed<K, V>
 export type IndexedExtended<K, V> = Collection.IndexedExtended<K, V>
+export type _Ranker<T> = Ranker<T>
 
 /** Enumerable readonly sequence of values, lazy by default */
 export class Sequence<T> implements Enumerable<T> {
@@ -259,7 +251,7 @@ export class Array__<T> implements Ordered<T> {
 	/** Sorts array in ascending order
 	 * @param comparer function used to compare each elements
 	 */
-	sort(comparer?: Ranker<T>, options?: { tryNumeric?: boolean }) { return this.ctor(this._arr.sort(comparer)) }
+	sort(comparer?: _Ranker<T>, options?: { tryNumeric?: boolean }) { return this.ctor(this._arr.sort(comparer)) }
 
 	/** Sorts array in descending order
 	 * @param comparer function used to compare each elements
