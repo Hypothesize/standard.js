@@ -279,9 +279,9 @@ export class Array__<T> implements Ordered<T> {
 	contains(value: T): boolean { return this._arr.indexOf(value) >= 0 }
 	includes(value: T): boolean { return this._arr.indexOf(value) >= 0 }
 
-	static flatten<X>(target: any[]): Array__<X> {
+	static flatten<X>(target: any[]): X[] {
 		if (target.length === 0)
-			return new Array__<X>([])
+			return []
 
 		let result: X[] = []
 		for (let val of target) {
@@ -291,7 +291,7 @@ export class Array__<T> implements Ordered<T> {
 			)
 		}
 
-		return new Array__<X>(result)
+		return result
 	}
 	flatten<X>(): Array__<X> {
 		if (this.length === 0)
@@ -300,7 +300,7 @@ export class Array__<T> implements Ordered<T> {
 		let result: X[] = []
 		for (let val of this) {
 			result = [...result.concat(Array.isArray(val)
-				? Array__.flatten(val as any)
+				?Array__.flatten(val as any)
 				: val as any
 			)]
 		}
