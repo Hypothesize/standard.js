@@ -285,10 +285,10 @@ export class Array__<T> implements Ordered<T> {
 
 		let result: X[] = []
 		for (let val of target) {
-			result = result.concat(Array.isArray(val)
+			result = [...result.concat(Array.isArray(val)
 				? Array__.flatten(val)
 				: val
-			)
+			)]
 		}
 
 		return result
@@ -300,7 +300,7 @@ export class Array__<T> implements Ordered<T> {
 		let result: X[] = []
 		for (let val of this) {
 			result = [...result.concat(Array.isArray(val)
-				?Array__.flatten(val as any)
+				? Array__.flatten(val as any)
 				: val as any
 			)]
 		}
@@ -407,7 +407,7 @@ export class ArrayNumeric extends Array__<number> {
 	}*/
 
 	min(): number | undefined {
-		let _min : number | undefined = undefined
+		let _min: number | undefined = undefined
 		for (let element of this) {
 			if (_min === undefined || (_min !== element && element < _min))
 				_min = element
@@ -415,7 +415,7 @@ export class ArrayNumeric extends Array__<number> {
 		return _min
 	}
 	max(): number | undefined {
-		let _min : number | undefined = undefined
+		let _min: number | undefined = undefined
 		for (let element of this) {
 			if (_min === undefined || (_min !== element && element > _min))
 				_min = element
@@ -1360,11 +1360,11 @@ export function getComparer<T>(projector: Projector<T, any>, tryNumeric: boolean
 
 //#region Tests
 console.log(process.argv)
-if(typeof global.describe === 'function'){
+if (typeof global.describe === 'function') {
 	describe("String", () => {
 		it("should check whether is a whitespace or not", () => {
 			const inputString = "";
-	
+
 			assert.equal(new String__(inputString).isWhiteSpace(), true);
 		});
 	})
