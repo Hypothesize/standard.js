@@ -19,6 +19,8 @@ type Projector<X = any, Y = any> = Types.Projector<X, Y>
 type ArrayElementType<T> = Types.ArrayElementType<T>
 type Primitive = Types.Primitive
 type Obj<T, K extends string = string> = Types.Obj<T, K>
+export interface NestedIterable<T> extends Iterable<T | NestedIterable<T>> { }
+
 
 
 /** Enumerable readonly sequence of values, lazy by default */
@@ -279,32 +281,15 @@ export class Array__<T> implements Ordered<T> {
 	contains(value: T): boolean { return this._arr.indexOf(value) >= 0 }
 	includes(value: T): boolean { return this._arr.indexOf(value) >= 0 }
 
-	static flatten<X>(target: any[]): X[] {
-		if (target.length === 0)
-			return []
-
-		let result: X[] = []
-		for (let val of target) {
-			result = result.concat(Array.isArray(val)
-				? Array__.flatten(val)
-				: val
-			)
-		}
-		return result
-	}
-	flatten<X>(): Array__<X> {
-		if (this.length === 0)
-			return new Array__<X>([])
-
-		let result: X[] = []
-		for (let val of this) {
-			result = result.concat(Array.isArray(val) || val["constructor"] === Array__
-				? Array__.flatten(val as any)
-				: val as any
-			)
-		}
-
-		return new Array__<X>(result)
+	static flatten<X>(target: NestedIterable<X>): Array__<X> {
+		return new Array__((function* (iterable: NestedIterable<X>) {
+			for (const element of iterable) {
+				if (element !== undefined && element !== null && typeof element[Symbol.iterator] === 'function')
+					yield* Array__.flatten(element as unknown as NestedIterable<X>)
+				else
+					yield element as X
+			}
+		})(target))
 	}
 
 	take(n: number) { return this.ctor(take(this, n)) }
@@ -1371,7 +1356,7 @@ if (typeof global.describe === 'function') {
 	describe("Array", () => {
 		it("should flatten arrays correctly", () => {
 			const nestedArray = new Array__([new Array__([1, 2, 3]), new Array__([4, 5, 6])])
-			const flattenedArray = nestedArray.flatten()
+			const flattenedArray = Array__.flatten(nestedArray)
 			assert.equal(flattenedArray.length, 6);
 		});
 	})
