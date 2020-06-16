@@ -285,10 +285,10 @@ export class Array__<T> implements Ordered<T> {
 
 		let result: X[] = []
 		for (let val of target) {
-			result = [...result.concat(Array.isArray(val)
+			result = result.concat(Array.isArray(val)
 				? Array__.flatten(val)
 				: val
-			)]
+			)
 		}
 		return result
 	}
