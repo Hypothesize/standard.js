@@ -290,7 +290,6 @@ export class Array__<T> implements Ordered<T> {
 				: val
 			)]
 		}
-
 		return result
 	}
 	flatten<X>(): Array__<X> {
@@ -299,10 +298,10 @@ export class Array__<T> implements Ordered<T> {
 
 		let result: X[] = []
 		for (let val of this) {
-			result = [...result.concat(Array.isArray(val)
+			result = result.concat(Array.isArray(val) || val["constructor"] === Array__
 				? Array__.flatten(val as any)
 				: val as any
-			)]
+			)
 		}
 
 		return new Array__<X>(result)
@@ -1366,6 +1365,14 @@ if (typeof global.describe === 'function') {
 			const inputString = "";
 
 			assert.equal(new String__(inputString).isWhiteSpace(), true);
+		});
+	})
+
+	describe("Array", () => {
+		it("should flatten arrays correctly", () => {
+			const nestedArray = new Array__([new Array__([1, 2, 3]), new Array__([4, 5, 6])])
+			const flattenedArray = nestedArray.flatten()
+			assert.equal(flattenedArray.length, 6);
 		});
 	})
 }
