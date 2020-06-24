@@ -314,8 +314,7 @@ export class Array__<T> implements Ordered<T> {
 	frequency(item: T): number { return this.filter(_item => _item === item).length }
 	mode(): T | undefined {
 		const freqs = this.frequencies().sort(x => x)
-		console.log(freqs[0])
-		return freqs[freqs.length - 1][0]
+		return freqs.getArray()[freqs.length - 1][0]
 	}
 	median() {
 		return this.sort().get(this.length / 2)
@@ -960,10 +959,10 @@ export class String__ extends global.String {
 
 	isURL(): boolean {
 		var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-			'((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
+			'((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.+)+[a-z]{2,}|' + // domain name
 			'((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
 			'(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-			'(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+			'(\\?[;&a-z\\d%_.~+=\\*-]*)?' + // query string
 			'(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
 		return pattern.test(this.toString());
 	}
@@ -1360,7 +1359,7 @@ export function getComparer<T>(projector: Projector<T, any>, tryNumeric: boolean
 
 
 //#region Tests
-console.log(process.argv)
+
 if (process.env.HYPOTESTING) {
 	describe("Array object", () => {
 
@@ -1520,14 +1519,14 @@ if (process.env.HYPOTESTING) {
 				assert.throws(testArray.variance, "Tried to call getNumber() on an array including undefined values")
 			})
 
-			it("It should return undefined for an array containing only NaN element", () => {
-				const testArray = new ArrayNumeric([NaN])
-				assert.equal(testArray.variance(), undefined)
+			it("It should return NaN for an array containing only NaN element", () => {
+				const testArray = new ArrayNumeric([NaN, NaN])
+				assert.ok(Number.isNaN(testArray.variance()))
 			})
 
-			it("should ignore the NaN values in the array", () => {
+			it("should return NaN if there is any NaN value in the array", () => {
 				const testArray = new ArrayNumeric([0, 1, 1.5, 2, 2, 4, 4, 6, 14, 15, 18, NaN])
-				assert.equal(testArray.variance(), 41.004545454545465)
+				assert.ok(Number.isNaN(testArray.variance()))
 			})
 		})
 	})
