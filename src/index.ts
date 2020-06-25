@@ -191,8 +191,23 @@ export class Array__<T> implements Ordered<T> {
 		let index = 0
 		return this.filter(item => !indices.includes(index++))
 	}
-	removeSliceCounted(index: number, count: number) { return this.ctor([...this].splice(index, count)) }
-	removeSliceDelimited(fromIndex: number, toIndex: number): Array__<T> { return this.ctor([...this].splice(fromIndex, toIndex - fromIndex + 1)) }
+	/** Returns a slice of the array, starting from 'index' and for 'count' element */
+	removeSliceCounted(index: number, count: number) {
+		if (index > this.length - 1) {
+			throw new Error(`Starting index is out of bounds (array contains only ${this.length} elements)`)
+		}
+		return this.ctor([...this].splice(index, count))
+	}
+
+	/** Returns a slice of the array */
+	removeSliceDelimited(fromIndex: number, toIndex: number): Array__<T> {
+		if (fromIndex > this.length - 1) {
+			throw new Error(`Starting index is out of bounds (array contains only ${this.length} elements)`)
+		} else if (fromIndex > toIndex) {
+			throw new Error(`end index is higher than starting index`)
+		}
+		return this.ctor([...this].splice(fromIndex, toIndex - fromIndex + 1))
+	}
 
 	insert(index: number, ...items: T[]): Array__<T> {
 		let arr = [...this]
@@ -1416,12 +1431,81 @@ if (process.env.HYPOTESTING) {
 			})
 		})
 
-		// describe("append()", () => {
-		// 	it("should create an Array__ with the elements contained in itself plus that of the passed array", () => {
-		// 		const testArray = new Array__([0, 1, 2]).append([3, 4, 5])
-		// 		assert.deepStrictEqual([...testArray], [0, 1, 2, 3, 4, 5])
-		// 	})
-		// })
+		describe("merge()", () => {
+
+			it("should ignore the values whose index is out of bounds", () => {
+				const testArray = new Array__([0, 1, 2]).merge({ value: 34, index: 5 })
+				assert.deepStrictEqual([...testArray], [0, 1, 2])
+			})
+
+			it("should enrich the array with the desired values, overriding some if their index already exists", () => {
+				const testArray = new Array__([0, 1, 2]).merge({ value: 99, index: 0 })
+				assert.deepStrictEqual([...testArray], [99, 1, 2])
+			})
+			it("should merge a passed object with an object in the array, if they are at the same index", () => {
+				const testArray = new Array__<{} | number>([{ alpha: 3 }, 1, 2]).merge({ value: { omega: 5 }, index: 0 })
+				assert.deepStrictEqual([...testArray], [{ alpha: 3, omega: 5 }, 1, 2])
+			})
+		})
+
+		describe("removeItems()", () => {
+			it("should remove the desired items if they are numbers", () => {
+				const testArray = new Array__([0, 1, 2]).removeItems(v => v, 2)
+				assert.deepStrictEqual([...testArray], [0, 1])
+			})
+			it("should remove the desired items if they are objects", () => {
+				const testArray = new Array__([{ color: "blue" }, { color: "green" }, { color: "red" }]).removeItems(v => v.color, { color: "red" })
+				assert.deepStrictEqual([...testArray], [{ color: "blue" }, { color: "green" }])
+			})
+		})
+
+		describe("removeIndices()", () => {
+			it("should remove a single index", () => {
+				const testArray = new Array__([0, 1, 2]).removeIndices([2])
+				assert.deepStrictEqual([...testArray], [0, 1])
+			})
+			it("should remove several indices at once", () => {
+				const testArray = new Array__([0, 1, 2]).removeIndices([2, 1])
+				assert.deepStrictEqual([...testArray], [0])
+			})
+		})
+
+		describe("removeSliceCounted", () => {
+			it("should throw is we want a slice that include out of bounds indices", () => {
+				assert.throws(() => {
+					new Array__([0, 1, 2, 3, 4, 5]).removeSliceCounted(12, 15)
+				}, "Error")
+			})
+			it("should return a slice until the end if the count goes above the array's length", () => {
+				const testArray = new Array__([0, 1, 2, 3, 4, 5]).removeSliceCounted(2, 15)
+				assert.deepStrictEqual([...testArray], [2, 3, 4, 5])
+			})
+			it("should return the slice starting from two and containing 2 elements", () => {
+				const testArray = new Array__([0, 1, 2, 3, 4, 5]).removeSliceCounted(2, 2)
+				assert.deepStrictEqual([...testArray], [2, 3])
+			})
+		})
+
+		describe("removeSliceDelimited", () => {
+			it("should throw is we want a slice whose start index is out of bound", () => {
+				assert.throws(() => {
+					new Array__([0, 1, 2, 3, 4, 5]).removeSliceDelimited(9, 13)
+				}, "Error")
+			})
+			it("should throw is the start index is bigger than the end index", () => {
+				assert.throws(() => {
+					new Array__([0, 1, 2, 3, 4, 5]).removeSliceDelimited(5, 2)
+				}, "Error")
+			})
+			it("should return a slice until the end, if the end index is above the array's length", () => {
+				const testArray = new Array__([0, 1, 2, 3, 4, 5, 6, 7]).removeSliceDelimited(4, 9)
+				assert.deepStrictEqual([...testArray], [4, 5, 6, 7])
+			})
+			it("should return the slice from 4 to 7", () => {
+				const testArray = new Array__([0, 1, 2, 3, 4, 5, 6, 7]).removeSliceDelimited(4, 7)
+				assert.deepStrictEqual([...testArray], [4, 5, 6, 7])
+			})
+		})
 
 		describe("unique()", () => {
 			it("should return an array were each number contained in the input appears once", () => {
