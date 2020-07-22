@@ -25,18 +25,24 @@
 			"ESNext.Symbol",
 			"ES2015.Symbol"
 		],
-		"keyofStringsOnly": true,
-		"suppressImplicitAnyIndexErrors": true,
-		"strict": true,
-		"rootDirs": [
-			"./src",
-		],
-		"outDir": "./dist",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
 		"noEmitOnError": true,
 		"declaration": true,
-		"incremental": true
+		"incremental": true,
+		"strict": true,
+		"rootDirs": [
+			"src",
+			"test"
+		],
+		"outDir": "./dist"
 	},
 	"include": [
-		"src"
+		"src",
+		"test"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
 	]
 }

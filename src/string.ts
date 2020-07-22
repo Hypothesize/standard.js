@@ -1,66 +1,85 @@
-"use strict";
+/* eslint-disable fp/no-mutating-methods */
+/* eslint-disable fp/no-unused-expression */
+/* eslint-disable fp/no-let */
+/* eslint-disable fp/no-class */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable fp/no-rest-parameters */
+/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable fp/no-mutation */
+/* eslint-disable fp/no-loops */
 
-import * as assert from 'assert'
 
-
-
-
-interface Container<T> {
-	new(args: Iterable<T>): InstanceType<this>
-}
-
-export class String__ extends global.String {
+export class stdString extends global.String {
 	constructor(str: string) {
 		super(str)
 	}
 
-	isWhiteSpace(): boolean { return this.replace(/^\s+|\s+$/g, '').length === 0 }
-	isUpperCase() { return this.toUpperCase() === this.valueOf() }
-	isLowerCase() { return this.toLowerCase() === this.valueOf() }
-	isEmptyOrWhitespace() { return this.strip([" ", "\n", "\t", "\v", "\r"]).length === 0; }
-	prependSpaceIfNotEmpty() { if (this.isEmptyOrWhitespace()) return ""; else return " " + this }
+	isWhiteSpace(): boolean {
+		return this.replace(/^\s+|\s+$/g, '').length === 0
+	}
+	isUpperCase() {
+		return this.toUpperCase() === this.valueOf()
+	}
+	isLowerCase() {
+		return this.toLowerCase() === this.valueOf()
+	}
+	isEmptyOrWhitespace() {
+		return this.strip([" ", "\n", "\t", "\v", "\r"]).length === 0
+	}
+	prependSpaceIfNotEmpty() {
+		if (this.isEmptyOrWhitespace()) return ""; else return " " + this
+	}
 	/** truncate this string by lopping a specified number of characters from the end */
-	truncate(numChars: number) { return new String__(this.substr(0, this.length - numChars)) }
+	truncate(numChars: number) {
+		return new stdString(this.substr(0, this.length - numChars))
+	}
 
-	toSnakeCase() { return new String__([...this.tokenizeWords()].join("_")) }
-	toCamelCase() { return new String__([...this.tokenizeWords()].map(word => word.toTitleCase).join("_")) }
+	toSnakeCase() {
+		return new stdString([...this.tokenizeWords()].join("_"))
+	}
+	toCamelCase() {
+		return new stdString([...this.tokenizeWords()].map(word => word.toTitleCase).join("_"))
+	}
 	toSpace() {
-		return new String__([...this.tokenizeWords({
+		return new stdString([...this.tokenizeWords({
 			separateCaseBoundary: "upper",
 			seperatorChars: ["-", "_", " ", "    ", "\t"]
 		})].join(" "))
 	}
-	toTitleCase() { return new String__(this.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase())) }
+	toTitleCase() {
+		return new stdString(this.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase()))
+	}
 
 	/** Transforms single or multiple consecutive white-space characters into single spaces
 	 * @param chars
 	 */
 	cleanWhitespace(chars?: string[]) {
 		if (["null", "undefined", "array"].indexOf(typeof (chars)) < 0)
-			throw `String.cleanWhitespace(): Invalid chars argument type; expected 'null', 'undefined', or 'array'; found ${typeof (chars)}`;
+			throw `String.cleanWhitespace(): Invalid chars argument type; expected 'null', 'undefined', or 'array'; found ${typeof (chars)}`
 
-		var _chars = !(chars) ? ["\n", "\t", "\v", "\r"] : chars;
-		var result = "";
+		const _chars = !(chars) ? ["\n", "\t", "\v", "\r"] : chars
+		let result = ""
 
-		for (var i = 0; i < this.length; i++) {
-			let val = this[i];
+		for (let i = 0; i < this.length; i++) {
+			const val = this[i]
 			result += (_chars.indexOf(val) < 0 ? val : " ")
 		}
-		return result.split(/[ ]{2,}/g).join(" ");
+		return result.split(/[ ]{2,}/g).join(" ")
 	}
 
 	isURL(): boolean {
-		var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+		const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
 			'((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
 			'((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
 			'(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
 			'(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-			'(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+			'(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
 		return pattern.test(this.toString())
 	}
 
-	getCharacters<C extends Iterable<String__>>(container: { (items: Iterable<String__>): C }) {
-		let arr = [...this].map(ch => new String__(ch))
+	getCharacters<C extends Iterable<stdString>>(container: { (items: Iterable<stdString>): C }) {
+		const arr = [...this].map(ch => new stdString(ch))
 		return container(arr)
 	}
 
@@ -84,22 +103,22 @@ export class String__ extends global.String {
 		return str
 	}
 
-	tokenizeWords<C extends Iterable<String__>>(args?:
+	tokenizeWords<C extends Iterable<stdString>>(args?:
 		{
 			separateCaseBoundary?: "upper" | "lower" | "all" | "none",
 			seperatorChars?: string[],
-			container?: { (items: Iterable<String__>): C }
+			container?: { (items: Iterable<stdString>): C }
 		}) {
 		//console.log(`starting tokenizeWords for "${this.valueOf()}"`)
 		const separateCaseBoundary = args?.separateCaseBoundary ?? "upper"
 		const seperatorChars = args?.seperatorChars ?? ["-", "_", " ", "    ", "\t"]
 		const container = args?.container ?? (items => items)
 
-		var words: string[] = []
-		var currentWord = ""
-		var lastChar = this[0]
+		const words: string[] = []
+		let currentWord = ""
+		let lastChar = this[0]
 
-		let pushWord = (str: string = "") => {
+		const pushWord = (str = "") => {
 			if (currentWord.length > 0) {
 				words.push(currentWord)
 				//console.log(`pushed ${currentWord} to words, now ${JSON.stringify(words)}`)
@@ -109,10 +128,10 @@ export class String__ extends global.String {
 			currentWord = str
 		}
 
-		let chars = [...this.getCharacters(container)]
+		const chars = [...this.getCharacters(container)]
 		// console.log(`chars array: ${JSON.stringify(chars)}`)
 
-		for (let ch of chars) {
+		for (const ch of chars) {
 			console.assert(ch !== undefined, `String.tokenizeWords(): ch is undefined`)
 			//console.log(`testing char "${ch.valueOf()}"`)
 
@@ -123,10 +142,10 @@ export class String__ extends global.String {
 			else {
 				//console.log(`separators do not include char tested, testing for case boundary`)
 
-				let nowCase = ch.getCase()
-				let lastCase = new String__(lastChar).getCase()
+				const nowCase = ch.getCase()
+				const lastCase = new stdString(lastChar).getCase()
 
-				let test = (
+				const test = (
 					(separateCaseBoundary === "none") ||
 					(seperatorChars.includes(lastChar)) ||
 					(lastCase === undefined) ||
@@ -159,31 +178,33 @@ export class String__ extends global.String {
 		//let result = words.map(x => new String__(x))
 		//console.log(`result of tokenizeWords(${this.valueOf()}) = ${words}`)
 
-		return container(words.map(x => new String__(x)))
+		return container(words.map(x => new stdString(x)))
 	}
 
 	/** Shorten a string by placing an ellipsis at the middle of it.
 	 * @param maxLen is the maximum length of the new shortened string
 	 */
 	shorten(maxLen: number) {
-		let title = this.toString()
-		if (title.length <= maxLen) return new String__(title);
+		const title = this.toString()
+		if (title.length <= maxLen) return new stdString(title)
 
-		let i = 0, j = title.length - 1;
-		let left = "", right = "";
-		let leftCount = 0, rightCount = 0;
+		let i = 0, j = title.length - 1
+		let left = "", right = ""
+		let leftCount = 0, rightCount = 0
 
+		// eslint-disable-next-line no-constant-condition
 		while (true) {
-			left += title[i];
-			leftCount += 1;
-			i += 1;
-			if (leftCount + rightCount + 3 >= maxLen) break;
+			left += title[i]
+			leftCount += 1
+			i += 1
+			if (leftCount + rightCount + 3 >= maxLen) break
 
-			right += title[j];
-			rightCount += 1;
-			j -= 1;
-			if (leftCount + rightCount + 3 >= maxLen) break;
+			right += title[j]
+			rightCount += 1
+			j -= 1
+			if (leftCount + rightCount + 3 >= maxLen) break
 		}
+		// eslint-disable-next-line fp/no-mutating-methods
 		right = right.split("").reverse().join("")
 
 		return new String(left + "..." + right)
@@ -203,25 +224,25 @@ export class String__ extends global.String {
 	}
 
 	strip(chars: string[]) {
-		if (!Array.isArray(chars))
-			throw `String.strip(): Invalid chars argument type; expected 'Array'; found ${typeof (chars)}`;
+		if (!globalThis.Array.isArray(chars))
+			throw `String.strip(): Invalid chars argument type; expected 'Array'; found ${typeof (chars)}`
 
-		var result = "";
-		for (var i = 0; i < this.length; i++) {
-			if (chars.indexOf(this[i]) < 0) result += this[i];
+		let result = ""
+		for (let i = 0; i < this.length; i++) {
+			if (chars.indexOf(this[i]) < 0) result += this[i]
 		}
 		return result
 	}
 
 	plural() {
-
-		let thisLower = this.toString().toLowerCase()
+		const thisLower = this.toString().toLowerCase()
+		// eslint-disable-next-line init-declarations, fp/no-let
 		let result: string
 
-		let singulars = ["sheep", "series", "species", "deer", "ox", "child", "goose", "man", "woman", "tooth", "foot", "mouse", "person"];
-		let plurals = ["sheep", "series", "species", "deer", "oxen", "children", "geese", "men", "women", "teeth", "feet", "mice", "people"]
+		const singulars = ["sheep", "series", "species", "deer", "ox", "child", "goose", "man", "woman", "tooth", "foot", "mouse", "person"]
+		const plurals = ["sheep", "series", "species", "deer", "oxen", "children", "geese", "men", "women", "teeth", "feet", "mice", "people"]
 
-		let match = singulars.indexOf(this.toString().toLowerCase())
+		const match = singulars.indexOf(this.toString().toLowerCase())
 		if (match >= 0) {
 			result = plurals[match]
 		}
@@ -244,10 +265,10 @@ export class String__ extends global.String {
 			else if (thisLower.endsWith("lf")) { // e.g., elf -> elves
 				result = (this.truncate(2).concat("lves"))
 			}
-			else if (thisLower.endsWith("y") && new CharASCII(this.charCodeAt(this.length - 2)).isConsonant()) {
+			else if (thisLower.endsWith("y") && new stdChar(this.charCodeAt(this.length - 2)).isConsonant()) {
 				result = this.truncate(1).concat("ies")
 			}
-			else if (thisLower.endsWith("y") && new CharASCII(this.charCodeAt(this.length - 2)).isVowel()) {
+			else if (thisLower.endsWith("y") && new stdChar(this.charCodeAt(this.length - 2)).isVowel()) {
 				result = (this.concat("s"))
 			}
 			else if (thisLower.endsWith("o") && !["photo", "piano", "halo"].includes(this.toString())) {
@@ -261,7 +282,7 @@ export class String__ extends global.String {
 			}
 		}
 
-		return new String__(this.isUpperCase() ? result.toUpperCase() : result)
+		return new stdString(this.isUpperCase() ? result.toUpperCase() : result)
 	}
 
 	split(arg: { [Symbol.split](string: string, limit?: number): string[]; } | string | RegExp | number) {
@@ -281,9 +302,10 @@ export class String__ extends global.String {
 	}
 }
 
+/** ASCII-only character functionality */
+export class stdChar {
+	protected readonly char: string
 
-export class CharASCII {
-	private char: string
 	constructor(charCode: number) {
 		if (charCode < 0)
 			throw new Error(`Invalid argument: must be non-negative`)
@@ -291,53 +313,16 @@ export class CharASCII {
 			throw new Error(`Invalid argument: must be less than 128`)
 
 		this.char = String.fromCharCode(charCode)
-		console.assert(this.char.length === 1)
+		//assert.ok(this.char.length === 1, `CharASCII can't be initialized with string of length greater than 1`)
 	}
 
+	isDigit() {
+		return [...new Array(10).keys()].some(i => this.char === String(i))
+	}
 	isVowel() {
 		return ["a", "e", "i", "o", "u"].includes(this.char)
 	}
 	isConsonant() {
 		return !this.isVowel()
 	}
-	isDigit() {
-		for (let i = 0; i < 10; i++) {
-			if (this.char === i.toString()) return true
-		}
-		return false
-	}
-
-	static Codes = {
-	}
 }
-
-//#region Tests
-if (process.env.TESTING) {
-	describe("Array", () => {
-		/*
-		before(async () => {
-			const jsDOM = (await import("jsdom")).JSDOM
-			const myGlobal = global as NodeJS.Global & {
-				document: Document,
-				window: Window,
-				navigator: Navigator
-			}
-			(function () {
-				const jsDom = new jsDOM()
-				myGlobal.window = jsDom.window
-				myGlobal.document = jsDom.window.document
-				myGlobal.navigator = jsDom.window.navigator
-				//Enzyme.configure({ adapter: new Adapter() })
-			})()
-		})
-		*/
-
-		describe("", () => {
-			it("should ...", () => {
-				assert.equal(1, true);
-			})
-		})
-	})
-}
-
-//#endregion
