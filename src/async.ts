@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable brace-style */
 /* eslint-disable fp/no-unused-expression */
 /* eslint-disable fp/no-mutation */
@@ -25,13 +26,13 @@ export interface ProgressInfo<T> {
 }*/
 
 
-type fnGenerator<X, Y> = (arg: X) => AsyncGenerator<ProgressInfo<Y>, void>
-type fnPromise<X, Y> = (arg: X) => Promise<Y>
+export type fnGenerator<X, Y> = (arg: X) => AsyncGenerator<ProgressInfo<Y>, void>
+export type fnPromise<X, Y> = (arg: X) => Promise<Y>
 type fn<X, Y> = fnPromise<X, Y> | fnGenerator<X, Y>
 
-function asProgressiveGenerator<X, Y>(f: fnGenerator<X, Y>): (arg: X) => AsyncGenerator<ProgressInfo<Y>>
-function asProgressiveGenerator<X, Y>(f: fnPromise<X, Y>, etaMillisecs: number): (arg: X) => AsyncGenerator<ProgressInfo<Y>>
-function asProgressiveGenerator<X, Y>(f: fn<X, Y>, etaMillisecs?: number) {
+export function asProgressiveGenerator<X, Y>(f: fnGenerator<X, Y>): (arg: X) => AsyncGenerator<ProgressInfo<Y>>
+export function asProgressiveGenerator<X, Y>(f: fnPromise<X, Y>, etaMillisecs: number): (arg: X) => AsyncGenerator<ProgressInfo<Y>>
+export function asProgressiveGenerator<X, Y>(f: fn<X, Y>, etaMillisecs?: number) {
 	return async function* wrappedFn(arg: X) {
 
 		const worker = new Worker(URL.createObjectURL(new Blob(
@@ -77,7 +78,8 @@ function asProgressiveGenerator<X, Y>(f: fn<X, Y>, etaMillisecs?: number) {
 	}
 }
 
-function sleep(ms: number) {
+
+export function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms))
 }
 
