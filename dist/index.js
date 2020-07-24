@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.web = exports.core = void 0;
+const core = require("./core");
+exports.core = core;
+const web = require("./web");
+exports.web = web;
+var containers_1 = require("./containers");
+Object.defineProperty(exports, "stdSequence", { enumerable: true, get: function () { return containers_1.stdSequence; } });
+Object.defineProperty(exports, "stdTupleSequence", { enumerable: true, get: function () { return containers_1.stdTupleSequence; } });
+Object.defineProperty(exports, "stdSet", { enumerable: true, get: function () { return containers_1.stdSet; } });
+Object.defineProperty(exports, "stdArray", { enumerable: true, get: function () { return containers_1.stdArray; } });
+Object.defineProperty(exports, "stdArrayNumeric", { enumerable: true, get: function () { return containers_1.stdArrayNumeric; } });
+Object.defineProperty(exports, "stdObject", { enumerable: true, get: function () { return containers_1.stdObject; } });
+var string_1 = require("./string");
+Object.defineProperty(exports, "stdChar", { enumerable: true, get: function () { return string_1.stdChar; } });
+Object.defineProperty(exports, "stdString", { enumerable: true, get: function () { return string_1.stdString; } });
+var number_1 = require("./number");
+Object.defineProperty(exports, "stdNumber", { enumerable: true, get: function () { return number_1.stdNumber; } });
+//# sourceMappingURL=index.js.map

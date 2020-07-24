@@ -1,6 +1,6 @@
 {
 	"name": "standard",
-	"version": "1.0.0",
+	"version": "0.2.0",
 	"description": "Standard library for JavaScript/TypeScript",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -8,7 +8,8 @@
 		"dist"
 	],
 	"scripts": {
-		"clean": "rm -rf ./dist",
+		"setup": "rm -rf ./node_modules package-lock.json && npm install",
+		"clean": "rm -rf ./dist .eslintcache",
 		"lint": "eslint --ext ts,tsx --cache src/*",
 		"compile": "tsc && flatten dist",
 		"test": "mocha ./dist/*.test.js",
