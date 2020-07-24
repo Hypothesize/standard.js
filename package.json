@@ -11,7 +11,7 @@
 		"setup": "rm -rf ./node_modules package-lock.json && npm install",
 		"clean": "rm -rf ./dist .eslintcache",
 		"lint": "eslint --ext ts,tsx --cache src/*",
-		"compile": "tsc && flatten dist",
+		"compile": "tsc && flatten dist && rm -rf dist/*.test.js.map dist/*.test.d.ts",
 		"test": "mocha ./dist/*.test.js",
 		"build": "npm run lint && npm run compile && npm run test"
 	},

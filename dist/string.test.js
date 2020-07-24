@@ -1,11 +1,14 @@
 "use strict";
-//import * as assert from "assert"
-//import { stdChar, stdString } from "./string"
-// describe("", () => {
-// 	it("should ...", (done) => {
-// 		assert.strictEqual(new stdString())
-// 	})
-// })
+Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable fp/no-unused-expression */
+const assert = require("assert");
+const string_1 = require("./string");
+describe("plural", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    it("should handles words ending in 'h' properly", () => {
+        assert.strictEqual(new string_1.stdString("batch").plural().toString(), "batches");
+    });
+});
 /*
 
 t.is(plur('unicorn', 0), 'unicorns');
