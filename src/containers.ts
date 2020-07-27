@@ -42,7 +42,8 @@ export type Predicate<X = unknown> = (value: X) => boolean
 export type Reducer<X = unknown, Y = unknown> = (prev: Y, current: X) => Y
 export type ReducerIndexed<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: X, indexOrKey: I) => Y
 
-/*
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Collection {
 	export interface Enumerable<X> extends Iterable<X> {
 		take: (n: number) => Enumerable<X>
@@ -103,8 +104,12 @@ export namespace Collection {
 
 		//indexOfRange(range: Iterable<number>, fromIndex?: number, fromEnd?: boolean): number
 	}
+	export interface ArrayLike<T> extends Iterable<T> {
+		length: number,
+		get(index: number): T
+	}
 }
-*/
+
 
 /** Lazy collection of elements accessed sequentially, not known in advance */
 export class stdSequence<X> implements Iterable<X> {
@@ -121,8 +126,21 @@ export class stdSequence<X> implements Iterable<X> {
 	take(n: number) { return this.ctor(take(this, n)) }
 	skip(n: number) { return this.ctor(skip(this, n)) }
 
-	first(): X | undefined { return first(this) }
-	last(): X | undefined { return last(this) }
+	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
+	 * @param predicate Optional predicate to filter elements
+	 * @returns First element, or <undefined> if such an element is not found
+	 */
+	first(predicate?: Predicate<X>): X | undefined {
+		return first(this)
+	}
+
+	/** Get last element (or last element to satisfy optional predicate argument) of this sequence
+	 * @param predicate Optional predicate to filter elements
+	 * @returns Last element as defined, or <undefined> if such an element is not found
+	 */
+	last(predicate?: Predicate<X>): X | undefined {
+		return last(this)
+	}
 
 	filter(predicate: Predicate<X>) { return this.ctor(filter(this, predicate)) }
 	map<Y>(projector: Projector<X, Y>) { return new stdSequence(map(this, projector)) }
@@ -147,6 +165,7 @@ export class stdTupleSequence<T> extends stdSequence<[string, T]> {
 		return stdObject.fromKeyValues([...this])
 	}
 }
+
 /** Set of elements, known in advance, without any order */
 export class stdSet<X> extends stdSequence<X> {
 	constructor(elements: Iterable<X>/*, protected opts?: { comparer?: Comparer<X>, ranker?: Ranker<X> }*/) {
@@ -188,10 +207,6 @@ export class stdSet<X> extends stdSequence<X> {
 
 	map<Y>(projector: Projector<X, Y>) { return new stdSet<Y>(map(this, projector)) }
 
-	/** Get unique items in this array
-	 * ToDo: Implement use of comparer in the include() call
-	 */
-	unique(comparer?: Comparer<X>) { return this.ctor(unique(this)) }
 	union(collections: Iterable<X>[]) { return this.ctor(union([this, ...collections])) }
 	intersection(collections: globalThis.Array<X>[]) { return this.ctor(intersection(collections)) }
 	except(collections: globalThis.Array<X>[]): Iterable<X> { return this.ctor(except(this, collections)) }
@@ -233,17 +248,18 @@ export class stdArray<X> extends stdSet<X> {
 	get length() { return this.core.array.length }
 	get size() { return this.length }
 
-	get(index: number): X | undefined
-	get(indices: Iterable<number>): (X | undefined)[]
-	get(...indices: number[]): (X | undefined)[]
+	get(index: number): X
+	get(indices: Iterable<number>): X[]
+	get(...indices: number[]): X[]
 	get(selection: number | Iterable<number>) {
 		if (typeof selection === "number") {
-			return this.core.array[selection] as (X | undefined)
+			if (selection < 0 || selection >= this.length)
+				throw new Error(`Array index ${selection} out of bounds`)
+			return this.core.array[selection] as X
 		}
 		else {
 			console.warn(`Array get() selection arg type: ${typeof selection}`)
-			//console.assert(Object__.isIterable(selection), `Array get() selection arg not iterable`)
-			return [...selection].map(index => this.core.array[index] as (X | undefined))
+			return [...selection].map(index => this.get(index))
 		}
 	}
 
@@ -256,25 +272,17 @@ export class stdArray<X> extends stdSet<X> {
 
 	entries() { return new stdArray(this.core.array.entries()) }
 
+	/** Get unique items in this array
+	 * ToDo: Implement use of comparer in the include() call
+	 */
+	unique(comparer?: Comparer<X>) { return this.ctor(unique(this)) }
+
 	/** Returns new array containing this array's elements in reverse order */
 	// eslint-disable-next-line fp/no-mutating-methods
 	reverse() { return this.ctor([...this].reverse()) }
 
-	/** Get last element (or last element to satisfy an optional predicate) of this collection
-	 * @param func Optional predicate to filter elements
-	 * @returns Last element as defined above, or <undefined> if such an element is not found
-	 */
-	last(predicate?: Predicate<X>): X | undefined {
-		const arr = this.core.array
-		if (!predicate)
-			return arr[this.size - 1]
-		else
-			// eslint-disable-next-line fp/no-mutating-methods
-			return arr.reverse().find(predicate)
-	}
-
+	/** Array-specific implementation of map() */
 	map<Y>(projector: Projector<X, Y>) { return new stdArray<Y>(map(this, projector)) }
-
 }
 
 export class stdArrayNumeric extends stdArray<number> {
@@ -651,24 +659,53 @@ export function* chunk<T>(arr: Iterable<T>, chunkSize: number): Iterable<T[]> {
 		yield* chunk(skip(arr, chunkSize), chunkSize)
 	}
 }
-export function first<T>(iterable: Iterable<T>): T | undefined {
+
+/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
+ * @param predicate Optional predicate to filter elements
+ * @returns First element, or <undefined> if such an element is not found
+ */
+export function first<T>(iterable: Iterable<T>, predicate?: Predicate<T>): T | undefined {
 	for (const element of iterable) {
-		return element
+		if (predicate === undefined || predicate(element))
+			return element
 	}
+	return undefined
 }
-export function last<T>(iterable: Iterable<T>): T | undefined {
+
+/** Get last element (or last element to satisfy optional predicate argument) of this sequence
+ * @param predicate Optional predicate to filter elements
+ * @returns Last element as defined, or <undefined> if such an element is not found
+ */
+export function last<T>(collection: Iterable<T> | Collection.ArrayLike<T>, predicate?: Predicate<T>): T | undefined {
+
 	// eslint-disable-next-line fp/no-let
-	let result: T | undefined = undefined
-	for (const element of iterable) {
-		result = element
+	if ('length' in collection) {
+		// Array-specific implementation of last() for better performance using direct elements access
+
+		// eslint-disable-next-line fp/no-let
+		for (let i = collection.length - 1; i >= 0; i--) {
+			const element = collection.get(i)
+			if (predicate === undefined || predicate(element))
+				return element
+		}
+		return undefined
 	}
-	return result
+	else {
+		// eslint-disable-next-line fp/no-let
+		let _last = undefined as T | undefined
+		const iterable = predicate === undefined ? collection : filter(collection, predicate)
+		for (const element of iterable) {
+			_last = element
+		}
+		return _last
+	}
 }
+
 export function sum(iterable: Iterable<number>) {
 	return last(reduce(iterable, 0, (prev, curr) => prev + curr)) ?? 0
 }
-export function* flatten<X>(target: Iterable<X>): Iterable<UnwrapNestedIterable<X>> {
-	for (const element of target) {
+export function* flatten<X>(nestedIterable: Iterable<X>): Iterable<UnwrapNestedIterable<X>> {
+	for (const element of nestedIterable) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		if (hasValue(element) && typeof (element as any)[Symbol.iterator] === 'function')
 			yield* flatten(element as unknown as Iterable<X>)

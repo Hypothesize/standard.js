@@ -24,6 +24,57 @@ export declare type ProjectorIndexed<X = unknown, Y = unknown, I = unknown> = (v
 export declare type Predicate<X = unknown> = (value: X) => boolean;
 export declare type Reducer<X = unknown, Y = unknown> = (prev: Y, current: X) => Y;
 export declare type ReducerIndexed<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: X, indexOrKey: I) => Y;
+export declare namespace Collection {
+    interface Enumerable<X> extends Iterable<X> {
+        take: (n: number) => Enumerable<X>;
+        skip: (n: number) => Enumerable<X>;
+        filter: (predicate: Predicate<X>) => Enumerable<X>;
+        map<Y extends [S, Z], Z, S extends string>(projector: Projector<X, Y>): Enumerable<[S, Z]>;
+        map<Y>(projector: Projector<X, Y>): Enumerable<Y>;
+        reduce: <Y>(initial: Y, reducer: Reducer<X, Y>) => Enumerable<Y>;
+        forEach: (action: Projector<X>) => void;
+        first(): X | undefined;
+        materialize(): MaterialExtended<X>;
+    }
+    interface Material<X> extends Enumerable<X> {
+        size: number;
+        some(predicate: Predicate<X>): boolean;
+        every(predicate: Predicate<X>): boolean;
+    }
+    interface MaterialExtended<X> extends Material<X> {
+        unique(comparer: Comparer<X>): Material<X>;
+        union(...collections: Material<X>[]): Material<X>;
+        intersection(...collections: Material<X>[]): Material<X>;
+        except(...collections: Material<X>[]): Material<X>;
+        complement(universe: Iterable<X>): Material<X>;
+        sort(comparer?: Ranker<X>): Ordered<X>;
+        sortDescending(comparer?: Ranker<X>): Ordered<X>;
+        contains(value: X): boolean;
+    }
+    interface Indexed<K, V> {
+        get(index: K): V | undefined;
+        get(indices: K[]): (V | undefined)[];
+        get(...indices: K[]): (V | undefined)[];
+        get(selector: K | K[]): undefined | V | V[];
+        indexesOf(value: V): Enumerable<K>;
+        indexesOf(value: V, mode: "as-value"): Enumerable<K>;
+        indexesOf(value: Predicate<V>, mode: "as-predicate"): Enumerable<K>;
+    }
+    interface IndexedExtended<K, V> extends Indexed<K, V> {
+        keys(): Material<K>;
+        hasKey(key: K): boolean;
+        values(): Material<V>;
+        hasValue(value: V): boolean;
+    }
+    interface Ordered<T> extends MaterialExtended<T>, Indexed<number, T> {
+        last(): T | undefined;
+        reverse(): Ordered<T>;
+    }
+    interface ArrayLike<T> extends Iterable<T> {
+        length: number;
+        get(index: number): T;
+    }
+}
 /** Lazy collection of elements accessed sequentially, not known in advance */
 export declare class stdSequence<X> implements Iterable<X> {
     constructor(iterable: Iterable<X>);
@@ -36,8 +87,16 @@ export declare class stdSequence<X> implements Iterable<X> {
     }): C;
     take(n: number): this;
     skip(n: number): this;
-    first(): X | undefined;
-    last(): X | undefined;
+    /** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
+     * @param predicate Optional predicate to filter elements
+     * @returns First element, or <undefined> if such an element is not found
+     */
+    first(predicate?: Predicate<X>): X | undefined;
+    /** Get last element (or last element to satisfy optional predicate argument) of this sequence
+     * @param predicate Optional predicate to filter elements
+     * @returns Last element as defined, or <undefined> if such an element is not found
+     */
+    last(predicate?: Predicate<X>): X | undefined;
     filter(predicate: Predicate<X>): this;
     map<Y>(projector: Projector<X, Y>): stdSequence<Y>;
     reduce<Y>(initial: Y, reducer: Reducer<X, Y>): stdSequence<Y>;
@@ -74,10 +133,6 @@ export declare class stdSet<X> extends stdSequence<X> {
     some(predicate: Predicate<X>): boolean;
     every(predicate: Predicate<X>): boolean;
     map<Y>(projector: Projector<X, Y>): stdSet<Y>;
-    /** Get unique items in this array
-     * ToDo: Implement use of comparer in the include() call
-     */
-    unique(comparer?: Comparer<X>): this;
     union(collections: Iterable<X>[]): this;
     intersection(collections: globalThis.Array<X>[]): this;
     except(collections: globalThis.Array<X>[]): Iterable<X>;
@@ -99,9 +154,9 @@ export declare class stdArray<X> extends stdSet<X> {
     };
     get length(): number;
     get size(): number;
-    get(index: number): X | undefined;
-    get(indices: Iterable<number>): (X | undefined)[];
-    get(...indices: number[]): (X | undefined)[];
+    get(index: number): X;
+    get(indices: Iterable<number>): X[];
+    get(...indices: number[]): X[];
     /** Get the indexes where a value occurs or a certain predicate/condition is met */
     indexesOf(args: ({
         value: X;
@@ -109,13 +164,13 @@ export declare class stdArray<X> extends stdSet<X> {
         predicate: Predicate<X>;
     })): stdArray<number>;
     entries(): stdArray<[number, X]>;
+    /** Get unique items in this array
+     * ToDo: Implement use of comparer in the include() call
+     */
+    unique(comparer?: Comparer<X>): this;
     /** Returns new array containing this array's elements in reverse order */
     reverse(): this;
-    /** Get last element (or last element to satisfy an optional predicate) of this collection
-     * @param func Optional predicate to filter elements
-     * @returns Last element as defined above, or <undefined> if such an element is not found
-     */
-    last(predicate?: Predicate<X>): X | undefined;
+    /** Array-specific implementation of map() */
     map<Y>(projector: Projector<X, Y>): stdArray<Y>;
 }
 export declare class stdArrayNumeric extends stdArray<number> {
@@ -203,10 +258,18 @@ export declare function indexesOf<K, V>(collection: Iterable<Tuple<K, V>>, targe
     predicate: Predicate<V>;
 })): Iterable<K>;
 export declare function chunk<T>(arr: Iterable<T>, chunkSize: number): Iterable<T[]>;
-export declare function first<T>(iterable: Iterable<T>): T | undefined;
-export declare function last<T>(iterable: Iterable<T>): T | undefined;
+/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
+ * @param predicate Optional predicate to filter elements
+ * @returns First element, or <undefined> if such an element is not found
+ */
+export declare function first<T>(iterable: Iterable<T>, predicate?: Predicate<T>): T | undefined;
+/** Get last element (or last element to satisfy optional predicate argument) of this sequence
+ * @param predicate Optional predicate to filter elements
+ * @returns Last element as defined, or <undefined> if such an element is not found
+ */
+export declare function last<T>(collection: Iterable<T> | Collection.ArrayLike<T>, predicate?: Predicate<T>): T | undefined;
 export declare function sum(iterable: Iterable<number>): number;
-export declare function flatten<X>(target: Iterable<X>): Iterable<UnwrapNestedIterable<X>>;
+export declare function flatten<X>(nestedIterable: Iterable<X>): Iterable<UnwrapNestedIterable<X>>;
 export declare function compare<T>(x: T, y: T, comparer?: Projector<T, unknown>, tryNumeric?: boolean): number;
 export declare function getRanker<T>(args: {
     projector: Projector<T, unknown>;

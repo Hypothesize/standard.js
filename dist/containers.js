@@ -19,69 +19,6 @@ exports.Tuple = class {
         return [x, y];
     }
 };
-/*
-export namespace Collection {
-    export interface Enumerable<X> extends Iterable<X> {
-        take: (n: number) => Enumerable<X>
-        skip: (n: number) => Enumerable<X>
-        filter: (predicate: Predicate<X>) => Enumerable<X>
-
-        map<Y extends [S, Z], Z, S extends string>(projector: Projector<X, Y>): Enumerable<[S, Z]>
-        map<Y>(projector: Projector<X, Y>): Enumerable<Y> //Y extends [string, infer Z] ? Enumerable<[string, Z]> : Enumerable<Y>
-
-        reduce: <Y>(initial: Y, reducer: Reducer<X, Y>) => Enumerable<Y>
-        forEach: (action: Projector<X>) => void
-
-        first(): X | undefined
-
-        materialize(): MaterialExtended<X>
-    }
-    export interface Material<X> extends Enumerable<X> {
-        size: number
-        some(predicate: Predicate<X>): boolean
-        every(predicate: Predicate<X>): boolean
-    }
-    export interface MaterialExtended<X> extends Material<X> {
-        unique(comparer: Comparer<X>): Material<X>
-        union(...collections: Material<X>[]): Material<X>
-        intersection(...collections: Material<X>[]): Material<X>
-        except(...collections: Material<X>[]): Material<X>
-        complement(universe: Iterable<X>): Material<X>
-
-        sort(comparer?: Ranker<X>): Ordered<X>
-        sortDescending(comparer?: Ranker<X>): Ordered<X>
-
-        //has(value: X): boolean
-        contains(value: X): boolean
-        //includes(value: X): boolean
-    }
-    export interface Indexed<K, V> {
-        get(index: K): V | undefined
-        get(indices: K[]): (V | undefined)[]
-        get(...indices: K[]): (V | undefined)[]
-        get(selector: K | K[]): undefined | V | V[]
-
-        indexesOf(value: V): Enumerable<K>
-        indexesOf(value: V, mode: "as-value"): Enumerable<K>
-        indexesOf(value: Predicate<V>, mode: "as-predicate"): Enumerable<K>
-    }
-    export interface IndexedExtended<K, V> extends Indexed<K, V> {
-        keys(): Material<K>
-        hasKey(key: K): boolean
-
-        values(): Material<V>
-        hasValue(value: V): boolean
-
-        //indexOf(args: ({ value: V } | { block: Iterable<V> } | { predicate: Predicate<V> }) & { fromIndex?: number, fromEnd?: boolean }): K
-    }
-    export interface Ordered<T> extends MaterialExtended<T>, Indexed<number, T> {
-        last(): T | undefined
-        reverse(): Ordered<T>
-
-        //indexOfRange(range: Iterable<number>, fromIndex?: number, fromEnd?: boolean): number
-    }
-}
-*/
 /** Lazy collection of elements accessed sequentially, not known in advance */
 class stdSequence {
     // eslint-disable-next-line fp/no-nil
@@ -92,8 +29,20 @@ class stdSequence {
     to(container) { return container([...this]); }
     take(n) { return this.ctor(take(this, n)); }
     skip(n) { return this.ctor(skip(this, n)); }
-    first() { return first(this); }
-    last() { return last(this); }
+    /** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
+     * @param predicate Optional predicate to filter elements
+     * @returns First element, or <undefined> if such an element is not found
+     */
+    first(predicate) {
+        return first(this);
+    }
+    /** Get last element (or last element to satisfy optional predicate argument) of this sequence
+     * @param predicate Optional predicate to filter elements
+     * @returns Last element as defined, or <undefined> if such an element is not found
+     */
+    last(predicate) {
+        return last(this);
+    }
     filter(predicate) { return this.ctor(filter(this, predicate)); }
     map(projector) { return new stdSequence(map(this, projector)); }
     reduce(initial, reducer) { return new stdSequence(reduce(this, initial, reducer)); }
@@ -150,10 +99,6 @@ class stdSet extends stdSequence {
     some(predicate) { return some(this, predicate); }
     every(predicate) { return every(this, predicate); }
     map(projector) { return new stdSet(map(this, projector)); }
-    /** Get unique items in this array
-     * ToDo: Implement use of comparer in the include() call
-     */
-    unique(comparer) { return this.ctor(unique(this)); }
     union(collections) { return this.ctor(union([this, ...collections])); }
     intersection(collections) { return this.ctor(intersection(collections)); }
     except(collections) { return this.ctor(except(this, collections)); }
@@ -192,12 +137,13 @@ class stdArray extends stdSet {
     get size() { return this.length; }
     get(selection) {
         if (typeof selection === "number") {
+            if (selection < 0 || selection >= this.length)
+                throw new Error(`Array index ${selection} out of bounds`);
             return this.core.array[selection];
         }
         else {
             console.warn(`Array get() selection arg type: ${typeof selection}`);
-            //console.assert(Object__.isIterable(selection), `Array get() selection arg not iterable`)
-            return [...selection].map(index => this.core.array[index]);
+            return [...selection].map(index => this.get(index));
         }
     }
     /** Get the indexes where a value occurs or a certain predicate/condition is met */
@@ -207,21 +153,14 @@ class stdArray extends stdSet {
             : this.entries().filter(kv => args.predicate(kv[1]) === true).map(kv => kv[0]);
     }
     entries() { return new stdArray(this.core.array.entries()); }
+    /** Get unique items in this array
+     * ToDo: Implement use of comparer in the include() call
+     */
+    unique(comparer) { return this.ctor(unique(this)); }
     /** Returns new array containing this array's elements in reverse order */
     // eslint-disable-next-line fp/no-mutating-methods
     reverse() { return this.ctor([...this].reverse()); }
-    /** Get last element (or last element to satisfy an optional predicate) of this collection
-     * @param func Optional predicate to filter elements
-     * @returns Last element as defined above, or <undefined> if such an element is not found
-     */
-    last(predicate) {
-        const arr = this.core.array;
-        if (!predicate)
-            return arr[this.size - 1];
-        else
-            // eslint-disable-next-line fp/no-mutating-methods
-            return arr.reverse().find(predicate);
-    }
+    /** Array-specific implementation of map() */
     map(projector) { return new stdArray(map(this, projector)); }
 }
 exports.stdArray = stdArray;
@@ -566,19 +505,43 @@ function* chunk(arr, chunkSize) {
     }
 }
 exports.chunk = chunk;
-function first(iterable) {
+/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
+ * @param predicate Optional predicate to filter elements
+ * @returns First element, or <undefined> if such an element is not found
+ */
+function first(iterable, predicate) {
     for (const element of iterable) {
-        return element;
+        if (predicate === undefined || predicate(element))
+            return element;
     }
+    return undefined;
 }
 exports.first = first;
-function last(iterable) {
+/** Get last element (or last element to satisfy optional predicate argument) of this sequence
+ * @param predicate Optional predicate to filter elements
+ * @returns Last element as defined, or <undefined> if such an element is not found
+ */
+function last(collection, predicate) {
     // eslint-disable-next-line fp/no-let
-    let result = undefined;
-    for (const element of iterable) {
-        result = element;
+    if ('length' in collection) {
+        // Array-specific implementation of last() for better performance using direct elements access
+        // eslint-disable-next-line fp/no-let
+        for (let i = collection.length - 1; i >= 0; i--) {
+            const element = collection.get(i);
+            if (predicate === undefined || predicate(element))
+                return element;
+        }
+        return undefined;
     }
-    return result;
+    else {
+        // eslint-disable-next-line fp/no-let
+        let _last = undefined;
+        const iterable = predicate === undefined ? collection : filter(collection, predicate);
+        for (const element of iterable) {
+            _last = element;
+        }
+        return _last;
+    }
 }
 exports.last = last;
 function sum(iterable) {
@@ -586,8 +549,8 @@ function sum(iterable) {
     return (_a = last(reduce(iterable, 0, (prev, curr) => prev + curr))) !== null && _a !== void 0 ? _a : 0;
 }
 exports.sum = sum;
-function* flatten(target) {
-    for (const element of target) {
+function* flatten(nestedIterable) {
+    for (const element of nestedIterable) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (hasValue(element) && typeof element[Symbol.iterator] === 'function')
             yield* flatten(element);
