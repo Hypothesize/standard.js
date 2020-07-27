@@ -13,13 +13,6 @@ export {
 	RecursivePartial,
 	Zip,
 
-	stdSequence,
-	stdTupleSequence,
-	stdSet,
-	stdArray,
-	stdArrayNumeric,
-	stdObject,
-
 	first,
 	last,
 	filter,
@@ -45,8 +38,12 @@ export {
 	getRanker,
 	hasValue
 
-} from "./containers"
+} from "./core"
 
+export { stdSequence, stdTupleSequence } from "./sequence"
+export { stdSet } from "./set"
+export { stdArray, stdArrayNumeric } from "./array"
+export { stdObject } from "./object"
 export { stdChar, stdString } from "./string"
 export { stdNumber } from "./number"
 
