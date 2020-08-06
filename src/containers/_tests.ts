@@ -1,7 +1,6 @@
 /* eslint-disable fp/no-unused-expression */
 import * as assert from "assert"
-
-import { flatten, chunk, take } from "./_combinators"
+import { flatten, chunk, take } from "./combinators"
 
 describe('flatten()', function () {
 	it('should return a result that excludes empty arrays', function () {

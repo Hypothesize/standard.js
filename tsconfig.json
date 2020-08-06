@@ -23,6 +23,7 @@
 			"./src",
 			"./src/async",
 			"./src/containers",
+			"./src/core",
 			"./src/http",
 			"./src/primitives",
 			"./test"
@@ -31,7 +32,6 @@
 	},
 	"include": [
 		"./src",
-		"./test"
 	],
 	"exclude": []
 }
