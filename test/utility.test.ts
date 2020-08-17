@@ -1,8 +1,7 @@
 /* eslint-disable fp/no-unused-expression */
 
 import * as assert from "assert"
-import { hasValue } from "./core"
-
+import { hasValue } from "./utility"
 
 describe('hasValue()', function () {
 	it('should return true for an empty array', function () {
@@ -47,3 +46,5 @@ describe('hasValue()', function () {
 		assert.equal(hasValue(Number.NaN), false)
 	})
 })
+
+

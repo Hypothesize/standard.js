@@ -1,7 +1,6 @@
 /* eslint-disable fp/no-unused-expression */
 import * as assert from "assert"
-import { flatten, chunk, take } from "./combinators"
-import { compare } from "./_utility"
+import { flatten, chunk, take, compare } from "./combinators"
 
 describe('flatten()', function () {
 	it('should return a result that excludes empty arrays', function () {
@@ -110,8 +109,6 @@ describe('compare()', () => {
 		assert.equal(compare(x, y, undefined, false, true) < 0, true)
 	})
 })
-
-
 /* // data-table tests
 	describe("page", () => {
 		it(`should return the original rows if page (original) is called several time in a row`, () => {
