@@ -171,20 +171,20 @@ export function* indexed<T>(items: Iterable<T>, from = 0) {
 }
 
 export function* flatten<X>(nestedIterable: Iterable<X>): Iterable<UnwrapNestedIterable<X>> {
-	//console.log(`\nInput to flatten: ${JSON.stringify(nestedIterable)}`)
-
-	for (const element of nestedIterable) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		if (typeof element !== "string" && typeof (element as any)[Symbol.iterator] === 'function') {
-			//console.log(`flatten: element <${JSON.stringify(element)}> is iterable; flattening it *`)
-			yield* flatten(element as unknown as Iterable<X>)
-		}
-		else {
-			//console.log(`flatten: element <${JSON.stringify(element)}> is not iterable; yielding it *`)
-			yield element as UnwrapNestedIterable<X>
+	console.log(`\nInput to flatten: ${JSON.stringify(nestedIterable)}`)
+	if (nestedIterable) {
+		for (const element of nestedIterable) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			if (hasValue(element) && typeof element !== "string" && typeof (element as any)[Symbol.iterator] === 'function') {
+				//console.log(`flatten: element <${JSON.stringify(element)}> is iterable; flattening it *`)
+				yield* flatten(element as unknown as Iterable<X>)
+			}
+			else {
+				//console.log(`flatten: element <${JSON.stringify(element)}> is not iterable; yielding it *`)
+				yield element as UnwrapNestedIterable<X>
+			}
 		}
 	}
-
 }
 
 export function forEach<T>(iterable: Iterable<T>, action: Projector<T>) {
