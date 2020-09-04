@@ -42,11 +42,9 @@
 	},
 	"homepage": "https://github.com/Hypothesize/standard.js#readme",
 	"dependencies": {
-		"request": "^2.88.2",
-		"ts-toolbelt": "^8.0.3"
+		"request": "^2.88.2"
 	},
 	"devDependencies": {
-		"@hutsoninc/flatten-dir-cli": "^1.0.2",
 		"@types/assert": "^1.5.1",
 		"@types/eslint": "^7.2.0",
 		"@types/mocha": "^7.0.2",

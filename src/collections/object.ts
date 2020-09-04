@@ -3,7 +3,7 @@
 /* eslint-disable fp/no-rest-parameters */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { O } from 'ts-toolbelt'
+
 import { Tuple, Obj, Merge, TypeGuard, ExtractByType, isObject, isSymbol } from "../utility"
 import { Predicate, Projector } from "../functional"
 import { skip } from "./iterable"
