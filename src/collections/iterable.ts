@@ -25,7 +25,7 @@ export function isIterable<T, _>(val: Iterable<T> | _): val is _ extends Iterabl
 export function* take<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 	if (typeof n !== "number") throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
 	if (n < 0) {
-		console.warn(`Warning: Negative value ${n} passed to argument <n> of take()`)
+		// console.warn(`Warning: Negative value ${n} passed to argument <n> of take()`)
 		return
 	}
 
@@ -41,7 +41,7 @@ export function* skip<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 	if (typeof n !== "number")
 		throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
 	if (n < 0) {
-		console.warn(`Warning: Negative value ${n} passed to argument <n> of skip()`)
+		// console.warn(`Warning: Negative value ${n} passed to argument <n> of skip()`)
 		return
 	}
 
@@ -171,7 +171,7 @@ export function* indexed<T>(items: Iterable<T>, from = 0) {
 }
 
 export function* flatten<X>(nestedIterable: Iterable<X>): Iterable<UnwrapNestedIterable<X>> {
-	console.log(`\nInput to flatten: ${JSON.stringify(nestedIterable)}`)
+	// console.log(`\nInput to flatten: ${JSON.stringify(nestedIterable)}`)
 	if (nestedIterable) {
 		for (const element of nestedIterable) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
