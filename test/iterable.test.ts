@@ -53,7 +53,7 @@ describe('flatten()', function () {
 		assert.deepEqual(actual, expected)
 	})
 
-	it('should be able to handle null or undefined elements inside input iterable', function () {
+	it('should be able to handle null or undefined elements inside input iterables', function () {
 		// eslint-disable-next-line fp/no-let, init-declarations
 		let actual: unknown
 		assert.doesNotThrow(() => {
@@ -64,7 +64,7 @@ describe('flatten()', function () {
 		assert.deepEqual(actual, expected)
 	})
 
-	it('should be able to handle null or undefined elements among other input iterable', function () {
+	it('should be able to handle null or undefined elements among other input iterables', function () {
 		// eslint-disable-next-line fp/no-let, init-declarations
 		let actual: unknown
 		assert.doesNotThrow(() => {
