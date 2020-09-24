@@ -64,14 +64,14 @@ describe('flatten()', function () {
 		assert.deepEqual(actual, expected)
 	})
 
-	it('should ignore null or undefined elements passed as input', function () {
+	it('should allow null or undefined to be passed among the iterables', function () {
 		// eslint-disable-next-line fp/no-let, init-declarations
 		let actual: unknown
 		assert.doesNotThrow(() => {
 			// eslint-disable-next-line fp/no-mutation
 			actual = [...flatten([["annotation"], null, undefined, ["simplicity"]])]
 		})
-		const expected = ["annotation", "simplicity"]
+		const expected = ["annotation", null, undefined, "simplicity"]
 		assert.deepEqual(actual, expected)
 	})
 })
