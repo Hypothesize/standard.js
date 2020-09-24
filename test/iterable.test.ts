@@ -63,6 +63,17 @@ describe('flatten()', function () {
 		const expected = ["annotation", undefined, 1, null, undefined, "simplicity"]
 		assert.deepEqual(actual, expected)
 	})
+
+	it('should ignore null or undefined elements passed as input', function () {
+		// eslint-disable-next-line fp/no-let, init-declarations
+		let actual: unknown
+		assert.doesNotThrow(() => {
+			// eslint-disable-next-line fp/no-mutation
+			actual = [...flatten([["annotation"], null, undefined, ["simplicity"]])]
+		})
+		const expected = ["annotation", "simplicity"]
+		assert.deepEqual(actual, expected)
+	})
 })
 
 describe('take()', function () {
