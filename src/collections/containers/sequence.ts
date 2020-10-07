@@ -39,7 +39,7 @@ export class Sequence<X> implements Iterable<X> {
 	reduce<Y>(initial: Y, reducer: Reducer<X, Y>) { return new Sequence(reduce(this, initial, reducer)) }
 	forEach(action: Projector<X>) { return forEach(this, action) }
 
-	/** Generate sequence of integers */
+	/** Generate sequence of integers including 'from' and 'to' values if provided */
 	static integers(args: { from: number, to: number } | { from: number, direction: "upwards" | "downwards" }) {
 		return new Sequence((function* () {
 			// eslint-disable-next-line fp/no-let
