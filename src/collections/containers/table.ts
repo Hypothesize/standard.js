@@ -3,9 +3,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable brace-style */
 
-import { ExtractByType, Primitive, Obj, hasValue } from "../../utility"
+import { ExtractByType, Primitive, hasValue } from "../../utility"
 import { zip } from "../iterable"
-import { Predicate, PredicateAsync } from "../../functional"
+import { Predicate } from "../../functional"
 import { Projector, getRanker } from "../../functional"
 import { Dictionary } from "./dictionary"
 import { Sequence } from "./sequence"
