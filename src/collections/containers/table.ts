@@ -3,18 +3,15 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable brace-style */
 
-import { ExtractByType, Primitive, hasValue } from "../../utility"
+import { Obj, ExtractByType, Primitive, hasValue } from "../../utility"
 import { zip } from "../iterable"
-import { Predicate } from "../../functional"
-import { Projector, getRanker } from "../../functional"
+import { Predicate, Projector, getRanker } from "../../functional"
 import { Dictionary } from "./dictionary"
 import { Sequence } from "./sequence"
 
-//import { tableParsers } from "./parsers"
-
 export const ROW_NUM_COL_NAME = "rowNum" as const
 
-export class DataTable<T extends Record<string, Primitive> = Record<string, Primitive>> /*implements Table<T>*/ {
+export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	protected readonly _idVector: number[]
 	protected readonly _colVectors: Dictionary<Record<keyof T, T[keyof T][]>>
 
@@ -118,13 +115,13 @@ export class DataTable<T extends Record<string, Primitive> = Record<string, Prim
 						// return (belowMin || aboveMax) === _test
 						return true
 					case "contains":
-						return (hasValue(_val) && _val.toString().indexOf(filter.value) >= 0) === _test
+						return (hasValue(_val) && String(_val).indexOf(filter.value) >= 0) === _test
 					case "is-contained":
-						return (hasValue(_val) && filter.value.indexOf(_val.toString()) >= 0) === _test
+						return (hasValue(_val) && filter.value.indexOf(String(_val)) >= 0) === _test
 					case "starts_with":
-						return (_val !== undefined && _val !== null && _val.toString().startsWith(filter.value)) === _test
+						return (_val !== undefined && _val !== null && String(_val).startsWith(filter.value)) === _test
 					case "ends_with":
-						return (_val !== undefined && _val !== null && _val.toString().endsWith(filter.value)) === _test
+						return (_val !== undefined && _val !== null && String(_val).endsWith(filter.value)) === _test
 					case "blank":
 						return _val === undefined || _val === null === _test
 
@@ -181,11 +178,11 @@ export class DataTable<T extends Record<string, Primitive> = Record<string, Prim
 		return new DataTable<T>(this._colVectors.asObject(), idColumnVectorPaged)
 	}
 
-	map(projector: Projector<Primitive, Primitive>) {
-		return new DataTable(this._colVectors.map(vector => vector.map(projector)).asObject())
+	map<Y>(projector: Projector<T[keyof T], Y>) {
+		return new DataTable(this._colVectors.map(vector => vector.map(projector)).asObject()) as DataTable<Obj<Y>>
 	}
 
-	static rowsToColumns = <X extends Record<string, Primitive> = Record<string, Primitive>>(rows: Iterable<X>) => {
+	static rowsToColumns = <X extends Obj = Record<string, Primitive>>(rows: Iterable<X>) => {
 		const srcArray = [...rows as Iterable<X>]
 		const columnVectors = {} as Record<keyof X, X[keyof X][]>
 		// eslint-disable-next-line fp/no-unused-expression
@@ -260,36 +257,36 @@ export class DataTable<T extends Record<string, Primitive> = Record<string, Prim
 }
 
 export namespace Filter {
-	export interface Base<TObj extends Record<string, Primitive>, TVal extends Primitive | null> {
+	export interface Base<TObj extends Obj, TVal> {
 		fieldName: keyof (ExtractByType<TObj, TVal>),
 		value: TVal,
 
 		/** If true, values matching the test will be excluded. If false, only they will be included */
 		negated?: boolean
 	}
-	export interface Categorical<T extends Record<string, Primitive>> extends Base<T, Primitive | null> {
+	export interface Categorical<T extends Obj> extends Base<T, Primitive | null> {
 		operator: "equal" | "not_equal" | "blank",
 	}
-	export interface Ordinal<T extends Record<string, Primitive>> extends Base<T, number> {
+	export interface Ordinal<T extends Obj> extends Base<T, number> {
 		operator: "greater" | "greater_or_equal" | "less" | "less_or_equal" | "blank",
 		negated?: boolean
 	}
-	export interface Textual<T extends Record<string, Primitive>> extends Base<T, string> {
+	export interface Textual<T extends Obj> extends Base<T, string> {
 		operator: "contains" | "is-contained" | "starts_with" | "ends_with" | "blank",
 	}
-	export interface Statistical<T extends Record<string, Primitive>> extends Base<T, number> {
+	export interface Statistical<T extends Obj> extends Base<T, number> {
 		operator: "is_outlier_by" | "blank",
 		/** number of std. deviations (possibly fractional) */
 		//value: number
 	}
 }
-export type Filter<T extends Record<string, Primitive> = Record<string, Primitive>> = (
+export type Filter<T extends Obj = Obj<Primitive>> = (
 	| Filter.Categorical<T>
 	| Filter.Ordinal<T>
 	| Filter.Textual<T>
 	| Filter.Statistical<T>
 )
-export interface FilterGroup<T extends Record<string, Primitive> = Record<string, Primitive>> {
+export interface FilterGroup<T extends Obj = Obj<Primitive>> {
 	filters: Array<Filter<T> | FilterGroup<T>>
 	combinator?: "AND" | "OR"
 }
