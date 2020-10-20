@@ -1,6 +1,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
-import { reduce, last } from "../collections/iterable"
+import { reduce, last, filter, map } from "../collections/iterable"
+import { Obj, Tuple } from "../utility"
 
 export function min(collection: Iterable<number>): number | undefined {
 	return last(
@@ -69,3 +70,20 @@ export function interQuartileRange(collection: Array<number>) {
 	return percentile25 && percentile75 ? percentile75 - percentile25 : undefined
 }
 
+export function frequencies<T>(items: Iterable<T>): globalThis.Map<T, number> {
+	const freqs = new globalThis.Map<T, number>(); //semi-colon required at end of this statement
+	// eslint-disable-next-line fp/no-unused-expression
+	[...items].forEach(item => {
+		// eslint-disable-next-line fp/no-unused-expression
+		freqs.set(item, (freqs.get(item) || 0) + 1)
+	})
+	return freqs
+}
+
+export function frequenciesPercentScaled<T>(items: Iterable<T>): globalThis.Map<T, number> {
+	return new globalThis.Map(map(frequencies(items), freq => new Tuple(freq[0], freq[1] * 100 / [...items].length)))
+}
+
+export function frequency<T>(items: Iterable<T>, item: T): number {
+	return [...filter(items, _item => _item === item)].length
+}
