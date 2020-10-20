@@ -50,6 +50,13 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 		console.log(`\nDataTable took ${new Date().getTime() - start}ms to instantiate`)
 	}
 
+	static fromColumns<T extends Obj = Obj>(columnVectors: Record<keyof T, T[keyof T][]>, idVector?: Iterable<number>) {
+		return new DataTable(columnVectors, idVector)
+	}
+	static fromRows<T extends Obj = Obj>(rowObjects: Iterable<T>, idVector?: Iterable<number>) {
+		return new DataTable(rowObjects, idVector)
+	}
+
 	get idVector() { return this._idVector }
 	/** Columns vectors excluding row ids vector */
 	get columnVectors() { return this._colVectors }
