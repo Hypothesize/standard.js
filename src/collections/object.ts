@@ -26,10 +26,9 @@ export function fromKeyValues<T, K extends string = string>(keyValues: Tuple<K, 
 	return obj
 }
 
-export function values<V, K extends string>(obj: Record<K, V>): Tuple<K, V>[]
-export function values<V, K extends string, T extends Record<K, V>>(obj: T): Tuple<K, V>[]
+export function values<V, K extends string>(obj: Record<K, V>): V[]
+export function values<V, K extends string, T extends Record<K, V>>(obj: T): V[]
 export function values(obj: Obj) { return Object.values(obj) }
-
 
 export function entries<V, K extends string>(obj: Record<K, V>): Tuple<K, V>[]
 export function entries<V, K extends string, T extends Record<K, V>>(obj: T): Tuple<K, V>[]
