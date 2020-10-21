@@ -1,26 +1,27 @@
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
 import { reduce, last, filter, map } from "../collections/iterable"
-import { Obj, Tuple } from "../utility"
+import { Projector } from "../functional"
+import { Tuple } from "../utility"
 
-export function min(collection: Iterable<number>): number | undefined {
-	return last(
-		reduce(
-			collection,
-			undefined as number | undefined,
-			(prev, curr) => (prev === undefined || curr < prev) ? curr : prev
-		)
-	)
+export function min<T>(collection: Iterable<number>): number | undefined
+export function min<T>(collection: Iterable<T>, projector: Projector<T, number, number>): T | undefined
+export function min(collection: Iterable<unknown>, projector?: Projector<unknown, number, number>): unknown | undefined {
+	return last(reduce(
+		(projector ? map(collection, projector) : collection) as Iterable<number>,
+		undefined as number | undefined,
+		(prev, curr) => (prev === undefined || curr < prev) ? curr : prev
+	))
 }
 
-export function max(collection: Iterable<number>): number | undefined {
-	return last(
-		reduce(
-			collection,
-			undefined as number | undefined,
-			(prev, curr) => (prev === undefined || curr > prev) ? curr : prev
-		)
-	)
+export function max<T>(collection: Iterable<number>): number | undefined
+export function max<T>(collection: Iterable<T>, projector: Projector<T, number, number>): T | undefined
+export function max(collection: Iterable<unknown>, projector?: Projector<unknown, number, number>): unknown | undefined {
+	return last(reduce(
+		(projector ? map(collection, projector) : collection) as Iterable<number>,
+		undefined as number | undefined,
+		(prev, curr) => (prev === undefined || curr > prev) ? curr : prev
+	))
 }
 
 export function sum(collection: Array<number>) { return last(reduce(collection, 0, (x, y) => x + y)) || 0 }

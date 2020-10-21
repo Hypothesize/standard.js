@@ -6,7 +6,7 @@
 /* eslint-disable fp/no-loops */
 /* eslint-disable brace-style */
 
-import { Tuple, TypeGuard, hasValue } from "../utility"
+import { Primitive, Tuple, TypeGuard, hasValue } from "../utility"
 import { Reducer, Projector, Predicate } from "../functional"
 
 type UnwrapIterable1<T> = T extends Iterable<infer X> ? X : T
@@ -21,7 +21,7 @@ export function isIterable<T, _>(val: Iterable<T> | _): val is _ extends Iterabl
 	return hasValue(val) && typeof (val as any)[Symbol.iterator] === "function"
 }
 
-/**  */
+/** Take n elements from start of sequence */
 export function* take<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 	if (typeof n !== "number") throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
 	if (n < 0) {
@@ -99,22 +99,22 @@ export function contains<A>(iterable: Iterable<A>, value: A) {
 	return false
 }
 
-export function* unique<T>(iterable: Iterable<T>): Iterable<T> {
-	const seen = new Set()
+export function* unique<T>(iterable: Iterable<T>, projector?: Projector<T, Primitive, void>): Iterable<T> {
+	const seen = new globalThis.Set()
 
 	outer:
 	for (const element of iterable) {
-		if (seen.has(element))
+		const elt = projector ? projector(element) : element
+		if (seen.has(elt))
 			continue outer
 		else {
 			// eslint-disable-next-line fp/no-unused-expression
-			seen.add(element)
+			seen.add(elt)
 		}
 		// eslint-disable-next-line fp/no-unused-expression
 		yield element
 
 	}
-
 }
 
 export function* chunk<T>(iter: Iterable<T>, chunkSize: number): Iterable<T[]> {
@@ -318,7 +318,6 @@ export function* range(from: number, to: number, opts?: { mode: "width", width: 
 		yield (from + (i * delta))
 	}
 }
-
 
 export function* repeat(val: unknown, count?: number) {
 	while (count === undefined || (--count >= 0)) {
