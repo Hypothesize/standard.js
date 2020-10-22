@@ -7,7 +7,7 @@
 /* eslint-disable brace-style */
 
 import { Primitive, Tuple, TypeGuard, hasValue } from "../utility"
-import { Reducer, Projector, Predicate } from "../functional"
+import { Reducer, Projector, Predicate, Ranker } from "../functional"
 
 type UnwrapIterable1<T> = T extends Iterable<infer X> ? X : T
 type UnwrapIterable2<T> = T extends Iterable<infer X> ? UnwrapIterable1<X> : T
@@ -132,6 +132,8 @@ export function* chunk<T>(iter: Iterable<T>, chunkSize: number): Iterable<T[]> {
 		yield* chunk(skip(iter, chunkSize), chunkSize)
 	}
 }
+
+export function sort<T>(items: Iterable<T>, comparer?: Ranker<T>) { return [...items].sort(comparer) }
 
 /** Turns n iterables into an iterable of n-tuples
  * The shortest iterable determines the length of the result

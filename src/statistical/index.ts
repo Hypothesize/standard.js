@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
-import { reduce, last, filter, map } from "../collections/iterable"
-import { Projector } from "../functional"
+import { reduce, last, filter, map, sort } from "../collections/iterable"
+import { Projector, Ranker } from "../functional"
 import { Tuple } from "../utility"
 
 export function min<T>(collection: Iterable<number>): number | undefined
@@ -61,6 +61,21 @@ export function median(collection: Array<number>): number | undefined {
 		const second = _ordered[Math.floor(_ordered.length / 2)]
 		return (first + second) / 2
 	}
+}
+
+export function firstQuartile<T>(collection: Array<T>, comparer?: Ranker<T>) {
+	const sortedList = sort(collection, comparer)
+	return sortedList[Math.floor(0.25 * sortedList.length)]
+}
+
+export function thirdQuartile<T>(collection: Array<T>, comparer?: Ranker<T>) {
+	const sortedList = sort(collection, comparer)
+	return sortedList[Math.ceil(0.75 * sortedList.length) - 1]
+}
+
+export function mode<T>(collection: Array<T>): T | undefined {
+	const freqs = sort([...frequencies(collection).entries()], (x => x[1]))
+	return last(freqs)![0]
 }
 
 export function interQuartileRange(collection: Array<number>) {

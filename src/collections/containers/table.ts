@@ -264,24 +264,24 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 }
 
 export namespace Filter {
-	export interface Base<TObj extends Obj, TVal> {
+	export type Base<TObj extends Obj, TVal> = {
 		fieldName: keyof (ExtractByType<TObj, TVal>),
 		value: TVal,
 
 		/** If true, values matching the test will be excluded. If false, only they will be included */
 		negated?: boolean
 	}
-	export interface Categorical<T extends Obj> extends Base<T, Primitive | null> {
+	export type Categorical<T extends Obj> = Base<T, Primitive | null> & {
 		operator: "equal" | "not_equal" | "blank",
 	}
-	export interface Ordinal<T extends Obj> extends Base<T, number> {
+	export type Ordinal<T extends Obj> = Base<T, number> & {
 		operator: "greater" | "greater_or_equal" | "less" | "less_or_equal" | "blank",
 		negated?: boolean
 	}
-	export interface Textual<T extends Obj> extends Base<T, string> {
+	export type Textual<T extends Obj> = Base<T, string> & {
 		operator: "contains" | "is-contained" | "starts_with" | "ends_with" | "blank",
 	}
-	export interface Statistical<T extends Obj> extends Base<T, number> {
+	export type Statistical<T extends Obj> = Base<T, number> & {
 		operator: "is_outlier_by" | "blank",
 		/** number of std. deviations (possibly fractional) */
 		//value: number
@@ -293,7 +293,7 @@ export type Filter<T extends Obj = Obj<Primitive>> = (
 	| Filter.Textual<T>
 	| Filter.Statistical<T>
 )
-export interface FilterGroup<T extends Obj = Obj<Primitive>> {
+export type FilterGroup<T extends Obj = Obj<Primitive>> = {
 	filters: Array<Filter<T> | FilterGroup<T>>
 	combinator?: "AND" | "OR"
 }
