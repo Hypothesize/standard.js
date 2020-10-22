@@ -48,7 +48,7 @@ export function deviation(collection: Array<number>): number | undefined {
 	return _variance ? Math.sqrt(_variance) : undefined
 }
 
-export function median(collection: Array<number>): number | undefined {
+export function median<T>(collection: Array<T>): T | undefined {
 	// eslint-disable-next-line fp/no-mutating-methods
 	const _ordered = collection.sort()
 	if (_ordered.length % 2 === 1) {
@@ -59,7 +59,9 @@ export function median(collection: Array<number>): number | undefined {
 		const first = _ordered[Math.floor(_ordered.length / 2) - 1]
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const second = _ordered[Math.floor(_ordered.length / 2)]
-		return (first + second) / 2
+		return (typeof first === "number" && typeof second === "number")
+			? ((first + second) / 2) as any as T
+			: first
 	}
 }
 
