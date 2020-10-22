@@ -32,7 +32,6 @@ export class Set<X> extends Sequence<X> {
 	})(this)
 	protected ctor(iterable: Iterable<X>): this { return new Set(iterable) as this }
 
-
 	get size(): number { return this.core.set.size }
 	get length(): number { return this.size }
 

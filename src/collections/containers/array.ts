@@ -78,64 +78,19 @@ export class Array<X> extends Set<X> {
 	map<Y>(projector: Projector<X, Y>) {
 		return new Array<Y>(map(this, projector))
 	}
+
+	removeSliceCounted(index: number, count: number) {
+		// eslint-disable-next-line fp/no-mutating-methods
+		return this.ctor([...this].splice(index, count))
+	}
+	removeSliceDelimited(fromIndex: number, toIndex: number) {
+		// eslint-disable-next-line fp/no-mutating-methods
+		return this.ctor([...this].splice(fromIndex, toIndex - fromIndex + 1))
+	}
 }
 
 export class ArrayNumeric extends Array<number> {
 	ctor(iterable: Iterable<number>): this { return new ArrayNumeric(iterable) as this }
-
-	min(): number | undefined {
-		return this
-			.reduce(undefined as number | undefined, (prev, curr) => (prev === undefined || curr < prev) ? curr : prev)
-			.last()
-	}
-	max(): number | undefined {
-		return this
-			.reduce(undefined as number | undefined, (prev, curr) => (prev === undefined || curr > prev) ? curr : prev)
-			.last()
-	}
-
-	mean(): number {
-		if (this.length === 0)
-			throw new Error(`Cannot calculate mean of empty array`)
-		return this.sum() / this.size
-	}
-	variance(mean?: number /*optional already calculated mean */): number | undefined {
-		if (this.size === 1)
-			return 0
-
-		const _mean = mean || this.mean()
-		if (_mean === undefined)
-			return undefined
-
-		return this.map(datum => Math.pow(datum - _mean, 2)).sum() / (this.size)
-	}
-	deviation(): number | undefined {
-		const variance = this.variance(this.mean())
-		return variance ? Math.sqrt(variance) : undefined
-	}
-
-	median(): number | undefined {
-		// eslint-disable-next-line fp/no-mutating-methods
-		const _ordered = this.sort()
-		if (_ordered.size % 2 === 1) {
-			return _ordered.get(Math.floor(this.size / 2))
-		}
-		else {
-			// eslint-disable-next-line no-shadow, @typescript-eslint/no-non-null-assertion
-			const first = _ordered.get(Math.floor(_ordered.size / 2) - 1)
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			const second = _ordered.get(Math.floor(_ordered.size / 2))
-			return (first + second) / 2
-		}
-	}
-	interQuartileRange() {
-		// eslint-disable-next-line fp/no-mutating-methods
-		const sortedList = this.sort()
-		const percentile25 = sortedList.get(Math.floor(0.25 * sortedList.size))
-		const percentile75 = sortedList.get(Math.ceil(0.75 * sortedList.size))
-		return percentile25 && percentile75 ? percentile75 - percentile25 : undefined
-	}
-	sum() { return this.reduce(0, (x, y) => x + y).last() || 0 }
 
 	map(projector: Projector<number, number>): ArrayNumeric
 	map<Y>(projector: Projector<number, Y>): Array<Y>

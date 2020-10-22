@@ -68,6 +68,10 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 	get(selector: keyof T) { return this.obj[selector] }
 	getAll(selector: Iterable<keyof T>) { return new Set(map(selector, index => this.obj[index])) }
 
+	set(key: keyof T, value: T[keyof T]) {
+		return new Dictionary({ ...this.obj, [key]: value })
+	}
+
 	/** Get the indexes where a value occurs or a certain predicate/condition is met */
 	indexesOf(args: ({ value: T[keyof T] } | { predicate: Predicate<T[keyof T], keyof T> })) {
 		return 'value' in args
