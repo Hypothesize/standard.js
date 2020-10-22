@@ -1,5 +1,6 @@
 /* eslint-disable brace-style */
 import { Predicate, Projector } from "../../functional"
+import { min, max, sum } from "../../statistical"
 import { unique, map } from "../iterable"
 import { Set } from "./set"
 
@@ -75,9 +76,10 @@ export class Array<X> extends Set<X> {
 	reverse() { return this.ctor([...this].reverse()) }
 
 	/** Array-specific implementation of map() */
-	map<Y>(projector: Projector<X, Y>) {
-		return new Array<Y>(map(this, projector))
-	}
+	map<Y>(projector: Projector<X, Y>) { return new Array<Y>(map(this, projector)) }
+
+	min(projector: Projector<X, number, number>) { return min([...this], projector) }
+	max(projector: Projector<X, number, number>) { return max([...this], projector) }
 
 	removeSliceCounted(index: number, count: number) {
 		// eslint-disable-next-line fp/no-mutating-methods
@@ -91,6 +93,8 @@ export class Array<X> extends Set<X> {
 
 export class ArrayNumeric extends Array<number> {
 	ctor(iterable: Iterable<number>): this { return new ArrayNumeric(iterable) as this }
+
+	sum() { return sum([...this]) }
 
 	map(projector: Projector<number, number>): ArrayNumeric
 	map<Y>(projector: Projector<number, Y>): Array<Y>
