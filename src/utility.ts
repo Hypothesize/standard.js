@@ -29,6 +29,7 @@ export type TypeAssert<T1, T2> = (
 )
 
 export type Fx<Ret, Args extends any[]> = (...args: Args) => Ret
+export type ArgsType<F extends (...x: any[]) => any> = F extends (...x: infer A) => any ? A : never
 export type Primitive = number | string | bigint | boolean | symbol
 export type Obj<TValue = unknown, TKey extends string = string> = { [key in TKey]: TValue }
 export type RecursivePartial<T> = { [P in keyof T]?: T[P] extends Record<string, unknown> ? RecursivePartial<T[P]> : T[P] }

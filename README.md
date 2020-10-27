@@ -2,13 +2,14 @@
 Standard library for JavaScript/TypeScript
 
 ## Features
-- Lazy iterable combinators such as map, filter, reduce, etc.
-- Lazy async iterable combinators such as mapAsync, filterAsync, etc.
-- Functional combinators such as flip, curry, etc.
-- Async combinators such as promisify, sleep, etc.
-- Iterable fluent containers: Sequence, Group, Vector, Dictionary, and Table (for manipulation of tabular in-memory data)
-- Http communication functionality
-- Extensions of basic types: string, number, date, char
+- Lazy iterable combinators such as _map_, _filter_, _reduce_, etc.
+- Lazy async iterable combinators such as _mapAsync_, _filterAsync_, etc.
+- Iterable fluent containers: _Sequence_, _Set_, _Array_, _Dictionary_, and _DataTable_
+- Functional combinators such as _flip_, _curry_, etc.
+- Async combinators such as _promisify_, _sleep_, etc.
+- Statistical functions such as mean, median, 1st/3rd quartiles, variance, etc.
+- HTTP communication functionality
+- Extensions of basic types: string,  number, date-time, char
 - Basic utilities: types, type guards, helpers
 
 

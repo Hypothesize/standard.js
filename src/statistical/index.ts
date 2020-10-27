@@ -1,34 +1,41 @@
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
 import { reduce, last, filter, map, sort } from "../collections/iterable"
-import { Projector, Ranker } from "../functional"
+import { Projector, Ranker, Comparer } from "../functional"
 import { Tuple, isNumber } from "../utility"
 
-export function min<T>(vector: Iterable<number>): number | undefined
-export function min<T>(vector: Iterable<T>, projector: Projector<T, number, number>): T | undefined
-export function min(vector: Iterable<unknown>, projector?: Projector<unknown, number, number>): unknown | undefined {
-	return last(
-		reduce(
-			(projector ? map(vector, projector) : vector) as Iterable<number>,
-			undefined as number | undefined,
-			(prev, curr) => (prev === undefined || curr < prev) ? curr : prev
-		)
-	)
+export function min(vector: Iterable<number>): number | undefined
+export function min<T>(vector: Iterable<T>, ranker: Ranker<T>): T | undefined
+export function min<T>(vector: Iterable<T> | Iterable<number>, ranker?: Ranker<unknown>) {
+	// eslint-disable-next-line fp/no-let
+	let min = undefined
+	// eslint-disable-next-line fp/no-loops
+	for (const x of vector) {
+		if (min === undefined || (ranker && ranker(x, min) < 0) || (!ranker && x < min))
+			// eslint-disable-next-line fp/no-mutation
+			min = x
+	}
+
+	return min
 }
 
 export function max<T>(vector: Iterable<number>): number | undefined
-export function max<T>(vector: Iterable<T>, projector: Projector<T, number, number>): T | undefined
-export function max(vector: Iterable<unknown>, projector?: Projector<unknown, number, number>) {
-	return last(
-		reduce(
-			(projector
-				? map(vector, projector)
-				: vector
-			) as Iterable<number>,
+export function max<T>(vector: Iterable<T>, ranker: Ranker<T>): T | undefined
+export function max(vector: Iterable<unknown>, ranker?: Ranker<unknown>) {
+	if (ranker) {
+		return last(reduce(
+			vector,
+			undefined as unknown,
+			(prev, curr) => (prev === undefined || (ranker(curr, prev) > 0)) ? curr : prev
+		))
+	}
+	else {
+		return last(reduce(
+			vector as Iterable<number>,
 			undefined as number | undefined,
 			(prev, curr) => (prev === undefined || curr > prev) ? curr : prev
-		)
-	)
+		))
+	}
 }
 
 export function sum(vector: number[]): number {
@@ -117,13 +124,13 @@ export function median<T>(vector: Array<T>): T | undefined {
 	}
 }
 
-export function firstQuartile<T>(vector: Array<T>, comparer?: Ranker<T>) {
-	const sortedList = sort(vector, comparer)
+export function firstQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
+	const sortedList = sort(vector, ranker)
 	return sortedList[Math.floor(0.25 * sortedList.length)]
 }
 
-export function thirdQuartile<T>(vector: Array<T>, comparer?: Ranker<T>) {
-	const sortedList = sort(vector, comparer)
+export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
+	const sortedList = sort(vector, ranker)
 	return sortedList[Math.ceil(0.75 * sortedList.length) - 1]
 }
 

@@ -26,47 +26,6 @@ export type Reducer<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: 
 export type ReducerAsync<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: X, index: I) => Promise<Y>
 
 
-export function compare<T>(x: T, y: T, comparer?: Projector<T, unknown, void>, tryNumeric = false, tryDate = false): number {
-	const _x: unknown = comparer ? comparer(x) : x
-	const _y: unknown = comparer ? comparer(y) : y
-
-	if (typeof _x === "string" && typeof _y === "string") {
-		if (tryDate === true) {
-			const __x = new Date(_x)
-			const __y = new Date(_y)
-			if (__x > __y)
-				return 1
-			else if (__x === __y)
-				return 0
-			else
-				return -1
-		}
-		if (tryNumeric === true) {
-			const __x = parseFloat(_x)
-			const __y = parseFloat(_y)
-			if ((!Number.isNaN(__x)) && (!Number.isNaN(__y))) {
-				return __x - __y
-			}
-		}
-
-		return new Intl.Collator().compare(_x || "", _y || "")
-	}
-	else if (typeof _x === "number" && typeof _y === "number") {
-		return (_x || 0) - (_y || 0)
-	}
-	else if (_x instanceof Date && _y instanceof Date) {
-		const __x = _x || new Date()
-		const __y = _y || new Date()
-		if ((__x as Date) > (__y as Date))
-			return 1
-		else if (__x === __y)
-			return 0
-		else
-			return -1
-	}
-	else
-		return _x === _y ? 0 : 1
-}
 
 export function getRanker<T>(args: { projector: Projector<T, unknown, void>, tryNumeric?: boolean/*=false*/, tryDate?: boolean/*=false*/, reverse?: boolean/*=false*/ }): Ranker<T> {
 	//console.log(`generating comparer, try numeric is ${tryNumeric}, reversed is ${reverse} `)
@@ -80,6 +39,51 @@ export function getComparer<T>(projector: Projector<T, unknown, void>, tryNumeri
 		return compare(x, y, projector, tryNumeric, tryDate) === 0
 	}
 }
+export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unknown, void>, tryNumeric = false, tryDate = false): -1 | 0 | 1 {
+	const _larger: unknown = projector ? projector(larger) : larger
+	const _smaller: unknown = projector ? projector(smaller) : smaller
+
+	const sign = (n: number) => Math.sign(n) as -1 | 0 | 1
+
+	if (typeof _larger === "string" && typeof _smaller === "string") {
+		if (tryDate === true) {
+			const __x = new Date(_larger)
+			const __y = new Date(_smaller)
+			if (__x > __y)
+				return 1
+			else if (__x === __y)
+				return 0
+			else
+				return -1
+		}
+		if (tryNumeric === true) {
+			const __x = parseFloat(_larger)
+			const __y = parseFloat(_smaller)
+			if ((!Number.isNaN(__x)) && (!Number.isNaN(__y))) {
+				return sign(__x - __y)
+			}
+		}
+
+		return sign(new Intl.Collator().compare(_larger || "", _smaller || ""))
+	}
+	else if (typeof _larger === "number" && typeof _smaller === "number") {
+		return sign((_larger || 0) - (_smaller || 0))
+	}
+	else if (_larger instanceof Date && _smaller instanceof Date) {
+		const largerDate = _larger || new Date()
+		const smallerDate = _smaller || new Date()
+		if (largerDate > smallerDate)
+			return 1
+		else if (largerDate === smallerDate)
+			return 0
+		else
+			return -1
+	}
+	else
+		return _larger === _smaller ? 0 : 1
+}
+
+export const noop = () => { }
 
 export const identity = <T>(val: T) => val
 

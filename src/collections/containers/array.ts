@@ -1,7 +1,8 @@
 /* eslint-disable brace-style */
-import { Predicate, Projector } from "../../functional"
+import { Predicate, Projector, Ranker } from "../../functional"
 import { min, max, sum } from "../../statistical"
 import { unique, map } from "../iterable"
+import { Sequence } from "./sequence"
 import { Set } from "./set"
 
 
@@ -78,8 +79,8 @@ export class Array<X> extends Set<X> {
 	/** Array-specific implementation of map() */
 	map<Y>(projector: Projector<X, Y>) { return new Array<Y>(map(this, projector)) }
 
-	min(projector: Projector<X, number, number>) { return min([...this], projector) }
-	max(projector: Projector<X, number, number>) { return max([...this], projector) }
+	min(ranker: Ranker<X>) { return min([...this], ranker) }
+	max(ranker: Ranker<X>) { return max([...this], ranker) }
 
 	removeSliceCounted(index: number, count: number) {
 		// eslint-disable-next-line fp/no-mutating-methods
@@ -93,6 +94,10 @@ export class Array<X> extends Set<X> {
 
 export class ArrayNumeric extends Array<number> {
 	ctor(iterable: Iterable<number>): this { return new ArrayNumeric(iterable) as this }
+
+	static fromRange(from: number, to: number, opts?: { mode: "width", width: number } | { mode: "count", count: number }) {
+		return new ArrayNumeric(Sequence.fromRange(from, to, opts))
+	}
 
 	sum() { return sum([...this]) }
 
