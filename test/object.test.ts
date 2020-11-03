@@ -157,6 +157,18 @@ describe('merge', () => {
 		assert.throws(() => deepMerge(null, {}))
 	})*/
 
+	it('ignores all arguments that are not object', function () {
+		assert.deepEqual(deepMerge({ a: 11 }, undefined, 58, { b: 99 }), { a: 11, b: 99 })
+	})
+
+	it('ignores all objects that are not plain object', function () {
+		assert.deepEqual(deepMerge({ a: 11 }, null, [], { b: 99 }), { a: 11, b: 99 })
+	})
+
+	it('doesn\'t override objects when a function is part of the arguments', function () {
+		assert.deepEqual(deepMerge({ a: 11 }, () => 2, { b: 99 }), { a: 11, b: 99 })
+	})
+
 	it('returns an empty object if passed empty objects', function () {
 		assert.deepEqual(deepMerge({}, {}, {}), {})
 	})

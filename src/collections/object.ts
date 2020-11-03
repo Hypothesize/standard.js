@@ -143,9 +143,11 @@ export function deepMerge(...args: any[])/*: O.Compact<T, Tn, 'deep'>*/ {
 		return result
 	}
 
-	return [...skip(args, 1)].reduce((result, newComer) => {
+	// We ignore arguments that aren't objects
+	const validObjects = args.filter(obj => typeof obj === "object" && !Array.isArray(obj) && obj !== null)
+	return [...skip(validObjects, 1)].reduce((result, newComer) => {
 		return mergeRecursively(result, newComer)
-	}, args[0]) //as O.Compact<T, Tn, 'deep'>
+	}, validObjects[0]) //as O.Compact<T, Tn, 'deep'>
 }
 
 // const m = (deepMerge({ n: 1 }, { str: "num" }))
