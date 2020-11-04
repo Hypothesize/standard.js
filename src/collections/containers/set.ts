@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable brace-style */
 
 import { map, intersection, every, union, some, except, complement } from "../iterable"
@@ -14,6 +15,7 @@ export class Set<X> extends Sequence<X> {
 	protected _set?: globalThis.Set<X> = undefined
 	protected readonly core = ((me: this) => {
 		return {
+			// eslint-disable-next-line fp/no-get-set
 			get set() {
 				if (me._set === undefined) {
 					// set is created from array for performance reasons

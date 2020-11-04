@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable indent */
 /* eslint-disable brace-style */
 /* eslint-disable fp/no-rest-parameters */
@@ -26,17 +27,17 @@ export function fromKeyValues<T, K extends string | number = string>(keyValues: 
 	return obj
 }
 
-export function values<V, K extends string>(obj: Record<K, V>): V[]
-export function values<V, K extends string, T extends Record<K, V>>(obj: T): V[]
+export function values<V, K extends string | number>(obj: Record<K, V>): V[]
+export function values<V, K extends string | number, T extends Record<K, V>>(obj: T): V[]
 export function values(obj: Obj) { return Object.values(obj) }
 
-export function entries<V, K extends string>(obj: Record<K, V>): Tuple<K, V>[]
-export function entries<V, K extends string, T extends Record<K, V>>(obj: T): Tuple<K, V>[]
+export function entries<V, K extends string | number>(obj: Record<K, V>): Tuple<K, V>[]
+export function entries<V, K extends string | number, T extends Record<K, V>>(obj: T): Tuple<K, V>[]
 export function entries(obj: Obj) { return keys(obj).map(key => new Tuple(key, obj[key])) }
 
-export function mapObject<K extends string, X, Y>(obj: Record<K, X>, projector: Projector<X, Y, K>): Record<K, Y>
-export function mapObject<K extends string, X, Y, T extends Record<K, X>>(obj: T, projector: Projector<X, Y, K>): Record<K, Y>
-export function mapObject<X, Y>(obj: Obj<X>, projector: Projector<X, Y, string>) {
+export function mapObject<K extends string | number, X, Y>(obj: Record<K, X>, projector: Projector<X, Y, K>): Record<K, Y>
+export function mapObject<K extends string | number, X, Y, T extends Record<K, X>>(obj: T, projector: Projector<X, Y, K>): Record<K, Y>
+export function mapObject<X, Y>(obj: Obj<X, string | number>, projector: Projector<X, Y, string | number>) {
 	const _entries = entries(obj)
 	const mapped = _entries.map(kv => new Tuple(kv[0], projector(kv[1], kv[0])))
 	const newObj = fromKeyValues(mapped)
@@ -48,8 +49,8 @@ export function mapObject<X, Y>(obj: Obj<X>, projector: Projector<X, Y, string>)
  * The type guard must return true for all values of type `B`.
  */
 // export function filterObject<K extends string, V, V1 extends V>(obj: Obj<V, K>, predicate: TypeGuard<V, V1>): ExtractByType<Obj<V, K>, V1>
-export function filterObject<V, K extends string = string>(obj: Obj<V, K>, predicate: Predicate<V, K>): Partial<Obj<V, K>>
-export function filterObject<V, K extends string = string>(obj: Obj<V, K>, predicate: Predicate<V, K>): Partial<Obj<V, K>>
+export function filterObject<V, K extends string | number = string>(obj: Obj<V, K>, predicate: Predicate<V, K>): Partial<Obj<V, K>>
+export function filterObject<V, K extends string | number = string>(obj: Obj<V, K>, predicate: Predicate<V, K>): Partial<Obj<V, K>>
 export function filterObject<T extends Obj>(obj: T, predicate: Predicate<T[keyof T], keyof T>): Partial<T>
 export function filterObject<T extends Obj<V>, V, V1 extends V>(obj: T, predicate: TypeGuard<V, V1>): ExtractByType<T, V1>
 export function filterObject(obj: Obj, predicate: Predicate<unknown, keyof typeof obj>) {

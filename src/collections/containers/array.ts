@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable brace-style */
 import { Predicate, Projector, Ranker } from "../../functional"
 import { min, max, sum } from "../../statistical"

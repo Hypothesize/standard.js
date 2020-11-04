@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable brace-style */
 import { Tuple } from "../../utility"
 import { Predicate, Projector, Reducer } from "../../functional"
