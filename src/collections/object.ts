@@ -16,7 +16,7 @@ export function keys(obj: any) {
 	return Object.keys(obj)
 }
 
-export function fromKeyValues<T, K extends string = string>(keyValues: Tuple<K, T>[]) {
+export function fromKeyValues<T, K extends string | number = string>(keyValues: Tuple<K, T>[]) {
 	const obj = {} as Record<K, T>
 	// eslint-disable-next-line fp/no-unused-expression
 	keyValues.forEach(kvp => {

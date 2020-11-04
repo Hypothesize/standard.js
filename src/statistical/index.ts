@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
 import { reduce, last, filter, map, sort } from "../collections/iterable"
-import { Projector, Ranker, Comparer } from "../functional"
+import { Ranker, noop } from "../functional"
 import { Tuple, isNumber } from "../utility"
 
 export function min(vector: Iterable<number>): number | undefined
@@ -49,8 +50,7 @@ export function mean(vector: number[], opts?:
 	}): number | undefined {
 
 	const len = vector.length
-	if (len === 0)
-		return undefined
+	if (len === 0) return undefined
 
 	if (opts) {
 		if (opts.original) {
@@ -80,17 +80,15 @@ export function variance(vector: number[], opts?:
 	}): number | undefined {
 
 	const len = vector.length
-	if (len === 0)
-		return undefined
-	// if (len === 1)
-	// 	return 0
+	if (len === 1) return 0
+	if (len === 0) return undefined
 
 	const _mean = typeof opts?.mean === "number"
 		? opts.mean
 		: mean(vector, opts?.mean)
 
 	return _mean
-		? sum(vector.map(datum => Math.pow(datum - _mean, 2))) / (len - ((opts?.forSample ?? true) ? 1 : 0))
+		? sum(vector.filter(noop).map(datum => Math.pow(datum - _mean, 2))) / (len - ((opts?.forSample ?? true) ? 1 : 0))
 		: undefined
 }
 
@@ -119,6 +117,7 @@ export function median<T>(vector: Array<T>): T | undefined {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const second = _ordered[Math.floor(_ordered.length / 2)]
 		return (typeof first === "number" && typeof second === "number")
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			? ((first + second) / 2) as any as T
 			: first
 	}
@@ -135,7 +134,9 @@ export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
 }
 
 export function mode<T>(vector: Array<T>): T | undefined {
+	if (vector.length === 0) return undefined
 	const freqs = sort([...frequencies(vector).entries()], (x => x[1]))
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	return last(freqs)![0]
 }
 

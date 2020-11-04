@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable fp/no-rest-parameters */
 /* eslint-disable fp/no-loops */
 /* eslint-disable indent */
@@ -11,12 +12,10 @@
 /* eslint-disable fp/no-let */
 
 import { Tuple, hasValue } from "../utility"
-import { map, integers, isIterable } from "./iterable"
-import { PredicateAsync, ProjectorAsync } from "../functional"
+import { map, integers, isIterable, indexed } from "./iterable"
+import { Predicate, PredicateAsync, Projector, ProjectorAsync, Reducer, ReducerAsync } from "../functional"
 
-//type IterableAsync<X> = AsyncIterable<X> | Iterable<Promise<X>> | Iterable<() => Promise<X>>
 export type ZipAsync<A extends ReadonlyArray<unknown>> = { [K in keyof A]: A[K] extends AsyncIterable<infer T> | Iterable<infer T> ? T : never }
-
 export type AsyncOptions = ({ mode: "parallel", resultOrder: "completion" | "original" } | { mode: "serial" })
 
 /** AsyncIterable type guard */
@@ -55,11 +54,14 @@ export async function toArrayAsync<T>(iterable: Iterable<T> | AsyncIterable<T>) 
 	return arr
 }
 
+export async function* indexedAsync<T>(items: AsyncIterable<T>, from = 0) {
+	yield* zipAsync(integers({ from, direction: "upwards" }), items)
+}
+
 /** Turns n (possible async) iterables into an async iterable of n-tuples
  * The shortest iterable determines the length of the resulting iterable
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function* zipAsync<T extends readonly (AsyncIterable<any> | Iterable<any>)[]>(...iterables: T): AsyncIterable<ZipAsync<T>> {
+export async function* zipAsync<T extends readonly (AsyncIterable<unknown> | Iterable<unknown>)[]>(...iterables: T): AsyncIterable<ZipAsync<T>> {
 	// console.assert(iterables.every(iter => isAsyncIterable(iter)))
 
 	//const iterators = iterables.map(i => i[Symbol.asyncIterator]() as AsyncIterator<unknown>)
@@ -130,22 +132,6 @@ export async function* mapAsync<X, Y>(items: AsyncIterable<X>, projector: Projec
 	}
 }
 
-/* export async function* filterAsync<T>(iterable: AsyncIterable<T>, predicate: PredicateAsync<T>, options: { concurrency: number }) {
-	let c = 0
-
-	const mapped = new ParallelRunner(
-		iterable[Symbol.asyncIterator](),
-		async item => ({ item, value: await func(item, c++) }),
-		concurrency,
-	)
-
-	for await (const item of mapped) {
-		if (item.value) {
-			yield item.item
-		}
-	}
-}*/
-
 export async function containsAsync<A>(iterable: AsyncIterable<A>, value: A) {
 	for await (const x of iterable) {
 		if (x === value) return true
@@ -169,6 +155,84 @@ export async function* takeAsync<T>(iterable: AsyncIterable<T>, n: number): Asyn
 	}
 }
 
+export async function* skipAsync<T>(iterable: AsyncIterable<T>, n: number): AsyncIterable<T> {
+	if (typeof n !== "number")
+		throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
+	if (n < 0) {
+		// console.warn(`Warning: Negative value ${n} passed to argument <n> of skip()`)
+		return
+	}
+
+	for await (const element of iterable) {
+		if (n === 0)
+			yield element
+		else
+			n--
+	}
+}
+
+export async function* reduceAsync<X, Y>(iterable: AsyncIterable<X>, initial: Y, reducer: Reducer<X, Y> | ReducerAsync<X, Y>): AsyncIterable<Y> {
+	for await (const tuple of indexedAsync(iterable)) {
+		initial = await reducer(initial, tuple[1], tuple[0])
+		yield initial
+	}
+}
+
+export async function forEachAsync<T>(iterable: AsyncIterable<T>, action: Projector<T> | ProjectorAsync<T>) {
+	for await (const tuple of indexedAsync(iterable)) {
+		// eslint-disable-next-line fp/no-unused-expression
+		action(tuple[1], tuple[0])
+	}
+}
+
+export async function firstAsync<T>(items: AsyncIterable<T>, predicate?: Predicate<T> | PredicateAsync<T>): Promise<T | undefined> {
+	for await (const tuple of indexedAsync(items)) {
+		if (predicate === undefined || predicate(tuple[1], tuple[0]))
+			return tuple[1]
+	}
+	return undefined
+}
+
+/*export async function lastAsync<T>(iter: AsyncIterable<T> | { length: number, get(index: number): T | Promise<T> }, predicate?: Predicate<T> | PredicateAsync<T>): Promise<T | undefined> {
+	// eslint-disable-next-line fp/no-let
+	if ('length' in iter) {
+		// Array-specific implementation of last() for better performance using direct elements access
+
+		// eslint-disable-next-line fp/no-let
+		for (let i = iter.length - 1; i >= 0; i--) {
+			// eslint-disable-next-line no-await-in-loop
+			const element = await iter.get(i)
+			// eslint-disable-next-line no-await-in-loop
+			if (predicate === undefined || await predicate(element, i))
+				return element
+		}
+		return undefined
+	}
+	else {
+		// eslint-disable-next-line fp/no-let
+		let _last = undefined as T | undefined
+		const iterable = predicate === undefined ? iter : filter(iter, predicate)
+		for (const element of iterable) {
+			_last = element
+		}
+		return _last
+	}
+}*/
+
+export async function someAsync<T>(iter: AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
+	for await (const tuple of indexedAsync(iter)) {
+		if (predicate(tuple[1], tuple[0]) === true) return true
+	}
+	return false
+}
+
+export async function everyAsync<T>(items: AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
+	for await (const tuple of indexedAsync(items)) {
+		if (predicate(tuple[1], tuple[0]) === false) return false
+	}
+	return true
+}
+
 /*async function mapDictAsync<X, Y, I>(projection: AsyncProjector<X, Y, I>) {
 	var _map = new Dictionary<T>()
 	let promisesArr = this.entries()
@@ -178,5 +242,19 @@ export async function* takeAsync<T>(iterable: AsyncIterable<T>, n: number): Asyn
 	return new Dictionary(resolvedArr);
 }*/
 
+// export async function* filterAsync<T>(iterable: AsyncIterable<T>, predicate: PredicateAsync<T>, options: { concurrency: number }) {
+// 	let c = 0
 
+// 	const mapped = new ParallelRunner(
+// 		iterable[Symbol.asyncIterator](),
+// 		async item => ({ item, value: await func(item, c++) }),
+// 		concurrency,
+// 	)
+
+// 	for await (const item of mapped) {
+// 		if (item.value) {
+// 			yield item.item
+// 		}
+// 	}
+// }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable indent */
 /* eslint-disable fp/no-loops */
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -60,7 +61,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	get idVector() { return this._idVector }
 	/** Columns vectors excluding row ids vector */
 	get columnVectors() { return this._colVectors }
-	/** Return data as an iterable of rows that include a sequential row number property */
+	/** Return data as an iterable of rows that includes a sequential row number property */
 	get rowObjects(): Iterable<T & { rowNum: number }> {
 		return (function* (me): IterableIterator<T & { rowNum: number }> {
 			for (const rowNumInfo of zip(Sequence.integers({ from: 0, to: me.length - 1 }), me._idVector)) {
@@ -77,6 +78,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 			}
 		})(this)
 	}
+
 
 	get length() { return this._idVector.length }
 

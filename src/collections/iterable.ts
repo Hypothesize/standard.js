@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable indent */
 /* eslint-disable fp/no-rest-parameters */
 /* eslint-disable fp/no-mutation */
@@ -133,6 +134,7 @@ export function* chunk<T>(iter: Iterable<T>, chunkSize: number): Iterable<T[]> {
 	}
 }
 
+// eslint-disable-next-line fp/no-mutating-methods
 export function sort<T>(items: Iterable<T>, comparer?: Ranker<T>) { return [...items].sort(comparer) }
 
 /** Turns n iterables into an iterable of n-tuples
@@ -275,10 +277,12 @@ export function except<T>(src: Iterable<T>, ...exclusions: ArrayLike<T>[]): Iter
 	throw new Error(`Not Implemented`)
 }
 
+/** */
 export function complement<T>(target: ArrayLike<T>, universe: Iterable<T>): Iterable<T> {
 	throw new Error(`Not Implemented`)
 }
 
+/** */
 export function indexesOf<K, V>(collection: Iterable<Tuple<K, V>>, target: ({ value: V } | { predicate: Predicate<V, K> })) {
 	return 'value' in target
 		? map(filter(collection, kv => kv[1] === target.value), kv => kv[0])
