@@ -62,23 +62,31 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	/** Columns vectors excluding row ids vector */
 	get columnVectors() { return this._colVectors }
 	/** Return data as an iterable of rows that includes a sequential row number property */
-	get rowObjects(): Iterable<T & { rowNum: number }> {
-		return (function* (me): IterableIterator<T & { rowNum: number }> {
-			for (const rowNumInfo of zip(Sequence.integers({ from: 0, to: me.length - 1 }), me._idVector)) {
-				const [sequentialRowNum, originalRowNum] = rowNumInfo
-
-				const row: T & { rowNum: number } = {
-					rowNum: sequentialRowNum + 1,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	get rowObjects(): Iterable<T> {
+		return (function* (me): IterableIterator<T> {
+			for (const originalRowNum of me._idVector) {
+				const row = {
 					...me._colVectors.map(vector => vector[originalRowNum]).asObject() as any as T
 				}
-
-				// eslint-disable-next-line fp/no-unused-expression
 				yield row
 			}
 		})(this)
 	}
+	get rowObjectsNumbered(): Iterable<T & { origRowNum: number, sequentialRowNum: number }> {
+		return (function* (me): IterableIterator<T & { origRowNum: number, sequentialRowNum: number }> {
+			for (const rowNumInfo of zip(Sequence.integers({ from: 0, to: me.length - 1 }), me._idVector)) {
+				const [sequentialRowNum, originalRowNum] = rowNumInfo
 
+				const row: T & { origRowNum: number, sequentialRowNum: number } = {
+					origRowNum: originalRowNum,
+					sequentialRowNum: sequentialRowNum + 1,
+					...me._colVectors.map(vector => vector[originalRowNum]).asObject() as any as T
+				}
+
+				yield row
+			}
+		})(this)
+	}
 
 	get length() { return this._idVector.length }
 
@@ -265,8 +273,14 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 }
 
+export type TableFilter = {
+	fieldName: string,
+	value: any,
+	negated?: boolean
+}
+
 export namespace Filter {
-	export type Base<TObj extends Obj, TVal> = {
+	export type Base<TObj extends Obj = Obj, TVal = any> = {
 		fieldName: keyof (ExtractByType<TObj, TVal>),
 		value: TVal,
 
@@ -278,7 +292,6 @@ export namespace Filter {
 	}
 	export type Ordinal<T extends Obj> = Base<T, number> & {
 		operator: "greater" | "greater_or_equal" | "less" | "less_or_equal" | "blank",
-		negated?: boolean
 	}
 	export type Textual<T extends Obj> = Base<T, string> & {
 		operator: "contains" | "is-contained" | "starts_with" | "ends_with" | "blank",
@@ -286,19 +299,19 @@ export namespace Filter {
 	export type Statistical<T extends Obj> = Base<T, number> & {
 		operator: "is_outlier_by" | "blank",
 		/** number of std. deviations (possibly fractional) */
-		//value: number
 	}
 }
-export type Filter<T extends Obj = Obj<Primitive>> = (
+export type Filter<T extends Obj = Obj> = (
 	| Filter.Categorical<T>
 	| Filter.Ordinal<T>
 	| Filter.Textual<T>
 	| Filter.Statistical<T>
 )
-export type FilterGroup<T extends Obj = Obj<Primitive>> = {
+export type FilterGroup<T extends Obj = Obj> = {
 	filters: Array<Filter<T> | FilterGroup<T>>
 	combinator?: "AND" | "OR"
 }
+
 
 export type SortOrder = "ascending" | "descending" | "none"
 
