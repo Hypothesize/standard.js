@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable indent */
 /* eslint-disable fp/no-loops */
@@ -91,8 +92,8 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	get length() { return this._idVector.length }
 
 	/** Return a new data table that excludes data disallowed by the passed filters */
-	filter(args: { filter?: Predicate<T, void> | Filter<T> | FilterGroup<T>, options?: FilterOptions }): DataTable<T> {
-		const shouldRetain = (row: T, filter: Predicate<T, void> | Filter<T> | FilterGroup<T>): boolean => {
+	filter(args: { filter?: Predicate<T, void> | TableFilter | FilterGroup, options?: FilterOptions }): DataTable<T> {
+		const shouldRetain = (row: T, filter: Predicate<T, void> | TableFilter | FilterGroup): boolean => {
 			if ("filters" in filter) {
 				switch (filter.combinator) {
 					case undefined:
@@ -144,7 +145,6 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 					default: {
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const _: never = filter
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						throw new Error(`Unknown filter operator: ${(filter as any).operator}`)
 					}
@@ -275,6 +275,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 export type TableFilter = {
 	fieldName: string,
+	operator: string,
 	value: any,
 	negated?: boolean
 }
@@ -283,8 +284,6 @@ export namespace Filter {
 	export type Base<TObj extends Obj = Obj, TVal = any> = {
 		fieldName: keyof (ExtractByType<TObj, TVal>),
 		value: TVal,
-
-		/** If true, values matching the test will be excluded. If false, only they will be included */
 		negated?: boolean
 	}
 	export type Categorical<T extends Obj> = Base<T, Primitive | null> & {
@@ -307,8 +306,9 @@ export type Filter<T extends Obj = Obj> = (
 	| Filter.Textual<T>
 	| Filter.Statistical<T>
 )
-export type FilterGroup<T extends Obj = Obj> = {
-	filters: Array<Filter<T> | FilterGroup<T>>
+
+export type FilterGroup = {
+	filters: Array<TableFilter | FilterGroup>
 	combinator?: "AND" | "OR"
 }
 
@@ -327,13 +327,13 @@ interface PagingOptions {
 	/** Page without consideration of id vector i.e., use all/original values in column vectors */
 	scope: "current" | "original"
 }
-interface DataView {
-	filters: Record<string, Filter>,
-	sortColumn: string,
-	sortOrder: SortOrder,
-	pageSize: number,
-	pageIndex: number
-}
+// interface DataView {
+// 	filters: Record<string, Filter>,
+// 	sortColumn: string,
+// 	sortOrder: SortOrder,
+// 	pageSize: number,
+// 	pageIndex: number
+// }
 
 /** Data table */
 /*export interface Table<T extends Record<string, unknown> = {}> {
@@ -345,7 +345,7 @@ interface DataView {
 	// columnNames: Collection.Ordered<keyof T>
 	rowObjects: Iterable<T & { rowId: number }>
 
-	filter(args: { filterGroup: FilterGroup<T>, options?: Record<string, unknown> }): Table<T>
+	filter(args: { filterGroup: FilterGroup, options?: Record<string, unknown> }): Table<T>
 
 	sort(args: { columnName: string, order: SortOrder, options?: Record<string, unknown> }): Table<T>
 
