@@ -11,7 +11,7 @@
 /* eslint-disable init-declarations */
 /* eslint-disable fp/no-let */
 
-import { Tuple, hasValue } from "../utility"
+import { Tuple, TypeGuard, hasValue } from "../utility"
 import { map, integers, isIterable, indexed } from "./iterable"
 import { Predicate, PredicateAsync, Projector, ProjectorAsync, Reducer, ReducerAsync } from "../functional"
 
@@ -231,6 +231,17 @@ export async function everyAsync<T>(items: AsyncIterable<T>, predicate: Predicat
 		if (predicate(tuple[1], tuple[0]) === false) return false
 	}
 	return true
+}
+
+export function filterAsync<X>(iterable: AsyncIterable<X>, predicate: PredicateAsync<X, number>): AsyncIterable<X>
+export function filterAsync<X, X1 extends X>(iterable: AsyncIterable<X>, predicate: TypeGuard<X, X1>): AsyncIterable<X1>
+export async function* filterAsync<X, X1 extends X>(iterable: AsyncIterable<X>, predicate: PredicateAsync<X, number> | TypeGuard<X, X1>) {
+	for await (const tuple of indexedAsync(iterable)) {
+		if (await predicate(tuple[1], tuple[0]))
+			yield tuple[1]
+		else
+			continue
+	}
 }
 
 /*async function mapDictAsync<X, Y, I>(projection: AsyncProjector<X, Y, I>) {
