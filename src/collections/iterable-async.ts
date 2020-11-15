@@ -54,7 +54,7 @@ export async function toArrayAsync<T>(iterable: Iterable<T> | AsyncIterable<T>) 
 	return arr
 }
 
-export async function* indexedAsync<T>(items: AsyncIterable<T>, from = 0) {
+export async function* indexedAsync<T>(items: Iterable<T> | AsyncIterable<T>, from = 0) {
 	yield* zipAsync(integers({ from, direction: "upwards" }), items)
 }
 
@@ -125,21 +125,21 @@ export async function* zipAsync<T extends readonly (AsyncIterable<unknown> | Ite
 	}*/
 }
 
-export async function* mapAsync<X, Y>(items: AsyncIterable<X>, projector: ProjectorAsync<X, Y>) {
+export async function* mapAsync<X, Y>(items: Iterable<X> | AsyncIterable<X>, projector: ProjectorAsync<X, Y>) {
 	const zipped = zipAsync(integers({ from: 0, direction: "upwards" }), items)
 	for await (const element of zipped) {
 		yield projector(element[1], element[0])
 	}
 }
 
-export async function containsAsync<A>(iterable: AsyncIterable<A>, value: A) {
+export async function containsAsync<A>(iterable: Iterable<A> | AsyncIterable<A>, value: A) {
 	for await (const x of iterable) {
 		if (x === value) return true
 	}
 	return false
 }
 
-export async function* takeAsync<T>(iterable: AsyncIterable<T>, n: number): AsyncIterable<T> {
+export async function* takeAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, n: number): AsyncIterable<T> {
 	if (typeof n !== "number")
 		throw new Error(`take(): Invalid type ${typeof n} for argument "n"\nMust be number`)
 	if (n < 0) {
@@ -155,7 +155,7 @@ export async function* takeAsync<T>(iterable: AsyncIterable<T>, n: number): Asyn
 	}
 }
 
-export async function* skipAsync<T>(iterable: AsyncIterable<T>, n: number): AsyncIterable<T> {
+export async function* skipAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, n: number): AsyncIterable<T> {
 	if (typeof n !== "number")
 		throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
 	if (n < 0) {
@@ -171,21 +171,21 @@ export async function* skipAsync<T>(iterable: AsyncIterable<T>, n: number): Asyn
 	}
 }
 
-export async function* reduceAsync<X, Y>(iterable: AsyncIterable<X>, initial: Y, reducer: Reducer<X, Y> | ReducerAsync<X, Y>): AsyncIterable<Y> {
+export async function* reduceAsync<X, Y>(iterable: Iterable<X> | AsyncIterable<X>, initial: Y, reducer: Reducer<X, Y> | ReducerAsync<X, Y>): AsyncIterable<Y> {
 	for await (const tuple of indexedAsync(iterable)) {
 		initial = await reducer(initial, tuple[1], tuple[0])
 		yield initial
 	}
 }
 
-export async function forEachAsync<T>(iterable: AsyncIterable<T>, action: Projector<T> | ProjectorAsync<T>) {
+export async function forEachAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, action: Projector<T> | ProjectorAsync<T>) {
 	for await (const tuple of indexedAsync(iterable)) {
 		// eslint-disable-next-line fp/no-unused-expression
 		action(tuple[1], tuple[0])
 	}
 }
 
-export async function firstAsync<T>(items: AsyncIterable<T>, predicate?: Predicate<T> | PredicateAsync<T>): Promise<T | undefined> {
+export async function firstAsync<T>(items: Iterable<T> | AsyncIterable<T>, predicate?: Predicate<T> | PredicateAsync<T>): Promise<T | undefined> {
 	for await (const tuple of indexedAsync(items)) {
 		if (predicate === undefined || predicate(tuple[1], tuple[0]))
 			return tuple[1]
@@ -219,23 +219,23 @@ export async function firstAsync<T>(items: AsyncIterable<T>, predicate?: Predica
 	}
 }*/
 
-export async function someAsync<T>(iter: AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
+export async function someAsync<T>(iter: Iterable<T> | AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
 	for await (const tuple of indexedAsync(iter)) {
 		if (predicate(tuple[1], tuple[0]) === true) return true
 	}
 	return false
 }
 
-export async function everyAsync<T>(items: AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
+export async function everyAsync<T>(items: Iterable<T> | AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
 	for await (const tuple of indexedAsync(items)) {
 		if (predicate(tuple[1], tuple[0]) === false) return false
 	}
 	return true
 }
 
-export function filterAsync<X>(iterable: AsyncIterable<X>, predicate: PredicateAsync<X, number>): AsyncIterable<X>
-export function filterAsync<X, X1 extends X>(iterable: AsyncIterable<X>, predicate: TypeGuard<X, X1>): AsyncIterable<X1>
-export async function* filterAsync<X, X1 extends X>(iterable: AsyncIterable<X>, predicate: PredicateAsync<X, number> | TypeGuard<X, X1>) {
+export function filterAsync<X>(iterable: Iterable<X> | AsyncIterable<X>, predicate: PredicateAsync<X, number>): AsyncIterable<X>
+export function filterAsync<X, X1 extends X>(iterable: Iterable<X> | AsyncIterable<X>, predicate: TypeGuard<X, X1>): AsyncIterable<X1>
+export async function* filterAsync<X, X1 extends X>(iterable: Iterable<X> | AsyncIterable<X>, predicate: PredicateAsync<X, number> | TypeGuard<X, X1>) {
 	for await (const tuple of indexedAsync(iterable)) {
 		if (await predicate(tuple[1], tuple[0]))
 			yield tuple[1]
