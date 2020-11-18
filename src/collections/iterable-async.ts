@@ -11,8 +11,9 @@
 /* eslint-disable init-declarations */
 /* eslint-disable fp/no-let */
 
+import * as assert from "assert"
 import { Tuple, TypeGuard, hasValue } from "../utility"
-import { map, integers, isIterable, indexed } from "./iterable"
+import { map, integers, isIterable } from "./iterable"
 import { Predicate, PredicateAsync, Projector, ProjectorAsync, Reducer, ReducerAsync } from "../functional"
 
 export type ZipAsync<A extends ReadonlyArray<unknown>> = { [K in keyof A]: A[K] extends AsyncIterable<infer T> | Iterable<infer T> ? T : never }
@@ -193,31 +194,27 @@ export async function firstAsync<T>(items: Iterable<T> | AsyncIterable<T>, predi
 	return undefined
 }
 
-/*export async function lastAsync<T>(iter: AsyncIterable<T> | { length: number, get(index: number): T | Promise<T> }, predicate?: Predicate<T> | PredicateAsync<T>): Promise<T | undefined> {
-	// eslint-disable-next-line fp/no-let
-	if ('length' in iter) {
-		// Array-specific implementation of last() for better performance using direct elements access
-
-		// eslint-disable-next-line fp/no-let
-		for (let i = iter.length - 1; i >= 0; i--) {
-			// eslint-disable-next-line no-await-in-loop
-			const element = await iter.get(i)
-			// eslint-disable-next-line no-await-in-loop
-			if (predicate === undefined || await predicate(element, i))
+export async function lastAsync<T>(collection: AsyncIterable<T> | Iterable<T> | ArrayLike<T> | { length: number, get: (index: number) => T }, predicate?: PredicateAsync<T>): Promise<T | undefined> {
+	if ("length" in collection) { // Array-like-specific implementation of last() for better performance using direct elements access
+		const accessor = (i: number) => ("get" in collection) ? collection.get(i) : collection[i]
+		for (let i = collection.length - 1; i >= 0; i--) {
+			const element = accessor(i)
+			if (predicate === undefined || predicate(element, i))
 				return element
 		}
 		return undefined
 	}
 	else {
+		assert(isAsyncIterable(collection))
 		// eslint-disable-next-line fp/no-let
 		let _last = undefined as T | undefined
-		const iterable = predicate === undefined ? iter : filter(iter, predicate)
-		for (const element of iterable) {
+		const iterable = predicate === undefined ? collection : filterAsync(collection, predicate)
+		for await (const element of iterable) {
 			_last = element
 		}
 		return _last
 	}
-}*/
+}
 
 export async function someAsync<T>(iter: Iterable<T> | AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
 	for await (const tuple of indexedAsync(iter)) {

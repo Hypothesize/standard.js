@@ -1,3 +1,5 @@
+/* eslint-disable fp/no-let */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable indent */
 /* eslint-disable fp/no-rest-parameters */
@@ -7,6 +9,7 @@
 /* eslint-disable fp/no-loops */
 /* eslint-disable brace-style */
 
+import * as assert from "assert"
 import { Primitive, Tuple, TypeGuard, hasValue } from "../utility"
 import { Reducer, Projector, Predicate, Ranker } from "../functional"
 
@@ -211,24 +214,22 @@ export function first<T>(iterable: Iterable<T>, predicate?: Predicate<T>): T | u
 }
 
 /** Get last element (or last element to satisfy optional predicate argument) of this sequence
+ * @param getter Optional direct access getter, for improved performance for array-like collections
  * @param predicate Optional predicate to filter elements
  * @returns Last element as defined, or <undefined> if such an element is not found
  */
-export function last<T>(collection: Iterable<T> | { length: number, get(index: number): T }, predicate?: Predicate<T>): T | undefined {
-
-	// eslint-disable-next-line fp/no-let
-	if ('length' in collection) {
-		// Array-specific implementation of last() for better performance using direct elements access
-
-		// eslint-disable-next-line fp/no-let
+export function last<T>(collection: Iterable<T> | ArrayLike<T> | { length: number, get: (index: number) => T }, predicate?: Predicate<T>): T | undefined {
+	if ("length" in collection) { // Arraylike-specific implementation of last() for better performance using direct elements access
+		const accessor = (i: number) => ("get" in collection) ? collection.get(i) : collection[i]
 		for (let i = collection.length - 1; i >= 0; i--) {
-			const element = collection.get(i)
+			const element = accessor(i)
 			if (predicate === undefined || predicate(element, i))
 				return element
 		}
 		return undefined
 	}
 	else {
+		assert(isIterable(collection))
 		// eslint-disable-next-line fp/no-let
 		let _last = undefined as T | undefined
 		const iterable = predicate === undefined ? collection : filter(collection, predicate)
