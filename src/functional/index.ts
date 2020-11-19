@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable fp/no-rest-parameters */
 /* eslint-disable brace-style */
-import { } from "../utility"
+import { Obj } from "../utility"
 
 /** Return -1 if a is smaller than b; 0 if a & b are equal, and 1 if a is bigger than b */
 export type Ranker<X = unknown> = (a: X, b: X) => number
@@ -162,6 +162,12 @@ export function curry(fn: (...args: any[]) => unknown) {
 			return x
 		}
 		return curry(fn.bind(null, ...args))
+	}
+}
+
+export function objectCurry<X extends Obj, Y>(fn: (x: X) => Y) {
+	return <P extends Partial<X>>(part: P) => (x: Omit<X, keyof P>): Y => {
+		return fn({ ...x, ...part } as X)
 	}
 }
 
