@@ -72,7 +72,7 @@ export function* map<X, Y>(iterable: Iterable<X>, projector: Projector<X, Y>): I
 
 export function filter<X>(iterable: Iterable<X>, predicate: Predicate<X, number>): Iterable<X>
 export function filter<X, X1 extends X>(iterable: Iterable<X>, predicate: TypeGuard<X, X1>): Iterable<X1>
-export function* filter<X, X1 extends X>(iterable: Iterable<X>, predicate: Predicate<X> | TypeGuard<X, X1>) {
+export function* filter<X, X1 extends X>(iterable: Iterable<X>, predicate: Predicate<X, number> | TypeGuard<X, X1>) {
 	for (const tuple of indexed(iterable)) {
 		if (predicate(tuple[1], tuple[0]))
 			yield tuple[1]

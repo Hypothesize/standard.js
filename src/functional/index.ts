@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable fp/no-rest-parameters */
@@ -19,7 +20,7 @@ export type HasherAsync<X = unknown, Y extends string | number | symbol = number
 export type Projector<X = unknown, Y = unknown, I = number> = (value: X, index: I) => Y
 export type ProjectorAsync<X = unknown, Y = unknown, I = unknown> = (item: X, index: I) => Y | Promise<Y>
 
-export type Predicate<X = unknown, I = number> = (value: X, index: I) => boolean
+export type Predicate<X = unknown, I = unknown> = (value: X, index: I) => boolean
 export type PredicateAsync<X = unknown, I = unknown> = (value: X, index: I) => Promise<boolean>
 
 export type Reducer<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: X, index: I) => Y
