@@ -46,7 +46,7 @@ function from<X>(items: Promise<X>[], strategy: AsyncOptions) {
 	}
 }
 
-export async function toArrayAsync<T>(iterable: Iterable<T> | AsyncIterable<T>) {
+export async function toArrayAsync<T>(iterable: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>) {
 	const arr = [] as Array<T>
 	for await (const element of iterable) {
 		// eslint-disable-next-line fp/no-mutating-methods
@@ -55,7 +55,7 @@ export async function toArrayAsync<T>(iterable: Iterable<T> | AsyncIterable<T>) 
 	return arr
 }
 
-export async function* indexedAsync<T>(items: Iterable<T> | AsyncIterable<T>, from = 0) {
+export async function* indexedAsync<T>(items: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, from = 0) {
 	yield* zipAsync(integers({ from, direction: "upwards" }), items)
 }
 
@@ -140,7 +140,7 @@ export async function containsAsync<A>(iterable: Iterable<A> | AsyncIterable<A>,
 	return false
 }
 
-export async function* takeAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, n: number): AsyncIterable<T> {
+export async function* takeAsync<T>(iterable: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, n: number): AsyncIterable<T> {
 	if (typeof n !== "number")
 		throw new Error(`take(): Invalid type ${typeof n} for argument "n"\nMust be number`)
 	if (n < 0) {
@@ -156,7 +156,7 @@ export async function* takeAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, n:
 	}
 }
 
-export async function* skipAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, n: number): AsyncIterable<T> {
+export async function* skipAsync<T>(iterable: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, n: number): AsyncIterable<T> {
 	if (typeof n !== "number")
 		throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
 	if (n < 0) {
@@ -179,14 +179,14 @@ export async function* reduceAsync<X, Y>(iterable: Iterable<X> | AsyncIterable<X
 	}
 }
 
-export async function forEachAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, action: Projector<T> | ProjectorAsync<T>) {
+export async function forEachAsync<T>(iterable: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, action: Projector<T> | ProjectorAsync<T>) {
 	for await (const tuple of indexedAsync(iterable)) {
 		// eslint-disable-next-line fp/no-unused-expression
 		action(tuple[1], tuple[0])
 	}
 }
 
-export async function firstAsync<T>(items: Iterable<T> | AsyncIterable<T>, predicate?: Predicate<T> | PredicateAsync<T>): Promise<T | undefined> {
+export async function firstAsync<T>(items: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, predicate?: Predicate<T> | PredicateAsync<T>): Promise<T | undefined> {
 	for await (const tuple of indexedAsync(items)) {
 		if (predicate === undefined || predicate(tuple[1], tuple[0]))
 			return tuple[1]
@@ -216,14 +216,14 @@ export async function lastAsync<T>(collection: AsyncIterable<T> | Iterable<T> | 
 	}
 }
 
-export async function someAsync<T>(iter: Iterable<T> | AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
+export async function someAsync<T>(iter: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, predicate: Predicate<T> | PredicateAsync<T>) {
 	for await (const tuple of indexedAsync(iter)) {
 		if (predicate(tuple[1], tuple[0]) === true) return true
 	}
 	return false
 }
 
-export async function everyAsync<T>(items: Iterable<T> | AsyncIterable<T>, predicate: Predicate<T> | PredicateAsync<T>) {
+export async function everyAsync<T>(items: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, predicate: Predicate<T> | PredicateAsync<T>) {
 	for await (const tuple of indexedAsync(items)) {
 		if (predicate(tuple[1], tuple[0]) === false) return false
 	}

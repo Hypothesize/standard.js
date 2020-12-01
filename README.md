@@ -1,16 +1,16 @@
-# Standard
+# standard.js
 Standard library for JavaScript/TypeScript
 
 ## Features
 - Lazy iterable combinators such as _map_, _filter_, _reduce_, etc.
 - Lazy async iterable combinators such as _mapAsync_, _filterAsync_, etc.
-- Iterable fluent containers: _Sequence_, _Set_, _Array_, _Dictionary_, and _DataTable_
+- Fluent iterable containers: _Sequence_, _Set_, _Array_, _Dictionary_, and _DataTable_
 - Functional combinators such as _flip_, _curry_, etc.
 - Async combinators such as _promisify_, _sleep_, etc.
-- Statistical functions such as mean, median, 1st/3rd quartiles, variance, etc.
-- HTTP communication functionality
-- Extensions of basic types: string,  number, date-time, char
-- Basic utilities: types, type guards, helpers
+- Statistical functions such as _mean_, _median_, _quartiles_, _variance/standard deviation_, etc.
+- _HTTP_ communication functionality
+- Advanced _string_, _date-time_, and _numeric_ functions
+- Utility _types_, _type guards_, and _value helpers_
 
 
 ## Install
