@@ -115,6 +115,12 @@ describe("plural", () => {
 			assert.equal(actual, expected)
 		})
 
+		it(`should return true for urls that contain parentheses in the query after the domain name`, () => {
+			const expected = true
+			const actual = new String("https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=Mode_(statistics)").isURL()
+			assert.equal(actual, expected)
+		})
+
 	})
 
 })
