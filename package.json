@@ -1,6 +1,6 @@
 {
 	"name": "@sparkwave/standard",
-	"version": "2.24.1",
+	"version": "2.24.2",
 	"description": "Standard library for JavaScript/TypeScript",
 	"main": "index.js",
 	"types": "index.d.ts",
