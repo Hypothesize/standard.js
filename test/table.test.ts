@@ -1,5 +1,3 @@
-
-
 /* // data-table tests
 	describe("page", () => {
 		it(`should return the original rows if page (original) is called several time in a row`, () => {
