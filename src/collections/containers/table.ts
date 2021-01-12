@@ -130,7 +130,6 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 						std: stdv
 					}
 				}
-				console.log(averageAndDev)
 
 				const _test = filter.negated ? false : true
 				const _val = row[filter.fieldName as keyof T]
