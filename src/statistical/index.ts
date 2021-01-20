@@ -87,8 +87,8 @@ export function variance(vector: number[], opts?:
 		? opts.mean
 		: mean(vector, opts?.mean)
 
-	return _mean
-		? sum(vector.filter(noop).map(datum => Math.pow(datum - _mean, 2))) / (len - ((opts?.forSample ?? true) ? 1 : 0))
+	return _mean !== undefined
+		? sum(vector.map(datum => Math.pow(datum - _mean, 2))) / (len - ((opts?.forSample ?? true) ? 1 : 0))
 		: undefined
 }
 
@@ -102,7 +102,7 @@ export function deviation(vector: number[], opts?:
 	}): number | undefined {
 
 	const _variance = variance(vector, opts)
-	return _variance ? Math.sqrt(_variance) : undefined
+	return _variance !== undefined ? Math.sqrt(_variance) : undefined
 }
 
 export function median<T>(vector: Array<T>): T | undefined {

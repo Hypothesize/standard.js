@@ -1,3 +1,4 @@
+/* eslint-disable fp/no-mutation */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable indent */
@@ -7,6 +8,8 @@
 
 import { Obj, ExtractByType, Primitive, hasValue } from "../../utility"
 import { zip } from "../iterable"
+import { ArrayNumeric } from "./array"
+import { mean, deviation } from "../../statistical"
 import { Predicate, Projector, getRanker } from "../../functional"
 import { Dictionary } from "./dictionary"
 import { Sequence } from "./sequence"
@@ -93,6 +96,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 	/** Return a new data table that excludes data disallowed by the passed filters */
 	filter(args: { filter?: Predicate<T, void> | TableFilter | FilterGroup, options?: FilterOptions }): DataTable<T> {
+
 		const shouldRetain = (row: T, filter: Predicate<T, void> | TableFilter | FilterGroup): boolean => {
 			if ("filters" in filter) {
 				switch (filter.combinator) {
@@ -107,6 +111,26 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 				}
 			}
 			else if ("fieldName" in filter) {
+				// eslint-disable-next-line fp/no-let
+				let averageAndDev: { average: number, std: number } = { average: 0, std: 0 }
+				if (filter.operator === "is_outlier_by") {
+					const originalIdVector = this.idVector
+					const colVector: unknown[] = filter.fieldName === "rowId" ? originalIdVector : this._colVectors.get(filter.fieldName as keyof T)
+					if (colVector === undefined) {
+						throw new Error(`Trying to apply a filter on column ${filter.fieldName}, but no such column in the dataTable`)
+					}
+					const vector: number[] = colVector.filter(v => v !== undefined).map(val => Number.parseFloat(String(val)))
+					const columnMean = mean(vector)
+					const stdv = deviation(vector, { mean: columnMean, forSample: true })
+					if (columnMean === undefined) { throw new Error("Undefined mean, cannot filter by standard deviation") }
+					if (stdv === undefined) { throw new Error("Undefined std dev, cannot filter by standard deviation") }
+
+					averageAndDev = {
+						average: columnMean,
+						std: stdv
+					}
+				}
+
 				const _test = filter.negated ? false : true
 				const _val = row[filter.fieldName as keyof T]
 
@@ -127,11 +151,11 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 					case "less_or_equal":
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						return (parseFloat(String(_val)) <= parseFloat(filter.value as any)) === _test
-					case "is_outlier_by":
-						// const belowMin = parseFloat(_val) < filter.average! - parseFloat(filter.value as any) * filter.std!
-						// const aboveMax = parseFloat(_val) > filter.average! + parseFloat(filter.value as any) * filter.std!
-						// return (belowMin || aboveMax) === _test
-						return true
+					case "is_outlier_by": {
+						const belowMin = parseFloat(String(_val)) < averageAndDev.average - parseFloat(filter.value as any) * averageAndDev.std
+						const aboveMax = parseFloat(String(_val)) > averageAndDev.average + parseFloat(filter.value as any) * averageAndDev.std
+						return (belowMin || aboveMax) === _test
+					}
 					case "contains":
 						return (hasValue(_val) && String(_val).indexOf(filter.value) >= 0) === _test
 					case "is-contained":
