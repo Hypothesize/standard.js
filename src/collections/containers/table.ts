@@ -52,7 +52,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 				: []
 
 		// eslint-disable-next-line fp/no-unused-expression
-		console.log(`\nDataTable took ${new Date().getTime() - start}ms to instantiate`)
+		// console.log(`\nDataTable took ${new Date().getTime() - start}ms to instantiate`)
 	}
 
 	static fromColumns<T extends Obj = Obj>(columnVectors: Record<keyof T, T[keyof T][]>, idVector?: Iterable<number>) {
