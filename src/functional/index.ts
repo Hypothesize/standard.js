@@ -40,14 +40,14 @@ export function getComparer<T>(projector: Projector<T, unknown, void>, tryNumeri
 		return compare(x, y, projector, tryNumeric, tryDate) === 0
 	}
 }
-export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unknown, void>, tryNumeric = false, tryDate = false): -1 | 0 | 1 {
+export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unknown, void>, tryNumeric = false, tryDateAsNumeric = false): -1 | 0 | 1 {
 	const _larger: unknown = projector ? projector(larger) : larger
 	const _smaller: unknown = projector ? projector(smaller) : smaller
 
 	const sign = (n: number) => Math.sign(n) as -1 | 0 | 1
 
 	if (typeof _larger === "string" && typeof _smaller === "string") {
-		if (tryDate === true) {
+		if (tryDateAsNumeric === true) {
 			const __x = new Date(_larger)
 			const __y = new Date(_smaller)
 			if (__x > __y)
@@ -80,8 +80,29 @@ export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unkno
 		else
 			return -1
 	}
-	else
+	else if (typeof _larger !== typeof _smaller) { // When both values have different types
+		if (tryNumeric) {
+			const _largerNum = typeof _larger === "number"
+				? _larger
+				: typeof _larger === "string"
+					? parseFloat(_larger)
+					: 0
+			const _smallerNum = typeof _smaller === "number"
+				? _smaller
+				: typeof _smaller === "string"
+					? parseFloat(_smaller)
+					: 0
+			// If both types could succesfully be turned into numbers, we compare it numerically
+			if (!isNaN(_smallerNum) && !isNaN(_largerNum)) {
+				return sign(_largerNum - _smallerNum)
+			}
+		}
+		return typeof _larger === "string" ? 1 : -1 // Strings will appear last
+	}
+	else {
 		return _larger === _smaller ? 0 : 1
+
+	}
 }
 
 export const noop = () => { }
