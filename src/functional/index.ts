@@ -41,7 +41,7 @@ export function getComparer<T>(projector: Projector<T, unknown, void>, tryNumeri
 	}
 }
 /** Compares 2 values and sort them, possibly parsing it as date or number beforehand.
- * If the values have a different types, string values will always be sorted in last position.
+ * If the 2 compared values have a differnt type, the string type will always be ranked last, unless the user choses (through 'tryNumeric') to convert number-likes strings into numbers for comparison.
  * @param larger One value to compare
  * @param smaller The other value to compare
  * @param projector A projector used to find the values to compare, if the passed values are objects
