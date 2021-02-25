@@ -40,14 +40,22 @@ export function getComparer<T>(projector: Projector<T, unknown, void>, tryNumeri
 		return compare(x, y, projector, tryNumeric, tryDate) === 0
 	}
 }
-export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unknown, void>, tryNumeric = false, tryDate = false): -1 | 0 | 1 {
+/** Compares 2 values and sort them, possibly parsing it as date or number beforehand.
+ * If the 2 compared values have a different type, the string type will always be ranked last, unless the user choses (through 'tryNumeric') to convert number-likes strings into numbers for comparison.
+ * @param larger One value to compare
+ * @param smaller The other value to compare
+ * @param projector A projector used to find the values to compare, if the passed values are objects
+ * @param tryNumeric If any or both of the two values are strings, an attempt will be made to parse them as number before doing to comparison
+ * @param tryDateAsNumeric If both values are strings corresponding to dates, they will be parsed as Dates and compared as such.
+ */
+export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unknown, void>, tryNumeric = false, tryDateAsNumeric = false): -1 | 0 | 1 {
 	const _larger: unknown = projector ? projector(larger) : larger
 	const _smaller: unknown = projector ? projector(smaller) : smaller
 
 	const sign = (n: number) => Math.sign(n) as -1 | 0 | 1
 
 	if (typeof _larger === "string" && typeof _smaller === "string") {
-		if (tryDate === true) {
+		if (tryDateAsNumeric === true) {
 			const __x = new Date(_larger)
 			const __y = new Date(_smaller)
 			if (__x > __y)
@@ -80,8 +88,29 @@ export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unkno
 		else
 			return -1
 	}
-	else
+	else if (typeof _larger !== typeof _smaller) { // When both values have different types
+		if (tryNumeric) {
+			const _largerNum = typeof _larger === "number"
+				? _larger
+				: typeof _larger === "string"
+					? parseFloat(_larger)
+					: 0
+			const _smallerNum = typeof _smaller === "number"
+				? _smaller
+				: typeof _smaller === "string"
+					? parseFloat(_smaller)
+					: 0
+			// If both types could succesfully be turned into numbers, we compare it numerically
+			if (!isNaN(_smallerNum) && !isNaN(_largerNum)) {
+				return sign(_largerNum - _smallerNum)
+			}
+		}
+		return typeof _larger === "string" ? 1 : -1 // Strings will appear last
+	}
+	else {
 		return _larger === _smaller ? 0 : 1
+
+	}
 }
 
 export const noop = () => { }
