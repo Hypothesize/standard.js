@@ -1,3 +1,4 @@
+/* eslint-disable fp/no-mutating-methods */
 import * as assert from "assert"
 import { DataTable } from "../dist/collections/containers"
 
@@ -53,22 +54,21 @@ describe("filtering", () => {
 		assert.equal(filteredDT.length, 10)
 	})
 })
-/* // data-table tests
-	describe("page", () => {
-		it(`should return the original rows if page (original) is called several time in a row`, () => {
-			const startingDT = new DataTable([{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }, { v: 5 }, { v: 6 }, { v: 7 }, { v: 8 }, { v: 9 }, { v: 10 }])
-			const filteredDT = startingDT
-				.page({ size: 4, index: 0, options: { scope: "original" } })
-				.page({ size: 10, index: 0, options: { scope: "original" } })
-			assert.equal(filteredDT.length, 10)
-		})
-		it(`should discard original rows with the regular page function`, () => {
-			const startingDT = new DataTable([{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }, { v: 5 }, { v: 6 }, { v: 7 }, { v: 8 }, { v: 9 }, { v: 10 }])
-			const filteredDT = startingDT
-				.page({ size: 4, index: 0 })
-				.page({ size: 10, index: 0 })
-			assert.equal(filteredDT.length, 4)
-		})
+// data-table tests
+describe("page", () => {
+	it(`should return the original rows if page (original) is called several time in a row`, () => {
+		const startingDT = new DataTable([{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }, { v: 5 }, { v: 6 }, { v: 7 }, { v: 8 }, { v: 9 }, { v: 10 }])
+		const filteredDT = startingDT
+			.page({ size: 4, index: 0, options: { scope: "original" } })
+			.page({ size: 10, index: 0, options: { scope: "original" } })
+		assert.equal(filteredDT.length, 10)
+	})
+	it(`should discard original rows with the regular page function`, () => {
+		const startingDT = new DataTable([{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }, { v: 5 }, { v: 6 }, { v: 7 }, { v: 8 }, { v: 9 }, { v: 10 }])
+		const filteredDT = startingDT
+			.page({ size: 4, index: 0 })
+			.page({ size: 10, index: 0 })
+		assert.equal(filteredDT.length, 4)
 	})
 	it(`should discard original rows with the regular page function`, () => {
 		const startingDT = new DataTable([{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }, { v: 5 }, { v: 6 }, { v: 7 }, { v: 8 }, { v: 9 }, { v: 10 }])
