@@ -40,6 +40,14 @@ export function getComparer<T>(projector: Projector<T, unknown, void>, tryNumeri
 		return compare(x, y, projector, tryNumeric, tryDate) === 0
 	}
 }
+/** Compares 2 values and sort them, possibly parsing it as date or number beforehand.
+ * If the values have a different types, string values will always be sorted in last position.
+ * @param larger One value to compare
+ * @param smaller The other value to compare
+ * @param projector A projector used to find the values to compare, if the passed values are objects
+ * @param tryNumeric If any or both of the two values are strings, an attempt will be made to parse them as number before doing to comparison
+ * @param tryDateAsNumeric If both values are strings corresponding to dates, they will be parsed as Dates and compared as such.
+ */
 export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unknown, void>, tryNumeric = false, tryDateAsNumeric = false): -1 | 0 | 1 {
 	const _larger: unknown = projector ? projector(larger) : larger
 	const _smaller: unknown = projector ? projector(smaller) : smaller
