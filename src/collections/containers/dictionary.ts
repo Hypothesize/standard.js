@@ -66,8 +66,8 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 		return this.entries().reduce((prev, curr) => reducer(prev, curr[1], curr[0]), initial)
 	}
 
-	get(selector: keyof T) { return this.obj[selector] }
-	getAll(selector: Iterable<keyof T>) { return new Set(map(selector, index => this.obj[index])) }
+	get(selector: keyof T): T[keyof T] | undefined { return this.obj[selector] }
+	getAll(selector: Iterable<keyof T>): Iterable<T[keyof T] | undefined> { return map(selector, index => this.obj[index]) }
 
 	set(key: keyof T, value: T[keyof T]) {
 		return new Dictionary({ ...this.obj, [key]: value })

@@ -115,7 +115,9 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 				let averageAndDev: { average: number, std: number } = { average: 0, std: 0 }
 				if (filter.operator === "is_outlier_by") {
 					const originalIdVector = this.idVector
-					const colVector: unknown[] = filter.fieldName === "rowId" ? originalIdVector : this._colVectors.get(filter.fieldName as keyof T)
+					const colVector: unknown[] | undefined = filter.fieldName === "rowId"
+						? originalIdVector
+						: this._colVectors.get(filter.fieldName as keyof T)
 					if (colVector === undefined) {
 						throw new Error(`Trying to apply a filter on column ${filter.fieldName}, but no such column in the dataTable`)
 					}
@@ -201,7 +203,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 			getRanker<number>({
 				projector: rowNum => args.columnName === ROW_NUM_COL_NAME
 					? rowNum
-					: this._colVectors.get(args.columnName)[rowNum],
+					: this._colVectors.get(args.columnName)![rowNum],
 				tryNumeric: args.options?.tryNumericSort ?? true,
 				reverse: args.order === "descending"
 			})
