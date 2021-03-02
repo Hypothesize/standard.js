@@ -25,10 +25,10 @@ module.exports = {
 		/* functional */
 		"fp/no-arguments": "warn",
 		//"fp/no-class": "warn",
-		
+
 		"fp/no-delete": "warn",
 		"fp/no-events": "warn",
-		"fp/no-get-set": "warn",
+		// "fp/no-get-set": "warn",
 		"fp/no-let": "warn",
 		"fp/no-loops": "warn",
 		"fp/no-mutating-assign": "warn",
