@@ -28,7 +28,7 @@ module.exports = {
 
 		"fp/no-delete": "warn",
 		"fp/no-events": "warn",
-		// "fp/no-get-set": "warn",
+		"fp/no-get-set": "warn",
 		"fp/no-let": "warn",
 		"fp/no-loops": "warn",
 		"fp/no-mutating-assign": "warn",
