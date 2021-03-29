@@ -47,3 +47,30 @@ describe("Array", () => {
 	})
 })
 
+describe("insert()", () => {
+	it("should return a new array with a new element at index 1 when using the insert method at that index", () => {
+		const actual = [...new Array([1, 3]).insert(1, 2)]
+		const expected = [...new Array([1, 2, 3])]
+
+		assert.deepEqual(actual, expected)
+	})
+	it("should return a new array with new elements when using the insert method with multiple elements", () => {
+		const actual = [...new Array([1, 3]).insert(1, 2, 4, 5, 6)]
+		const expected = [...new Array([1, 2, 4, 5, 6, 3])]
+
+		assert.deepEqual(actual, expected)
+	})
+	it("should return a new array with the same elements when using the insert method with a negative index", () => {
+		const actual = [...new Array([1, 3]).insert(-2, 2, 4)]
+		const expected = [...new Array([1, 3])]
+
+		assert.deepEqual(actual, expected)
+	})
+	it("should return a new array with the same elements when using the insert method without items to insert", () => {
+		const actual = [...new Array([1, 3]).insert(1)]
+		const expected = [...new Array([1, 3])]
+
+		assert.deepEqual(actual, expected)
+	})
+})
+
