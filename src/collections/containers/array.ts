@@ -91,6 +91,16 @@ export class Array<X> extends Set<X> {
 		// eslint-disable-next-line fp/no-mutating-methods
 		return this.ctor([...this].splice(fromIndex, toIndex - fromIndex + 1))
 	}
+
+	/** Insert items into the array at specific index. It returns a new created array with the added items
+	 * @param index the index of the array at which insert the items
+	 * @param items elements to insert
+	 */
+	insert(index: number, ...items: X[]) {
+		const arr = [...this]
+		if (index < 0 || index > arr.length) return this.ctor(arr)
+		return this.ctor([...arr.slice(0, index), ...items, ...arr.slice(index)])
+	}
 }
 
 export class ArrayNumeric extends Array<number> {
