@@ -135,7 +135,7 @@ export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
 
 export function mode<T>(vector: Array<T>): T | undefined {
 	if (vector.length === 0) return undefined
-	const freqs = sort([...frequencies(vector).entries()], (x => x[1]))
+	const freqs = sort([...frequencies(vector).entries()], ((a, b) => a[1] - b[1]))
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	return last(freqs)![0]
 }

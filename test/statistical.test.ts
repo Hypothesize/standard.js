@@ -81,3 +81,26 @@ describe('sum()', function () {
 	})
 
 })
+
+describe('mode()', function () {
+	it('should return 1 when passing an array of 3 zeros and 4 ones', function () {
+		const actual = mode([1, 0, 1, 0, 1, 0, 1])
+		const expected = 1
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return 1 when passing an array of 3 zeros and 4 ones but sorted in ascending order', function () {
+		const actual = mode([0, 0, 0, 1, 1, 1, 1])
+		const expected = 1
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return 5 when passing an array of different values but with more 5s', function () {
+		const actual = mode([3, 5, 6, 7, 3, 2, 13, 45, 43, 23, 13, 45, 5, 6, 7, 5, 14, 4])
+		const expected = 5
+
+		assert.deepEqual(actual, expected)
+	})
+})
