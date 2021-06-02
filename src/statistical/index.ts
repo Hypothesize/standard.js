@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
@@ -133,11 +134,24 @@ export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
 	return sortedList[Math.ceil(0.75 * sortedList.length) - 1]
 }
 
-export function mode<T>(vector: Array<T>): T | undefined {
+export function mode<T>(vector: Array<T>): T[] | undefined {
 	if (vector.length === 0) return undefined
-	const freqs = sort([...frequencies(vector).entries()], ((a, b) => a[1] - b[1]))
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	return last(freqs)![0]
+
+	return (vector.reduce((accu, curr) => {
+		const freqsMap = accu.freqsMap
+		freqsMap.set(curr, (freqsMap.get(curr) || 0) + 1)
+
+		const maxCount = freqsMap.get(curr)! > accu.maxCount
+			? freqsMap.get(curr)!
+			: accu.maxCount
+		const modes = freqsMap.get(curr) === accu.maxCount
+			? [...accu.modes, curr]
+			: freqsMap.get(curr)! > accu.maxCount
+				? [curr]
+				: accu.modes
+
+		return { freqsMap, maxCount, modes }
+	}, { freqsMap: new globalThis.Map<T, number>(), maxCount: 1, modes: [] as T[] })).modes
 }
 
 export function interQuartileRange(vector: number[]) {
