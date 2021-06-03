@@ -300,7 +300,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 export type TableFilter = {
 	fieldName: string,
-	operator: string,
+	operator: Filter["operator"],
 	value: any,
 	negated?: boolean
 }
