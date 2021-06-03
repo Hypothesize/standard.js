@@ -93,7 +93,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	}
 
 	get length() { return this._idVector.length }
-	get originalLength() { return this._colVectors.get(this._colVectors.keys()[0]).length }
+	get originalLength() { return this._colVectors.get(this._colVectors.keys()[0])?.length || 0 }
 
 	/** Return a new data table that excludes data disallowed by the passed filters */
 	filter(args: { filter?: Predicate<T, void> | TableFilter | FilterGroup, options?: FilterOptions }): DataTable<T> {
