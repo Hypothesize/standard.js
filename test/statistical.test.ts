@@ -132,7 +132,13 @@ describe('mode()', function () {
 	})
 })
 
-describe('multimode()', function () {
+describe('multiMode()', function () {
+	it('should return an empty array when passing an empty vector', () => {
+		const actual = multiMode([])
+		const expected = [] as string[]
+		assert.deepEqual(actual, expected)
+	})
+
 	it('should return an array with multiple modes when passing an array of three values with the same occurrences', function () {
 		const actual = multiMode([3, 5, 6, 7, 5, 5, 6, 6, 3, 3])
 		const expected = [5, 6, 3]
