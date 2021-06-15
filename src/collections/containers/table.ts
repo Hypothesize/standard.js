@@ -93,6 +93,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	}
 
 	get length() { return this._idVector.length }
+	get originalLength() { return this._colVectors.get(this._colVectors.keys()[0])?.length || 0 }
 
 	/** Return a new data table that excludes data disallowed by the passed filters */
 	filter(args: { filter?: Predicate<T, void> | TableFilter | FilterGroup, options?: FilterOptions }): DataTable<T> {
@@ -182,7 +183,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 		}
 
 		const effectiveIdVector = args.options?.scope === "original"
-			? Sequence.integers({ from: 0, to: this.length - 1 })
+			? Sequence.integers({ from: 0, to: this.originalLength - 1 })
 			: this._idVector
 		const idColumnVectorFiltered = effectiveIdVector.filter(rowNum => {
 			if (args.filter === undefined) return true
@@ -214,7 +215,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 	page(args: { size: number, index: number, options?: PagingOptions }) {
 		const effectiveIdVector = args.options?.scope === "original"
-			? [...Sequence.integers({ from: 0, to: this.length - 1 })]
+			? [...Sequence.integers({ from: 0, to: this.originalLength - 1 })]
 			: this._idVector
 
 		const idColumnVectorPaged = effectiveIdVector.slice(args.index * args.size, (args.index + 1) * args.size)
@@ -301,7 +302,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 export type TableFilter = {
 	fieldName: string,
-	operator: string,
+	operator: Filter["operator"],
 	value: any,
 	negated?: boolean
 }
