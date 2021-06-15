@@ -7,7 +7,7 @@
 import * as assert from "assert"
 import {
 	min, max, sum, mean,
-	median, mode, variance, deviation, firstQuartile, thirdQuartile, interQuartileRange,
+	median, mode, multiMode, variance, deviation, firstQuartile, thirdQuartile, interQuartileRange,
 	frequencies
 } from "../dist/statistical"
 
@@ -80,4 +80,83 @@ describe('sum()', function () {
 		assert.deepEqual(actual, expected)
 	})
 
+})
+
+describe('mode()', function () {
+	it ('should return undefined when passing an empty array', () => {
+		const actual = mode([])
+		const expected = undefined
+		assert.deepEqual(actual, expected)
+	})
+	
+	it('should return 1 when passing an array of 3 zeros and 4 ones', function () {
+		const actual = mode([1, 0, 1, 0, 1, 0, 1])
+		const expected = 1
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return 1 when passing an array of 3 zeros and 4 ones but sorted in ascending order', function () {
+		const actual = mode([0, 0, 0, 1, 1, 1, 1])
+		const expected = 1
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return 5 when passing an array of different values but with the value "5" with more occurrences', function () {
+		const actual = mode([3, 5, 6, 7, 3, 2, 13, 45, 43, 23, 13, 45, 5, 6, 7, 5, 14, 4])
+		const expected = 5
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return the middle value of all the possible modes when passing an array of three values with the same occurrences', function () {
+		const actual = mode([3, 5, 6, 7, 5, 5, 6, 6, 3, 3])
+		const expected = 5
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return the middle value of all the possible modes when passing an array with every element having the same occurrences', function () {
+		const actual = mode([1, 2, 3, 4])
+		const expected = 2
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return the middle value of all the possible modes when passing an array with number and characters', function () {
+		const actual = mode([2, 2 , 'a', 'a', 'v', 'v'])
+		const expected = 'a'
+
+		assert.deepEqual(actual, expected)
+	})
+})
+
+describe('multiMode()', function () {
+	it('should return an empty array when passing an empty vector', () => {
+		const actual = multiMode([])
+		const expected = [] as string[]
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return an array with multiple modes when passing an array of three values with the same occurrences', function () {
+		const actual = multiMode([3, 5, 6, 7, 5, 5, 6, 6, 3, 3])
+		const expected = [5, 6, 3]
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return the same array when passing an array with every element having the same occurrences', function () {
+		const actual = multiMode([1, 2, 3, 4, 5])
+		const expected = [1, 2, 3, 4, 5]
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should return an array of all the possible modes when passing an array with number and characters', function () {
+		const actual = multiMode([2, 2, 'a', 'a', 'v', 'v'])
+		const expected = [2, 'a', 'v']
+
+		assert.deepEqual(actual, expected)
+	})
 })
