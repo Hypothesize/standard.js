@@ -66,6 +66,93 @@ describe('max()', function () {
 	})
 })
 
+describe('FirstQuartile', function () {
+	it('should return <undefined> for an empty array', function () {
+		const actual = firstQuartile([])
+		const expected = undefined
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should work with strings', function () {
+		const actual = firstQuartile(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"])
+		const expected = "Blue"
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should work with numbers (sorted alphabetically)', function () {
+		const actual = firstQuartile([1, 1, 1, 2, 2, 2, 3, 4, 5, 6, 7, 8, 99, 99, 1, 2, 3])
+		const expected = 2
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should rank alphabetically by default', function () {
+		const actual = firstQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5])
+		const expected = 10
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should rank accept a ranker function, for instance to sort numerically', function () {
+		const actual = firstQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5], (a, b) => {
+			return a > b ? 1 : -1
+		})
+		const expected = 3
+
+		assert.deepEqual(actual, expected)
+	})
+})
+
+describe('ThirdQuartile', function () {
+	it('should return <undefined> for an empty array', function () {
+		const actual = thirdQuartile([])
+		const expected = undefined
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should work with strings', function () {
+		const actual = thirdQuartile(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"])
+		const expected = "Orange"
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should work with numbers (sorted alphabetically)', function () {
+		const actual = thirdQuartile([1, 1, 1, 2, 2, 2, 3, 4, 5, 6, 7, 8, 99, 99, 1, 2, 3])
+		const expected = 6
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should rank alphabetically by default', function () {
+		const actual = thirdQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5])
+		const expected = 3
+
+		assert.deepEqual(actual, expected)
+	})
+
+	it('should rank accept a ranker function, for instance to sort numerically', function () {
+		const actual = thirdQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5], (a, b) => {
+			return a > b ? 1 : -1
+		})
+		const expected = 10
+
+		assert.deepEqual(actual, expected)
+	})
+})
+
+describe('IQR', function () {
+	it('should sort the array numerically by default', function () {
+		const actual = interQuartileRange([1, 10, 10, 10, 2, 20, 21, 3, 4, 5])
+		const expected = 7
+
+		assert.deepEqual(actual, expected)
+	})
+})
+
 describe('sum()', function () {
 	it('should return 0 for an empty array', function () {
 		const actual = sum([])
@@ -83,12 +170,12 @@ describe('sum()', function () {
 })
 
 describe('mode()', function () {
-	it ('should return undefined when passing an empty array', () => {
+	it('should return undefined when passing an empty array', () => {
 		const actual = mode([])
 		const expected = undefined
 		assert.deepEqual(actual, expected)
 	})
-	
+
 	it('should return 1 when passing an array of 3 zeros and 4 ones', function () {
 		const actual = mode([1, 0, 1, 0, 1, 0, 1])
 		const expected = 1
@@ -125,7 +212,7 @@ describe('mode()', function () {
 	})
 
 	it('should return the middle value of all the possible modes when passing an array with number and characters', function () {
-		const actual = mode([2, 2 , 'a', 'a', 'v', 'v'])
+		const actual = mode([2, 2, 'a', 'a', 'v', 'v'])
 		const expected = 'a'
 
 		assert.deepEqual(actual, expected)
