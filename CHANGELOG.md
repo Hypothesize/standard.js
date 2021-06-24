@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.28.1](https://www.github.com/Hypothesize/standard.js/compare/v2.28.0...v2.28.1) (2021-06-24)
+
+
+### Bug Fixes
+
+* ([#96](https://www.github.com/Hypothesize/standard.js/issues/96)) Ensure the IQR calculation uses numerical sorting ([1d4cec7](https://www.github.com/Hypothesize/standard.js/commit/1d4cec7eaca023620cd1672740cb93e3886143c9))
+
 ## [2.28.0](https://www.github.com/Hypothesize/standard.js/compare/v2.27.0...v2.28.0) (2021-06-15)
 
 
