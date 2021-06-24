@@ -88,14 +88,14 @@ describe('FirstQuartile', function () {
 		assert.deepEqual(actual, expected)
 	})
 
-	it('should rank alphabetically by default', function () {
+	it('should  sort the input array alphabetically by default', function () {
 		const actual = firstQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5])
 		const expected = 10
 
 		assert.deepEqual(actual, expected)
 	})
 
-	it('should rank accept a ranker function, for instance to sort numerically', function () {
+	it('should accept a ranker function, for instance to sort the input array numerically', function () {
 		const actual = firstQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5], (a, b) => {
 			return a > b ? 1 : -1
 		})
@@ -127,14 +127,14 @@ describe('ThirdQuartile', function () {
 		assert.deepEqual(actual, expected)
 	})
 
-	it('should rank alphabetically by default', function () {
+	it('should sort the input array alphabetically by default', function () {
 		const actual = thirdQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5])
 		const expected = 3
 
 		assert.deepEqual(actual, expected)
 	})
 
-	it('should rank accept a ranker function, for instance to sort numerically', function () {
+	it('should accept a ranker function, for instance to sort the input array numerically', function () {
 		const actual = thirdQuartile([1, 10, 10, 10, 2, 20, 21, 3, 4, 5], (a, b) => {
 			return a > b ? 1 : -1
 		})
