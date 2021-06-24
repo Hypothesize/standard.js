@@ -154,7 +154,7 @@ export function multiMode<T>(vector: Array<T>): T[] {
 				: accu.modes
 
 		return { freqsMap, maxCount, modes }
-	}, { freqsMap: new globalThis.Map<T, number>(), maxCount: 1, modes: [] as T[] })).modes	
+	}, { freqsMap: new globalThis.Map<T, number>(), maxCount: 1, modes: [] as T[] })).modes
 }
 
 /**
@@ -166,7 +166,7 @@ export function mode<T>(vector: Array<T>): T | undefined {
 
 	// eslint-disable-next-line fp/no-mutating-methods
 	const modes = multiMode(vector).sort()
-	const index = modes.length % 2 === 0 
+	const index = modes.length % 2 === 0
 		? (modes.length / 2) - 1
 		: Math.floor(modes.length / 2)
 
@@ -175,9 +175,8 @@ export function mode<T>(vector: Array<T>): T | undefined {
 
 export function interQuartileRange(vector: number[]) {
 	// eslint-disable-next-line fp/no-mutating-methods
-	const sortedList = vector.sort()
-	const percentile25 = sortedList[Math.floor(0.25 * sortedList.length)]
-	const percentile75 = sortedList[Math.ceil(0.75 * sortedList.length)]
+	const percentile25 = firstQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
+	const percentile75 = thirdQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
 	return percentile25 && percentile75 ? percentile75 - percentile25 : undefined
 }
 
