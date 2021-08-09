@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.29.0](https://www.github.com/Hypothesize/standard.js/compare/v2.28.1...v2.29.0) (2021-08-09)
+
+
+### Features
+
+* ([#99](https://www.github.com/Hypothesize/standard.js/issues/99)) Improvements ([792f291](https://www.github.com/Hypothesize/standard.js/commit/792f29198db3d154a5dbbd926576d7658e7e7958))
+
 ### [2.28.1](https://www.github.com/Hypothesize/standard.js/compare/v2.28.0...v2.28.1) (2021-06-24)
 
 
