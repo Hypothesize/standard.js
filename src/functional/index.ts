@@ -27,7 +27,6 @@ export type Reducer<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: 
 export type ReducerAsync<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: X, index: I) => Promise<Y>
 
 
-
 export function getRanker<T>(args: { projector: Projector<T, unknown, void>, tryNumeric?: boolean/*=false*/, tryDate?: boolean/*=false*/, reverse?: boolean/*=false*/ }): Ranker<T> {
 	//console.log(`generating comparer, try numeric is ${tryNumeric}, reversed is ${reverse} `)
 	return (x: T, y: T) => {
@@ -113,9 +112,12 @@ export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unkno
 	}
 }
 
-export const noop = () => { }
+export function noop() { }
 
-export const identity = <T>(val: T) => val
+export function identity<T>(val: T) { return val }
+
+export function negate<X = any, I = void>(predicate: Predicate<X, I>) { return (x: X, i: I) => !predicate(x, i) }
+
 
 //#region Combinators
 export const constant = <T>(val: T) => () => val

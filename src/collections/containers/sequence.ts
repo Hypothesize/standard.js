@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable fp/no-class */
 
-import { take, skip, first, last, map, filter, reduce, forEach } from "../iterable"
+import { take, takeWhile, skip, skipWhile, first, last, map, filter, reduce, forEach } from "../iterable"
 import { Predicate, Projector, Reducer } from "../../functional"
 
 /** Lazy collection of elements accessed sequentially, not known in advance */
@@ -21,6 +21,9 @@ export class Sequence<X> implements Iterable<X> {
 
 	take(n: number) { return this.ctor(take(this, n)) }
 	skip(n: number) { return this.ctor(skip(this, n)) }
+
+	takeWhile(predicate: Predicate) { return this.ctor(takeWhile(this, predicate)) }
+	skipWhile(predicate: Predicate) { return this.ctor(skipWhile(this, predicate)) }
 
 	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate to filter elements

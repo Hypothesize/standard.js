@@ -27,7 +27,7 @@ export function isIterable<T, _>(val: Iterable<T> | _): val is _ extends Iterabl
 
 /** Take n elements from start of sequence */
 export function* take<T>(iterable: Iterable<T>, n: number): Iterable<T> {
-	if (typeof n !== "number") throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
+	if (typeof n !== "number") throw new Error(`Invalid type ${typeof n} for 2nd argument "n"\nMust be number`)
 	if (n < 0) {
 		// console.warn(`Warning: Negative value ${n} passed to argument <n> of take()`)
 		return
@@ -40,7 +40,19 @@ export function* take<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 		}
 	}
 }
+/** Return all elements while a condition is not violated */
+export function* takeWhile<T>(iterable: Iterable<T>, predicate: Predicate): Iterable<T> {
+	if (typeof predicate !== "function") throw new Error(`Invalid type ${typeof predicate} for 2nd argument "predicate"\nMust be function`)
 
+	for (const element of indexed(iterable)) {
+		if (predicate(element[1], element[0]))
+			yield element[1]
+		else
+			break
+	}
+}
+
+/** Skip n elements from start of sequence */
 export function* skip<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 	if (typeof n !== "number")
 		throw new Error(`Invalid type ${typeof n} for argument "n"\nMust be number`)
@@ -54,6 +66,17 @@ export function* skip<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 			yield element
 		else
 			n--
+	}
+}
+/** Return all remaining elements beginning from when condition is violated */
+export function* skipWhile<T>(iterable: Iterable<T>, predicate: Predicate): Iterable<T> {
+	if (typeof predicate !== "function") throw new Error(`Invalid type ${typeof predicate} for 2nd argument "predicate"\nMust be function`)
+
+	for (const element of indexed(iterable)) {
+		if (predicate(element[1], element[0]))
+			continue
+		else
+			yield element[1]
 	}
 }
 
@@ -219,7 +242,8 @@ export function first<T>(iterable: Iterable<T>, predicate?: Predicate<T>): T | u
  * @returns Last element as defined, or <undefined> if such an element is not found
  */
 export function last<T>(collection: Iterable<T> | ArrayLike<T> | { length: number, get: (index: number) => T }, predicate?: Predicate<T>): T | undefined {
-	if ("length" in collection) { // Arraylike-specific implementation of last() for better performance using direct elements access
+	if ("length" in collection) {
+		// Arraylike-specific implementation for better performance using direct elements access
 		const accessor = (i: number) => ("get" in collection) ? collection.get(i) : collection[i]
 		for (let i = collection.length - 1; i >= 0; i--) {
 			const element = accessor(i)
