@@ -22,8 +22,8 @@ export class Sequence<X> implements Iterable<X> {
 	take(n: number) { return this.ctor(take(this, n)) }
 	skip(n: number) { return this.ctor(skip(this, n)) }
 
-	takeWhile(predicate: Predicate) { return this.ctor(takeWhile(this, predicate)) }
-	skipWhile(predicate: Predicate) { return this.ctor(skipWhile(this, predicate)) }
+	takeWhile(predicate: Predicate<X, number | void>) { return this.ctor(takeWhile(this, predicate)) }
+	skipWhile(predicate: Predicate<X, number | void>) { return this.ctor(skipWhile(this, predicate)) }
 
 	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate to filter elements
@@ -80,6 +80,9 @@ export class Sequence<X> implements Iterable<X> {
 		})())
 	}
 }
+
+
+// const s = new Sequence([[1], [1, 3]]).takeWhile(x => x.length > 0)
 
 /* export class stdTupleSequence<T> extends Sequence<[string, T]> {
 	toDictionary<X>() {

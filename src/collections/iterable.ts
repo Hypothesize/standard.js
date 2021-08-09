@@ -41,7 +41,7 @@ export function* take<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 	}
 }
 /** Return all elements while a condition is not violated */
-export function* takeWhile<T>(iterable: Iterable<T>, predicate: Predicate): Iterable<T> {
+export function* takeWhile<X>(iterable: Iterable<X>, predicate: Predicate<X, number | void>): Iterable<X> {
 	if (typeof predicate !== "function") throw new Error(`Invalid type ${typeof predicate} for 2nd argument "predicate"\nMust be function`)
 
 	for (const element of indexed(iterable)) {
@@ -69,7 +69,7 @@ export function* skip<T>(iterable: Iterable<T>, n: number): Iterable<T> {
 	}
 }
 /** Return all remaining elements beginning from when condition is violated */
-export function* skipWhile<T>(iterable: Iterable<T>, predicate: Predicate): Iterable<T> {
+export function* skipWhile<T>(iterable: Iterable<T>, predicate: Predicate<T, number | void>): Iterable<T> {
 	if (typeof predicate !== "function") throw new Error(`Invalid type ${typeof predicate} for 2nd argument "predicate"\nMust be function`)
 
 	for (const element of indexed(iterable)) {
