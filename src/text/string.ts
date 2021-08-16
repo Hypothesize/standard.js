@@ -80,6 +80,17 @@ export class String extends global.String {
 		return pattern.test(this.toString())
 	}
 
+	safeIsURL(): boolean {
+		try {
+			new URL(this.toString())
+		}
+		catch (_) {
+			return false
+		}
+
+		return true
+	}
+
 	getCharacters<C extends Iterable<String>>(container: { (items: Iterable<String>): C }) {
 		const arr = [...this].map(ch => new String(ch))
 		return container(arr)
