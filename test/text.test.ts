@@ -65,27 +65,9 @@ describe("shorten()", () => {
 })
 
 describe("isUrl()", () => {
-	it(`should return true for valid URLs that start with 'www'`, () => {
-		const expected = true
-		const actual = new String("www.data.com/table.csv").isURL()
-		assert.strictEqual(actual, expected)
-	})
-
-	it(`should return true for valid URLs that start with neither 'http', 'https' or 'www' `, () => {
-		const expected = true
-		const actual = new String("gist.github.com").isURL()
-		assert.strictEqual(actual, expected)
-	})
-
 	it(`should return true for valid URLs that start with 'http'`, () => {
 		const expected = true
 		const actual = new String("http://gist.github.com").isURL()
-		assert.strictEqual(actual, expected)
-	})
-
-	it(`should return false for invalid URLs that start with 'https'`, () => {
-		const expected = false
-		const actual = new String("https:/gist.github.com").isURL()
 		assert.strictEqual(actual, expected)
 	})
 
@@ -95,10 +77,9 @@ describe("isUrl()", () => {
 		assert.strictEqual(actual, expected)
 	})
 
-	it(`should return false for invalid URLs that have no domain extension`, () => {
-		const expected = false
+	it(`should return true for URLs that have no domain extension`, () => {
 		const actual = new String("http://test").isURL()
-		assert.strictEqual(actual, expected)
+		assert.strictEqual(actual, true)
 	})
 
 	it(`should return false for empty URLs`, () => {
@@ -107,10 +88,9 @@ describe("isUrl()", () => {
 		assert.strictEqual(actual, expected)
 	})
 
-	it(`should return false for invalid URLs that start with special characters`, () => {
-		const expected = false
+	it(`should return true for URLs that start with special characters`, () => {
 		const actual = new String("http://www.*test.com").isURL()
-		assert.strictEqual(actual, expected)
+		assert.strictEqual(actual, true)
 	})
 
 	it(`should return true for urls that contain a * character in the query after the domain name`, () => {
@@ -133,7 +113,7 @@ describe("isUrl()", () => {
 
 	it(`should not freeze because of catastrophic backtracking`, async () => {
 		const expected = false
-		const actual = new String("long-file-name-causing-catastrophic-backtracking (1).csv").safeIsURL()
+		const actual = new String("long-file-name-causing-catastrophic-backtracking (1).csv").isURL()
 		assert.strictEqual(actual, expected)
 	}).timeout(1000)
 
