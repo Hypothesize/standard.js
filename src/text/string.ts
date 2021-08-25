@@ -71,14 +71,24 @@ export class String extends global.String {
 	}
 
 	isURL(): boolean {
+		const originalString = this.toString()
+
+		// eslint-disable-next-line init-declarations
+		let urlObject: URL
 		try {
-			new URL(this.toString())
+			urlObject = new URL(originalString)
+			return [originalString, `${originalString}/`].includes(urlObject.toString())
 		}
 		catch (_) {
-			return false
+			try {
+				const withProtocol = `https://${originalString}`
+				urlObject = new URL(withProtocol)
+				return [withProtocol, `${withProtocol}/`].includes(urlObject.toString())
+			}
+			catch (__) {
+				return false
+			}
 		}
-
-		return true
 	}
 
 	getCharacters<C extends Iterable<String>>(container: { (items: Iterable<String>): C }) {
