@@ -71,13 +71,24 @@ export class String extends global.String {
 	}
 
 	isURL(): boolean {
-		const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-			'((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.+)+[a-z]{2,}|' + // domain name
-			'((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-			'(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-			'(\\?[;&a-z\\d%_.~+=\\*()-]*)?' + // query string
-			'(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
-		return pattern.test(this.toString())
+		const originalString = this.toString()
+
+		// eslint-disable-next-line init-declarations
+		let urlObject: URL
+		try {
+			urlObject = new URL(originalString)
+			return [originalString, `${originalString}/`].includes(urlObject.toString())
+		}
+		catch (_) {
+			try {
+				const withProtocol = `https://${originalString}`
+				urlObject = new URL(withProtocol)
+				return [withProtocol, `${withProtocol}/`].includes(urlObject.toString())
+			}
+			catch (__) {
+				return false
+			}
+		}
 	}
 
 	getCharacters<C extends Iterable<String>>(container: { (items: Iterable<String>): C }) {
