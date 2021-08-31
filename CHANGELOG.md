@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.30.0](https://www.github.com/Hypothesize/standard.js/compare/v2.29.0...v2.30.0) (2021-08-26)
+
+
+### Features
+
+* ([#103](https://www.github.com/Hypothesize/standard.js/issues/103)) Resolve catastrophic backtracking with the isURL regex ([023af2a](https://www.github.com/Hypothesize/standard.js/commit/023af2a7548268dfc986ae592d7c519f9730ff5d))
+
 ## [2.29.0](https://www.github.com/Hypothesize/standard.js/compare/v2.28.1...v2.29.0) (2021-08-09)
 
 
