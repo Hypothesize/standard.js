@@ -106,9 +106,12 @@ export function deviation(vector: number[], opts?:
 	return _variance !== undefined ? Math.sqrt(_variance) : undefined
 }
 
-export function median<T>(vector: Array<T>): T | undefined {
+/** Returns the median of an array, alphabetically by default */
+export function median<T>(vector: Array<T>, sorting?: "numerical" | "alphabetical"): T | undefined {
 	// eslint-disable-next-line fp/no-mutating-methods
-	const _ordered = vector.sort()
+	const _ordered = sorting === "numerical"
+		? vector.sort((a, b) => { return (a as unknown as number) - (b as unknown as number) })
+		: vector.sort()
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
 	}
@@ -117,7 +120,7 @@ export function median<T>(vector: Array<T>): T | undefined {
 		const first = _ordered[Math.floor(_ordered.length / 2) - 1]
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const second = _ordered[Math.floor(_ordered.length / 2)]
-		return (typeof first === "number" && typeof second === "number")
+		return (typeof first === "number" && typeof second === "number" && sorting === "numerical")
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			? ((first + second) / 2) as any as T
 			: first
