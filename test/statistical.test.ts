@@ -74,7 +74,7 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should work with strings', function () {
+	it('should find the median of an array of strings', function () {
 		const actual = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"])
 		const expected = "Green"
 
@@ -88,14 +88,14 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should work with numbers sorted alphabetically', function () {
+	it('should find the median of an array of, sorted alphabetically', function () {
 		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
 		const expected = 18
 
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should work with numbers sorted numerically if the option is passed', function () {
+	it('should find the median of an array of numbers, sorted numerically if the option is passed', function () {
 		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "numerical")
 		const expected = 10.5
 
