@@ -114,7 +114,6 @@ export function median<A extends Array<number> | Array<string> | Array<Date>>(ve
 		: vector[0] instanceof Date
 			? "date"
 			: typeof vector[0]
-	console.log(`sortingtype: ${actualSortingType}`)
 
 	const explicitSortingMethod = sortingMethod
 		? sortingMethod
@@ -124,14 +123,12 @@ export function median<A extends Array<number> | Array<string> | Array<Date>>(ve
 				? (a: A[0], b: A[0]) => { return parseFloat(a.toString()) > parseFloat(b.toString()) ? 1 : -1 }
 				: actualSortingType === "date"
 					? (a: A[0], b: A[0]) => {
-						console.log(`${new Date(a).toString()} greater than ${new Date(b).toString()} ? ${new Date(a) > new Date(b)}`)
 						return new Date(a) > new Date(b) ? 1 : -1
 					}
 					: undefined
 
 	// eslint-disable-next-line fp/no-mutating-methods
 	const _ordered = vector.sort(explicitSortingMethod)
-	console.log(_ordered)
 
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
