@@ -81,24 +81,74 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should sort alphabetically by default', function () {
-		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-		const expected = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "alphabetical")
+	it('should sort string alphabetically by default', function () {
+		const actual = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"])
+		const expected = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"], "string")
 
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should find the median of an array of numbers, sorted alphabetically', function () {
+	it('should sort numbers numerically by default', function () {
 		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+		const expected = 10.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort numbers numerically if they are explicitely considered numbers', function () {
+		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "number")
+		const expected = 10.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort numbers chronologically if they are explicitely considered dates', function () {
+		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "date")
+		const expected = 10.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort numbers alphabetically if they are explicitely considered as strings', function () {
+		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "string")
 		const expected = 18
 
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should find the median of an array of numbers, sorted numerically if the option is passed', function () {
-		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "numerical")
-		const expected = 10.5
+	it('should sort dates chronologically by default', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")])
+		const expected = new Date("2010-01-03")
 
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort dates chronologically if treated explicitely as dates', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "date")
+		const expected = new Date("2010-01-03")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort dates chronologically if treated explicitely as numbers', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "number")
+		const expected = new Date("2010-01-03") // Sun Jan 03...
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort dates alphabetically if treated explicitely as strings', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "string")
+		const expected = new Date("2010-01-02") // Sat Jan 02...
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort values according to an explicitely passed sorting function', function () {
+		const sortByMonth = (a: Date, b: Date) => {
+			return a.toLocaleString('default', { month: 'long' }) > b.toLocaleString('default', { month: 'long' }) ? 1 : -1
+		}
+		const actual = median([new Date("2010-01-01"), new Date("2010-02-01"), new Date("2010-03-01"), new Date("2010-04-01"), new Date("2010-05-01")], undefined, sortByMonth)
+		const expected = new Date("2010-01-01") // Fri Jan 01...
 		assert.deepStrictEqual(actual, expected)
 	})
 

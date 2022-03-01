@@ -107,11 +107,32 @@ export function deviation(vector: number[], opts?:
 }
 
 /** Returns the median of an array, alphabetically by default */
-export function median<T>(vector: Array<T>, sorting?: "numerical" | "alphabetical"): T | undefined {
+export function median<A extends Array<number> | Array<string> | Array<Date>>(vector: A, sortingType?: "number" | "string" | "date", sortingMethod?: (a: A[0], b: A[0]) => number): A[0] | undefined {
+
+	const actualSortingType = sortingType
+		? sortingType
+		: vector[0] instanceof Date
+			? "date"
+			: typeof vector[0]
+	console.log(`sortingtype: ${actualSortingType}`)
+
+	const explicitSortingMethod = sortingMethod
+		? sortingMethod
+		: actualSortingType === "string"
+			? (a: A[0], b: A[0]) => { return a.toString() > b.toString() ? 1 : -1 }
+			: actualSortingType === "number"
+				? (a: A[0], b: A[0]) => { return parseFloat(a.toString()) > parseFloat(b.toString()) ? 1 : -1 }
+				: actualSortingType === "date"
+					? (a: A[0], b: A[0]) => {
+						console.log(`${new Date(a).toString()} greater than ${new Date(b).toString()} ? ${new Date(a) > new Date(b)}`)
+						return new Date(a) > new Date(b) ? 1 : -1
+					}
+					: undefined
+
 	// eslint-disable-next-line fp/no-mutating-methods
-	const _ordered = sorting === "numerical"
-		? vector.sort((a, b) => { return (a as unknown as number) - (b as unknown as number) })
-		: vector.sort()
+	const _ordered = vector.sort(explicitSortingMethod)
+	console.log(_ordered)
+
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
 	}
@@ -120,9 +141,9 @@ export function median<T>(vector: Array<T>, sorting?: "numerical" | "alphabetica
 		const first = _ordered[Math.floor(_ordered.length / 2) - 1]
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const second = _ordered[Math.floor(_ordered.length / 2)]
-		return (typeof first === "number" && typeof second === "number" && sorting === "numerical")
+		return (actualSortingType === "number" || actualSortingType === "date")
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			? ((first + second) / 2) as any as T
+			? (((first as number) + (second as number)) / 2) as A[0]
 			: first
 	}
 }
