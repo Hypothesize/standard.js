@@ -3,7 +3,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
 import { reduce, last, filter, map, sort } from "../collections/iterable"
-import { Ranker, noop } from "../functional"
+import { Ranker } from "../functional"
 import { Tuple, isNumber } from "../utility"
 
 export function min(vector: Iterable<number>): number | undefined
