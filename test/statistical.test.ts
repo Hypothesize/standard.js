@@ -81,9 +81,16 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should sort string alphabetically by default', function () {
+	it('should sort string alphabetically if we explicitely pass it as strings', function () {
 		const actual = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"])
 		const expected = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"], "string")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort values alphabetically, by converting it as strings if we explicitely set the sorting type as "string"', function () {
+		const actual = median([1, "Green", "Green", "Orange", "Red", "Yellow", 1, "Green", 1, 1], "string")
+		const expected = "Green"
 
 		assert.deepStrictEqual(actual, expected)
 	})
@@ -116,6 +123,13 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
+	it('should convert all values as numbers, if they are explicitely considered as numbers', function () {
+		const actual = median([1, 2, 3, 4, "5", 6, 7, 8, 9, 10, 11, "12", 13, 14, 15, 16, 17, 18, 19, 20], "number")
+		const expected = 10.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
 	it('should sort dates chronologically by default', function () {
 		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")])
 		const expected = new Date("2010-01-03")
@@ -130,9 +144,9 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should sort dates chronologically if treated explicitely as numbers', function () {
-		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "number")
-		const expected = new Date("2010-01-03") // Sun Jan 03...
+	it('should convert all values as dates, if the soring is explicitely "date"', function () {
+		const actual = median(["2010-01-01", "2010-01-02", new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "date")
+		const expected = new Date("2010-01-03")
 
 		assert.deepStrictEqual(actual, expected)
 	})
@@ -147,11 +161,38 @@ describe('median', function () {
 		const sortByMonth = (a: Date, b: Date) => {
 			return a.toLocaleString('default', { month: 'long' }) > b.toLocaleString('default', { month: 'long' }) ? 1 : -1
 		}
-		const actual = median([new Date("2010-01-01"), new Date("2010-02-01"), new Date("2010-03-01"), new Date("2010-04-01"), new Date("2010-05-01")], undefined, sortByMonth)
+		const actual = median([new Date("2010-01-01"), new Date("2010-02-01"), new Date("2010-03-01"), new Date("2010-04-01"), new Date("2010-05-01")], sortByMonth)
 		const expected = new Date("2010-01-01") // Fri Jan 01...
 		assert.deepStrictEqual(actual, expected)
 	})
 
+	it('should throw an error when a "number" sortingType was passed, but at least one value was not parseable to a number', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, "Blue"] as any, "number"))
+	})
+
+	it('should throw an error when a "string" sortingType was passed, but at least one value was not parseable as string', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, Object.create(null)] as any, "string"))
+	})
+
+	it('should throw an error when a "date" sortingType was passed, but at least one value was not parseable as date', function () {
+		assert.throws(() => median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05"), "Green"] as any, "date"))
+	})
+
+	it('should throw an error when the array includes a value that is neither a number, date or string', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, false] as any))
+	})
+
+	it('should throw an error when no explicit sorting type was passed, and the array includes number and dates', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, new Date("2010-01-01")] as any))
+	})
+
+	it('should throw an error when no explicit sorting type was passed, and the array includes strings and dates', function () {
+		assert.throws(() => median(["A", "B", "C", new Date("2010-01-01")] as any))
+	})
+
+	it('should throw an error when no explicit sorting type was passed, and the array includes strings and numbers', function () {
+		assert.throws(() => median(["A", "B", "C", 28] as any))
+	})
 })
 
 describe('FirstQuartile', function () {
