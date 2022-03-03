@@ -106,7 +106,10 @@ export function deviation(vector: number[], opts?:
 	return _variance !== undefined ? Math.sqrt(_variance) : undefined
 }
 
-/** Returns the median of an array, alphabetically by default */
+/** Returns the median of an array
+ * @param sortingType Indicates if the vector values should be treated as dates, numbers or string, for sorting purposes. If not passed, the sorting type will be defined from the type of the first value in the array.
+ * @param sortingMethod An optional custom sorting function
+ */
 export function median<A extends Array<number> | Array<string> | Array<Date>>(vector: A, sortingType?: "number" | "string" | "date", sortingMethod?: (a: A[0], b: A[0]) => number): A[0] | undefined {
 
 	const actualSortingType = sortingType
