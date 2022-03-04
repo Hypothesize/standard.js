@@ -10,7 +10,9 @@ import {
 	median, mode, multiMode, variance, deviation, firstQuartile, thirdQuartile, interQuartileRange,
 	frequencies
 } from "../dist/statistical"
-
+import {
+	Sequence
+} from "../dist/collections/containers/sequence"
 
 describe('min()', function () {
 	it('should return <undefined> for an empty array', function () {
@@ -192,6 +194,48 @@ describe('median', function () {
 
 	it('should throw an error when no explicit sorting type was passed, and the array includes strings and numbers', function () {
 		assert.throws(() => median(["A", "B", "C", 28] as any))
+	})
+
+	it('find the median of 100.000 numbers in less than a second', function () {
+		const numberVector = [...Sequence.fromRange(1, 100000)] as number[]
+		const start = new Date().getTime()
+		median(numberVector)
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 numbers in less than a second, including parseability check', function () {
+		const numberVector = [...Sequence.fromRange(1, 100000)] as number[]
+		const start = new Date().getTime()
+		median(numberVector, "number")
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 strings in less than a second', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => `${i} and then some more characters`)] as string[]
+		const start = new Date().getTime()
+		median(stringVector)
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 strings in less than a second, including parseability tests', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => `${i} and then some more characters`)] as string[]
+		const start = new Date().getTime()
+		median(stringVector, "string")
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 Dates in less than a second', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => new Date(i))] as Date[]
+		const start = new Date().getTime()
+		median(stringVector)
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 Dates in less than a second, including parseability tests', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => new Date(i))] as Date[]
+		const start = new Date().getTime()
+		median(stringVector, "date")
+		assert.ok(new Date().getTime() - start < 1000)
 	})
 })
 
