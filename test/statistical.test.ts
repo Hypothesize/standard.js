@@ -97,6 +97,18 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
+	it('should find the median of an array of strings, numerically if we explicitely set the sorting type as "number"', function () {
+		const actual = median(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], "number")
+		console.log(actual)
+		const expected = 5.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should throw an error if trying to caculate a numerical median on an array of strings, and some strings are not parseable as number', function () {
+		assert.throws(() => median(["1", "Green", "Green", "Orange", "Red", "Yellow", "1", "Green", "1", "1"], "number"))
+	})
+
 	it('should sort numbers numerically by default', function () {
 		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
 		const expected = 10.5
@@ -112,8 +124,8 @@ describe('median', function () {
 	})
 
 	it('should sort numbers chronologically if they are explicitely considered dates', function () {
-		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "date")
-		const expected = 10.5
+		const actual = median([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200], "date")
+		const expected = new Date("1970-01-01T00:00:00.105Z")
 
 		assert.deepStrictEqual(actual, expected)
 	})
@@ -135,6 +147,13 @@ describe('median', function () {
 	it('should sort dates chronologically by default', function () {
 		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")])
 		const expected = new Date("2010-01-03")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should find the median of dates, creating an in-between value if the vector length is odd', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05"), new Date("2010-01-06")])
+		const expected = new Date("2010-01-03T12:00:00.000Z")
 
 		assert.deepStrictEqual(actual, expected)
 	})

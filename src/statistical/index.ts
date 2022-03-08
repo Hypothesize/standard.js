@@ -162,7 +162,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 		case "number": {
 			vector.forEach((val: any) => {
 				if (val.toString === undefined || isNaN(parseFloat(val.toString()))) {
-					throw new Error(`Value ${val} least one value was not parseable to a number`)
+					throw new Error(`Value '${val}' was not parseable to a number`)
 				}
 			})
 			break
@@ -196,7 +196,9 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 		: rankingType === "string"
 			? (a: T, b: T) => { return a.toString() > b.toString() ? 1 : -1 }
 			: rankingType === "number"
-				? (a: T, b: T) => { return parseFloat(a.toString()) > parseFloat(b.toString()) ? 1 : -1 }
+				? (a: T, b: T) => {
+					return parseFloat(a.toString()) > parseFloat(b.toString()) ? 1 : -1
+				}
 				: rankingType === "date"
 					? (a: T, b: T) => {
 						return new Date(a) > new Date(b) ? 1 : -1
@@ -205,6 +207,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 
 	// eslint-disable-next-line fp/no-mutating-methods
 	const _ordered = vector.sort(sortingMethod)
+
 
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
@@ -215,10 +218,25 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const second = _ordered[Math.floor(_ordered.length / 2)]
 
-		return (rankingType === "number" || rankingType === "bigint" || rankingType === "date")
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			? (((first as number) + (second as number)) / 2) as T
-			: first
+		switch (rankingType) {
+			case "bigint":
+			case "number": {
+				const numericalFirst = parseFloat(first.toString())
+				const numericalSecond = parseFloat(second.toString())
+
+				return ((numericalFirst + numericalSecond) / 2) as T
+			}
+			case "date": {
+				const numericalFirst = new Date(first).getTime()
+				const numericalSecond = new Date(second).getTime()
+				return new Date(((numericalFirst + numericalSecond) / 2)) as T
+			}
+			case "string":
+			default: {
+				return first
+			}
+		}
+
 	}
 }
 
