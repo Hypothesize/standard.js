@@ -127,7 +127,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 	switch (implicitRankingType) {
 		case "number":
 		case "bigint": {
-			vector.forEach((val: any) => {
+			vector.forEach(val => {
 				if (!["bigint", "number"].includes(typeof val)) {
 					throw new Error(`Value ${val} was not of type number, like the first value`)
 				}
@@ -135,7 +135,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 			break
 		}
 		case "string": {
-			vector.forEach((val: any) => {
+			vector.forEach(val => {
 				if (typeof val !== "string") {
 					throw new Error(`At least one value was of type string, like the first value`)
 				}
@@ -143,7 +143,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 			break
 		}
 		case "date": {
-			vector.forEach((val: any) => {
+			vector.forEach(val => {
 				if (!(val instanceof Date)) {
 					throw new Error(`At least one value was of type Date, like the first value`)
 				}
@@ -160,7 +160,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 
 	switch (explicitRankingType) {
 		case "number": {
-			vector.forEach((val: any) => {
+			vector.forEach(val => {
 				if (val.toString === undefined || isNaN(parseFloat(val.toString()))) {
 					throw new Error(`Value '${val}' was not parseable to a number`)
 				}
@@ -168,7 +168,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 			break
 		}
 		case "string": {
-			vector.forEach((val: any) => {
+			vector.forEach(val => {
 				if (val.toString === undefined) {
 					throw new Error(`Value ${val} least one value was not parseable to a string`)
 				}
@@ -176,7 +176,7 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 			break
 		}
 		case "date": {
-			vector.forEach((val: any) => {
+			vector.forEach(val => {
 				if (isNaN(new Date(val).getTime())) {
 					throw new Error(`Value ${val} least one value was not parseable to a date`)
 				}
