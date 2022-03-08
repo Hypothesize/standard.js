@@ -10,7 +10,9 @@ import {
 	median, mode, multiMode, variance, deviation, firstQuartile, thirdQuartile, interQuartileRange,
 	frequencies
 } from "../dist/statistical"
-
+import {
+	Sequence
+} from "../dist/collections/containers/sequence"
 
 describe('min()', function () {
 	it('should return <undefined> for an empty array', function () {
@@ -74,34 +76,185 @@ describe('median', function () {
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should work with strings', function () {
+	it('should find the median of an array of strings', function () {
 		const actual = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"])
 		const expected = "Green"
 
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should sort alphabetically by default', function () {
-		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-		const expected = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "alphabetical")
+	it('should sort string alphabetically if we explicitely pass it as strings', function () {
+		const actual = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"])
+		const expected = median(["Blue", "Green", "Green", "Orange", "Red", "Yellow", "Blue", "Green", "Blue", "Blue"], "string")
 
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should work with numbers sorted alphabetically', function () {
-		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-		const expected = 18
+	it('should sort values alphabetically, by converting it as strings if we explicitely set the sorting type as "string"', function () {
+		const actual = median([1, "Green", "Green", "Orange", "Red", "Yellow", 1, "Green", 1, 1], "string")
+		const expected = "Green"
 
 		assert.deepStrictEqual(actual, expected)
 	})
 
-	it('should work with numbers sorted numerically if the option is passed', function () {
-		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "numerical")
+	it('should find the median of an array of strings, numerically if we explicitely set the sorting type as "number"', function () {
+		const actual = median(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], "number")
+		const expected = 5.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should throw an error if trying to caculate a numerical median on an array of strings, and some strings are not parseable as number', function () {
+		assert.throws(() => median(["1", "Green", "Green", "Orange", "Red", "Yellow", "1", "Green", "1", "1"], "number"))
+	})
+
+	it('should sort numbers numerically by default', function () {
+		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
 		const expected = 10.5
 
 		assert.deepStrictEqual(actual, expected)
 	})
 
+	it('should sort numbers numerically if they are explicitely considered numbers', function () {
+		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "number")
+		const expected = 10.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort numbers chronologically if they are explicitely considered dates', function () {
+		const actual = median([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200], "date")
+		const expected = new Date("1970-01-01T00:00:00.105Z")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort numbers alphabetically if they are explicitely considered as strings', function () {
+		const actual = median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "string")
+		const expected = 18
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should convert all values as numbers, if they are explicitely considered as numbers', function () {
+		const actual = median([1, 2, 3, 4, "5", 6, 7, 8, 9, 10, 11, "12", 13, 14, 15, 16, 17, 18, 19, 20], "number")
+		const expected = 10.5
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort dates chronologically by default', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")])
+		const expected = new Date("2010-01-03")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should find the median of dates, creating an in-between value if the vector length is odd', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05"), new Date("2010-01-06")])
+		const expected = new Date("2010-01-03T12:00:00.000Z")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort dates chronologically if treated explicitely as dates', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "date")
+		const expected = new Date("2010-01-03")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should convert all values as dates, if the soring is explicitely "date"', function () {
+		const actual = median(["2010-01-01", "2010-01-02", new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "date")
+		const expected = new Date("2010-01-03")
+
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort dates alphabetically if treated explicitely as strings', function () {
+		const actual = median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05")], "string")
+		const expected = new Date("2010-01-02") // Sat Jan 02...
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should sort values according to an explicitely passed sorting function', function () {
+		const sortByMonth = (a: Date, b: Date) => {
+			return a.toLocaleString('default', { month: 'long' }) > b.toLocaleString('default', { month: 'long' }) ? 1 : -1
+		}
+		const actual = median([new Date("2010-01-01"), new Date("2010-02-01"), new Date("2010-03-01"), new Date("2010-04-01"), new Date("2010-05-01")], sortByMonth)
+		const expected = new Date("2010-01-01") // Fri Jan 01...
+		assert.deepStrictEqual(actual, expected)
+	})
+
+	it('should throw an error when a "number" sortingType was passed, but at least one value was not parseable to a number', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, "Blue"] as any, "number"))
+	})
+
+	it('should throw an error when a "string" sortingType was passed, but at least one value was not parseable as string', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, Object.create(null)] as any, "string"))
+	})
+
+	it('should throw an error when a "date" sortingType was passed, but at least one value was not parseable as date', function () {
+		assert.throws(() => median([new Date("2010-01-01"), new Date("2010-01-02"), new Date("2010-01-03"), new Date("2010-01-04"), new Date("2010-01-05"), "Green"] as any, "date"))
+	})
+
+	it('should throw an error when the array includes a value that is neither a number, date or string', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, false] as any))
+	})
+
+	it('should throw an error when no explicit sorting type was passed, and the array includes number and dates', function () {
+		assert.throws(() => median([1, 2, 3, 4, 5, new Date("2010-01-01")] as any))
+	})
+
+	it('should throw an error when no explicit sorting type was passed, and the array includes strings and dates', function () {
+		assert.throws(() => median(["A", "B", "C", new Date("2010-01-01")] as any))
+	})
+
+	it('should throw an error when no explicit sorting type was passed, and the array includes strings and numbers', function () {
+		assert.throws(() => median(["A", "B", "C", 28] as any))
+	})
+
+	it('find the median of 100.000 numbers in less than a second', function () {
+		const numberVector = [...Sequence.fromRange(1, 100000)] as number[]
+		const start = new Date().getTime()
+		median(numberVector)
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 numbers in less than a second, including parseability check', function () {
+		const numberVector = [...Sequence.fromRange(1, 100000)] as number[]
+		const start = new Date().getTime()
+		median(numberVector, "number")
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 strings in less than a second', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => `${i} and then some more characters`)] as string[]
+		const start = new Date().getTime()
+		median(stringVector)
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 strings in less than a second, including parseability tests', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => `${i} and then some more characters`)] as string[]
+		const start = new Date().getTime()
+		median(stringVector, "string")
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 Dates in less than a second', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => new Date(i))] as Date[]
+		const start = new Date().getTime()
+		median(stringVector)
+		assert.ok(new Date().getTime() - start < 1000)
+	})
+
+	it('find the median of 100.000 Dates in less than a second, including parseability tests', function () {
+		const stringVector = [...Sequence.fromRange(1, 100000).map(i => new Date(i))] as Date[]
+		const start = new Date().getTime()
+		median(stringVector, "date")
+		assert.ok(new Date().getTime() - start < 1000)
+	})
 })
 
 describe('FirstQuartile', function () {

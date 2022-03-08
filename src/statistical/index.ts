@@ -3,7 +3,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
 import { reduce, last, filter, map, sort } from "../collections/iterable"
-import { Ranker, noop } from "../functional"
+import { Ranker } from "../functional"
 import { Tuple, isNumber } from "../utility"
 
 export function min(vector: Iterable<number>): number | undefined
@@ -106,12 +106,109 @@ export function deviation(vector: number[], opts?:
 	return _variance !== undefined ? Math.sqrt(_variance) : undefined
 }
 
-/** Returns the median of an array, alphabetically by default */
-export function median<T>(vector: Array<T>, sorting?: "numerical" | "alphabetical"): T | undefined {
+/** Returns the median of an array
+ * If no ranker is passed, all values should have the same type (otherwise an error will be thrown), and will be ranked accordingly.
+ * If a ranker is passed as a type, all values will be parsed as that type (an error will be thrown if it cannot be)
+ * If a ranker is passed as a function, the function will be used on the values, no matter their type
+ */
+export function median<T extends number | string | Date>(vector: Array<T>, ranker?: "number" | "string" | "date" | Ranker<T>): T | undefined {
+	if (vector.length === 0) { return undefined }
+
+	const implicitRankingType = ranker === undefined
+		? vector[0] instanceof Date
+			? "date"
+			: typeof vector[0]
+		: undefined
+
+	const explicitRankingType = ranker && typeof ranker !== "function"
+		? ranker
+		: undefined
+
+	switch (implicitRankingType) {
+		case "number":
+		case "bigint": {
+			vector.forEach(val => {
+				if (!["bigint", "number"].includes(typeof val)) {
+					throw new Error(`Value ${val} was not of type number, like the first value`)
+				}
+			})
+			break
+		}
+		case "string": {
+			vector.forEach(val => {
+				if (typeof val !== "string") {
+					throw new Error(`At least one value was of type string, like the first value`)
+				}
+			})
+			break
+		}
+		case "date": {
+			vector.forEach(val => {
+				if (!(val instanceof Date)) {
+					throw new Error(`At least one value was of type Date, like the first value`)
+				}
+			})
+			break
+		}
+		case undefined: {
+			break // If we don't use an implicit sorting type, we don't verify the similarity of value types
+		}
+		default: {
+			throw new Error(`Type '${implicitRankingType}' not supported`)
+		}
+	}
+
+	switch (explicitRankingType) {
+		case "number": {
+			vector.forEach(val => {
+				if (val.toString === undefined || isNaN(parseFloat(val.toString()))) {
+					throw new Error(`Value '${val}' was not parseable to a number`)
+				}
+			})
+			break
+		}
+		case "string": {
+			vector.forEach(val => {
+				if (val.toString === undefined) {
+					throw new Error(`Value ${val} least one value was not parseable to a string`)
+				}
+			})
+			break
+		}
+		case "date": {
+			vector.forEach(val => {
+				if (isNaN(new Date(val).getTime())) {
+					throw new Error(`Value ${val} least one value was not parseable to a date`)
+				}
+			})
+			break
+		}
+		case undefined:
+		default: {
+			break // If we don't use an explicit sorting type, we don't verify the parseability of value types
+		}
+	}
+
+	const rankingType = explicitRankingType || implicitRankingType
+
+	const sortingMethod = typeof ranker === "function"
+		? ranker
+		: rankingType === "string"
+			? (a: T, b: T) => { return a.toString() > b.toString() ? 1 : -1 }
+			: rankingType === "number"
+				? (a: T, b: T) => {
+					return parseFloat(a.toString()) > parseFloat(b.toString()) ? 1 : -1
+				}
+				: rankingType === "date"
+					? (a: T, b: T) => {
+						return new Date(a) > new Date(b) ? 1 : -1
+					}
+					: undefined
+
 	// eslint-disable-next-line fp/no-mutating-methods
-	const _ordered = sorting === "numerical"
-		? vector.sort((a, b) => { return (a as unknown as number) - (b as unknown as number) })
-		: vector.sort()
+	const _ordered = vector.sort(sortingMethod)
+
+
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
 	}
@@ -120,10 +217,26 @@ export function median<T>(vector: Array<T>, sorting?: "numerical" | "alphabetica
 		const first = _ordered[Math.floor(_ordered.length / 2) - 1]
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const second = _ordered[Math.floor(_ordered.length / 2)]
-		return (typeof first === "number" && typeof second === "number" && sorting === "numerical")
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			? ((first + second) / 2) as any as T
-			: first
+
+		switch (rankingType) {
+			case "bigint":
+			case "number": {
+				const numericalFirst = parseFloat(first.toString())
+				const numericalSecond = parseFloat(second.toString())
+
+				return ((numericalFirst + numericalSecond) / 2) as T
+			}
+			case "date": {
+				const numericalFirst = new Date(first).getTime()
+				const numericalSecond = new Date(second).getTime()
+				return new Date(((numericalFirst + numericalSecond) / 2)) as T
+			}
+			case "string":
+			default: {
+				return first
+			}
+		}
+
 	}
 }
 
