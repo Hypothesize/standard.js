@@ -99,7 +99,6 @@ describe('median', function () {
 
 	it('should find the median of an array of strings, numerically if we explicitely set the sorting type as "number"', function () {
 		const actual = median(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], "number")
-		console.log(actual)
 		const expected = 5.5
 
 		assert.deepStrictEqual(actual, expected)
