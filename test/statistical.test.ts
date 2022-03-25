@@ -255,6 +255,18 @@ describe('median', function () {
 		median(stringVector, "date")
 		assert.ok(new Date().getTime() - start < 1000)
 	})
+
+	it('should not sort the passed array by default', function () {
+		const arr = [9, 14, 2, 50, 5]
+		median(arr)
+		assert.strictEqual(arr.toString(), "9,14,2,50,5")
+	})
+
+	it('should mutate the vector (by sorting it) if the mutate argument was passed', function () {
+		const arr = [9, 14, 2, 50, 5]
+		median(arr, "number", true)
+		assert.strictEqual(arr.toString(), "2,5,9,14,50")
+	})
 })
 
 describe('FirstQuartile', function () {
