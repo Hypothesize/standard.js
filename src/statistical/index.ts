@@ -206,9 +206,10 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 					}
 					: undefined
 
-	// eslint-disable-next-line fp/no-mutating-methods
 	const _ordered = mutable === true
+		// eslint-disable-next-line fp/no-mutating-methods
 		? vector.sort(sortingMethod)
+		// eslint-disable-next-line fp/no-mutating-methods
 		: [...vector].sort(sortingMethod)
 
 	if (_ordered.length % 2 === 1) {
