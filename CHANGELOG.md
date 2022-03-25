@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.31.0](https://www.github.com/Hypothesize/standard.js/compare/v2.30.0...v2.31.0) (2022-03-08)
+
+
+### Features
+
+* Enhancements to the median calculations ([e146e48](https://www.github.com/Hypothesize/standard.js/commit/e146e48bbfc3729370dda7bb67d37b7bf9b11fad))
+
 ## [2.30.0](https://www.github.com/Hypothesize/standard.js/compare/v2.29.0...v2.30.0) (2021-08-26)
 
 
