@@ -110,8 +110,9 @@ export function deviation(vector: number[], opts?:
  * If no ranker is passed, all values should have the same type (otherwise an error will be thrown), and will be ranked accordingly.
  * If a ranker is passed as a type, all values will be parsed as that type (an error will be thrown if it cannot be)
  * If a ranker is passed as a function, the function will be used on the values, no matter their type
+ * If mutable is true, there won't be a duplication of the passed array, which is faster but leaves the passed array mutated.
  */
-export function median<T extends number | string | Date>(vector: Array<T>, ranker?: "number" | "string" | "date" | Ranker<T>): T | undefined {
+export function median<T extends number | string | Date>(vector: Array<T>, ranker?: "number" | "string" | "date" | Ranker<T>, mutable?: boolean): T | undefined {
 	if (vector.length === 0) { return undefined }
 
 	const implicitRankingType = ranker === undefined
@@ -205,9 +206,11 @@ export function median<T extends number | string | Date>(vector: Array<T>, ranke
 					}
 					: undefined
 
-	// eslint-disable-next-line fp/no-mutating-methods
-	const _ordered = vector.sort(sortingMethod)
-
+	const _ordered = mutable === true
+		// eslint-disable-next-line fp/no-mutating-methods
+		? vector.sort(sortingMethod)
+		// eslint-disable-next-line fp/no-mutating-methods
+		: [...vector].sort(sortingMethod)
 
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
