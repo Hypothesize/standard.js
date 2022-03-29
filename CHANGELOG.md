@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.32.0](https://www.github.com/Hypothesize/standard.js/compare/v2.31.0...v2.32.0) (2022-03-29)
+
+
+### Features
+
+* Make the median function immutable by default ([d0bed7c](https://www.github.com/Hypothesize/standard.js/commit/d0bed7c2e7c6525fa2fbeb3ad98464a59aedaf17))
+
 ## [2.31.0](https://www.github.com/Hypothesize/standard.js/compare/v2.30.0...v2.31.0) (2022-03-08)
 
 
