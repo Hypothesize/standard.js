@@ -2,8 +2,32 @@
 /* eslint-disable fp/no-unused-expression */
 
 import * as assert from "assert"
-import { pick, deepMerge, filterObject, mapObject, omit, keys, entries, fromKeyValues } from "../dist/collections/object.js"
+import { pick, deepMerge, shallowEquals, omit, keys, entries, objectFromTuples } from "../dist/object"
 
+
+describe('objectFromTuples', () => {
+	it('should return an empty for an emtpy collection of tuples', () => {
+		assert.deepStrictEqual(objectFromTuples([]), {})
+	})
+
+	it('should return an object that matches input collection of tuples', () => {
+		const fn = (x: any) => x
+		assert.deepStrictEqual(
+			objectFromTuples<unknown, string>([["/", false], ["str", 'str'], ["num", 1], ['fn', fn]]),
+			{ "/": false, str: "str", num: 1, fn }
+		)
+
+		assert.deepStrictEqual(
+			objectFromTuples<unknown, string>([["num", 1], ['fn', fn], ["str", 'str']]),
+			{ num: 1, fn, str: "str" }
+		)
+
+		assert.deepStrictEqual(
+			objectFromTuples<unknown, string>([["x", true]]),
+			{ x: true }
+		)
+	})
+})
 
 describe('keys', () => {
 	it('should return a typed array of objects keys', () => {
@@ -25,46 +49,6 @@ describe('keys', () => {
 	// })
 })
 
-describe('mapObject', () => {
-	it('should return transformed object', () => {
-		const obj = { a: 'first', b: 32 }
-		/** @type {{ a: string; b: string }} */
-		const mapped = mapObject(obj, (value, key) => `${key}-${value}`)
-
-		assert.deepEqual(mapped, { a: 'a-first', b: 'b-32' })
-	})
-
-	it('should return empty object when given an empty object', () => {
-		const obj = {}
-		// const mapfn = jest.fn()
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
-		const mapped = mapObject(obj, () => { })
-
-		// expect(mapfn).toHaveBeenCalledTimes(0)
-		assert.deepEqual(mapped, {})
-	})
-})
-
-describe('filterObject', () => {
-	it('should remove fields not matching predicate', () => {
-		const obj = { a: 'first', b: 2, c: 'third' }
-		const result = filterObject(obj, ((field, key) => `${key}-${field}` !== 'b-2'))
-		assert.deepEqual(result, { a: 'first', c: 'third' })
-	})
-
-	it('should remove fields not matching guard and cast values that match using the guard', () => {
-		//const obj = { a: 'first', b: 2, c: 'third' }
-		/** String type guard
-		 * @param value { unknown }
-		 * @returns { value is string }
-		 */
-		//const isString = (value) => typeof value === 'string'
-		///** @type {{ readonly a: string; readonly c: string }} */
-		//const result = filterObject(obj, isString)
-		//assert.deepEqual(result, { a: 'first', c: 'third', })
-	})
-})
-
 describe('pick', () => {
 	const obj = { a: 'first', b: 2, c: 'third' }
 
@@ -80,60 +64,55 @@ describe('pick', () => {
 })
 
 describe('merge', () => {
-	/*it('returns default empty object if inputs are undefined', () => {
-		expect(deepmerge()).toEqual({})
+	it('returns default empty object if inputs are undefined', () => {
+		assert.deepStrictEqual(deepMerge({}), {})
 	})
 
-	it('returns empty object if inputs are null', () => {
-		expect(deepmerge(null, null)).toEqual({})
+	it('returns null if inputs are null', () => {
+		assert.deepStrictEqual(deepMerge(null, null), null)
 	})
 
 	it('returns default object if inputs are undefined', () => {
-		expect(deepmerge(undefined, undefined, { foo: 'bar' })).toEqual({
-			foo: 'bar',
-		})
+		assert.deepStrictEqual(deepMerge(undefined, undefined, { foo: 'bar' }), { foo: 'bar', })
 	})
 
 	it('returns default object if inputs are null', () => {
-		expect(deepmerge(null, null, { foo: 'bar' })).toEqual({ foo: 'bar' })
+		assert.deepStrictEqual(deepMerge(null, null, { foo: 'bar' }), { foo: 'bar' })
 	})
 
 	it('returns merged objects for multiple inputs', () => {
-		expect(
-			deepmerge(null, null, { foo: 'bar' }, null, {}, { foo: 'baz' })
-		).toEqual({ foo: 'baz' })
+		assert.deepStrictEqual(
+			deepMerge(null, null, { foo: 'bar' }, null, {}, { foo: 'baz' })
+			, { foo: 'baz' })
 	})
 
-	it('throws exception if first input is a string', () => {
-		expect(() => deepmerge('foo', null)).toThrow(
-			'All merge parameters are expected to be objects, null, or undefined.'
-		)
-	})
+	// it('throws exception if first input is a string', () => {
+	// 	assert.throws(() => deepMerge('foo', null), 'All merge parameters are expected to be objects, null, or undefined.'
+	// 	)
+	// })
 
-	it('throws exception if second input is a string', () => {
-		expect(() => deepmerge({}, 'foo')).toThrow(
-			'All merge parameters are expected to be objects, null, or undefined.'
-		)
-	})
+	// it('throws exception if second input is a string', () => {
+	// 	assert.throws(() => deepMerge({}, 'foo'), 'All merge parameters are expected to be objects, null, or undefined.')
+	// })
 
 	it('returns object one if input two is undefined', () => {
-		expect(deepmerge({ foo: 'bar' })).toEqual({ foo: 'bar' })
+		assert.deepStrictEqual(deepMerge({ foo: 'bar' }), { foo: 'bar' })
 	})
 
-	it('returns object one if input two is null', () => {
-		expect(deepmerge({ foo: 'bar' }, null)).toEqual({ foo: 'bar' })
+	it('returns null if input two is null', () => {
+		assert.deepStrictEqual(deepMerge({ foo: 'bar' }, null), null /*{ foo: 'bar' }*/)
 	})
 
 	it('returns object two if input one is undefined', () => {
-		expect(deepmerge(undefined, { foo: 'bar' })).toEqual({ foo: 'bar' })
+		assert.deepStrictEqual(deepMerge(undefined, { foo: 'bar' }), { foo: 'bar' })
 	})
 
 	it('returns object two if input one is null', () => {
-		expect(deepmerge(null, { foo: 'bar' })).toEqual({ foo: 'bar' })
+		assert.deepStrictEqual(deepMerge(null, { foo: 'bar' }), { foo: 'bar' })
 	})
 
 	it('does perform deep merge', () => {
-		expect(deepmerge({ foo: { bar: 'baz' } }, { foo: { baz: 'bar' } })).toEqual(
+		assert.deepStrictEqual(deepMerge({ foo: { bar: 'baz' } }, { foo: { baz: 'bar' } }),
 			{
 				foo: { bar: 'baz', baz: 'bar' },
 			}
@@ -141,18 +120,12 @@ describe('merge', () => {
 	})
 
 	it('does perform deep merge on multiple parameters', () => {
-		expect(
-			deepmerge(
-				{ foo: { bar: 'baz' } },
-				{ foo: { baz: 'bar' } },
-				{ baz: 'foo' }
-			)
-		).toEqual({
-			foo: { bar: 'baz', baz: 'bar' },
-			baz: 'foo',
-		})
+		assert.deepStrictEqual(
+			deepMerge({ foo: { bar: 'baz' } }, { foo: { baz: 'bar' } }, { baz: 'foo' }),
+			{ foo: { bar: 'baz', baz: 'bar' }, baz: 'foo', }
+		)
 	})
-	*/
+
 	/*it('throws error if first argument is not an array', function () {
 		assert.throws(() => deepMerge(null, {}))
 	})*/
@@ -228,3 +201,42 @@ describe('merge', () => {
 	})*/
 
 })
+
+describe('equalsShallow', () => {
+	it('returns true when comparing empty objects', () => {
+		assert(shallowEquals({}, {}))
+		assert(!shallowEquals({}, { foo: {} }))
+	})
+
+	it('Properly compares each object property irrespective of their order', () => {
+		assert(shallowEquals({ str: "hello", num: 1 }, { num: 1, str: "hello" }))
+		assert(!shallowEquals({ str: "str", num: 1 }, { num: 1, str: "hello" }))
+	})
+
+	it('Properly compares reference properties', () => {
+		const obj = { str: "hello", num: 1 }
+		assert(shallowEquals({ obj, foo: "bar" }, { foo: "bar", obj }))
+		assert(!shallowEquals({ obj }, { obj: { str: "hello", num: 1 } }))
+	})
+
+	it('Properly compares objects with single a property', () => {
+		assert(shallowEquals({ str: "hello" }, { str: "hello" }))
+	})
+})
+
+
+/*describe('filterObject', () => {
+	it('should remove fields not matching predicate', () => {
+		const obj = { a: 'first', b: 2, c: 'third' }
+		const result = filterObject(obj, ((field, key) => `${key}-${field}` !== 'b-2'))
+		assert.deepEqual(result, { a: 'first', c: 'third' })
+	})
+
+	it('should remove fields not matching guard and cast values that match using the guard', () => {
+		//const obj = { a: 'first', b: 2, c: 'third' }
+		//const isString = (value) => typeof value === 'string'
+		//const result = filterObject(obj, isString)
+		//assert.deepEqual(result, { a: 'first', c: 'third', })
+	})
+})
+*/
