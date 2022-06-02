@@ -1,6 +1,7 @@
-const OFF = 0, WARN = 1, ERROR = 2;
+// const OFF = 0, WARN = 1, ERROR = 2;
 
 module.exports = {
+	"root": true,
 	"parser": "@typescript-eslint/parser",
 	"plugins": ["@typescript-eslint", "fp"],
 	"env": { "browser": true, "node": true },
@@ -9,6 +10,7 @@ module.exports = {
 		"plugin:@typescript-eslint/eslint-recommended",
 		"plugin:@typescript-eslint/recommended"
 	],
+
 	"rules": {
 		/* typescript */
 		"@typescript-eslint/member-delimiter-style": ["off", {
@@ -21,30 +23,32 @@ module.exports = {
 				"requireLast": false
 			}
 		}],
+		"@typescript-eslint/explicit-module-boundary-types": "off",
+
 
 		/* functional */
 		"fp/no-arguments": "warn",
-		//"fp/no-class": "warn",
+		// "fp/no-class": "warn",
 		"fp/no-delete": "warn",
 		"fp/no-events": "warn",
-		"fp/no-get-set": "warn",
+		// "fp/no-get-set": "warn",
 		"fp/no-let": "warn",
 		"fp/no-loops": "warn",
 		"fp/no-mutating-assign": "warn",
 		"fp/no-mutating-methods": "warn",
 		"fp/no-mutation": "warn",
-		//"fp/no-nil": "warn",
+		// "fp/no-nil": "warn",
 		"fp/no-proxy": "warn",
-		"fp/no-rest-parameters": "off",
+		"fp/no-rest-parameters": "warn",
 		//"fp/no-this": "warn",
 		//"fp/no-throw": "warn",
-		//"fp/no-unused-expression": "warn",
+		"fp/no-unused-expression": "warn",
 		"fp/no-valueof-field": "warn",
 
 		/* general */
 		"no-var": "warn",
 		"no-console": "off",
-		//"no-unused-vars": "error",
+		// "no-unused-vars": "error",
 		"no-unused-expressions": "error",
 		"no-unused-labels": "error",
 		"no-await-in-loop": "error",
@@ -64,6 +68,6 @@ module.exports = {
 		"brace-style": ["error", "stroustrup"],
 		"camelcase": ["error", { "properties": "always", "ignoreImports": true }],
 		"block-spacing": ["error", "always"],
-		//"indent": ["warn", "tab"]
+		"indent": ["warn", "tab"]
 	}
 }

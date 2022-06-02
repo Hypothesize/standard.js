@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable fp/no-unused-expression */
+/* eslint-disable fp/no-mutation */
 /* eslint-disable indent */
 /* eslint-disable brace-style */
 /* eslint-disable fp/no-rest-parameters */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Tuple, Obj, Merge, TypeGuard, ExtractByType, isObject, isSymbol } from "../utility"
-import { Predicate, Projector } from "../functional"
-import { skip } from "./iterable"
-
+import { Tuple, Obj, Merge, isObject, isSymbol } from "../utility"
 
 export function keys<T extends Obj>(obj: T): (keyof T)[]
 export function keys<K extends string | number | symbol, V>(obj: Record<K, V>): K[]
@@ -17,13 +15,22 @@ export function keys(obj: any) {
 	return Object.keys(obj)
 }
 
-export function fromKeyValues<T, K extends string | number = string>(keyValues: Tuple<K, T>[]) {
+export function objectFromTuples<T, K extends string = string>(keyValues: Tuple<K, T>[]) {
 	const obj = {} as Record<K, T>
 	// eslint-disable-next-line fp/no-unused-expression
 	keyValues.forEach(kvp => {
 		// eslint-disable-next-line fp/no-mutation
 		obj[kvp[0]] = kvp[1]
 	})
+	return obj
+}
+export async function objectFromTuplesAsync<T, K extends string = string>(keyValues: Iterable<Tuple<K, T>> | AsyncIterable<Tuple<K, T>>) {
+	const obj = {} as Obj<T, K>
+	// eslint-disable-next-line fp/no-loops
+	for await (const kv of keyValues) {
+		// eslint-disable-next-line fp/no-mutation
+		obj[kv[0]] = kv[1]
+	}
 	return obj
 }
 
@@ -34,30 +41,6 @@ export function values(obj: Obj) { return Object.values(obj) }
 export function entries<V, K extends string | number>(obj: Record<K, V>): Tuple<K, V>[]
 export function entries<V, K extends string | number, T extends Record<K, V>>(obj: T): Tuple<K, V>[]
 export function entries(obj: Obj) { return keys(obj).map(key => new Tuple(key, obj[key])) }
-
-export function mapObject<K extends string | number, X, Y>(obj: Record<K, X>, projector: Projector<X, Y, K>): Record<K, Y>
-export function mapObject<K extends string | number, X, Y, T extends Record<K, X>>(obj: T, projector: Projector<X, Y, K>): Record<K, Y>
-export function mapObject<X, Y>(obj: Obj<X, string | number>, projector: Projector<X, Y, string | number>) {
-	const _entries = entries(obj)
-	const mapped = _entries.map(kv => new Tuple(kv[0], projector(kv[1], kv[0])))
-	const newObj = fromKeyValues(mapped)
-	return newObj
-}
-
-/** `filter` returns an object with fields that match the condition.
- * If condition is a type guard, the values are cast into the guarded type.
- * The type guard must return true for all values of type `B`.
- */
-// export function filterObject<K extends string, V, V1 extends V>(obj: Obj<V, K>, predicate: TypeGuard<V, V1>): ExtractByType<Obj<V, K>, V1>
-export function filterObject<V, K extends string | number = string>(obj: Obj<V, K>, predicate: Predicate<V, K>): Partial<Obj<V, K>>
-export function filterObject<V, K extends string | number = string>(obj: Obj<V, K>, predicate: Predicate<V, K>): Partial<Obj<V, K>>
-export function filterObject<T extends Obj>(obj: T, predicate: Predicate<T[keyof T], keyof T>): Partial<T>
-export function filterObject<T extends Obj<V>, V, V1 extends V>(obj: T, predicate: TypeGuard<V, V1>): ExtractByType<T, V1>
-export function filterObject(obj: Obj, predicate: Predicate<unknown, keyof typeof obj>) {
-	return fromKeyValues(entries(obj).filter(entry => predicate(entry[1], entry[0])))
-}
-// const _ = filter({ str: "", num: 1 }, x => x === undefined)
-
 
 /** Return object consisting of only certain properties from onput object certain properties excluded */
 export function pick<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): Record<K, T[K]> {
@@ -76,8 +59,14 @@ export function omit<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): O
 }
 
 /** Return a shallow clone of an object literal */
-export function cloneShallow<T>(val: T): T {
+export function shallowClone<T>(val: T): T {
 	return Object.assign({}, val)
+}
+
+export function shallowEquals<T extends Obj>(a: T, b: T): boolean {
+	const keysA = keys(a)
+	const keysB = keys(b)
+	return keysA.length === keysB.length && keysA.every(k => a[k] === b[k])
 }
 
 /** Merge anything recursively. Objects get merged, special objects (classes etc.) are re-assigned "as is". Basic types overwrite objects or other basic types.
@@ -90,7 +79,8 @@ export function deepMerge<T1, T2>(a1: T1, a2: T2): Merge<T1, T2>
 export function deepMerge<T1, T2, T3>(a1: T1, a2: T2, a3: T3): Merge<T1, Merge<T2, T3>>
 export function deepMerge<T1, T2, T3, T4>(a1: T1, a2: T2, a3: T3, a4: T4): Merge<T1, Merge<T2, Merge<T3, T4>>>
 export function deepMerge<T1, T2, T3, T4, T5>(a1: T1, a2: T2, a3: T3, a4: T4, a5: T5): Merge<T1, Merge<T2, Merge<T3, Merge<T4, T5>>>>
-export function deepMerge(...args: any[])/*: O.Compact<T, Tn, 'deep'>*/ {
+export function deepMerge<T1, T2, T3, T4, T5, T6>(a1: T1, a2: T2, a3: T3, a4: T4, a5: T5, a6: T6): Merge<T1, Merge<T2, Merge<T3, Merge<T4, Merge<T5, T6>>>>>
+export function deepMerge(...args: any[]) {
 	function assignProp(carry: Obj, key: string, newVal: any, originalObject: Obj): void {
 		const propType = {}.propertyIsEnumerable.call(originalObject, key) ? 'enumerable' : 'nonenumerable'
 		// eslint-disable-next-line fp/no-mutation
@@ -144,41 +134,57 @@ export function deepMerge(...args: any[])/*: O.Compact<T, Tn, 'deep'>*/ {
 		return result
 	}
 
-	return [...skip(args, 1)].reduce((result, newComer) => {
+	return args.slice(1).reduce((result, newComer) => {
 		return mergeRecursively(result, newComer)
 	}, args[0]) //as O.Compact<T, Tn, 'deep'>
 }
 
-// const m = (deepMerge({ n: 1 }, { str: "num" }))
-// const k = keys(m)[0] //as keyof typeof m
-// const t = m[k]
+/*export const mergeDeep = (options?: { mergeArrays: boolean, undefinedOverwrites: boolean }) => (
+	<T extends any[]>(...objects: T) => objects.reduce((result, current) => {
+		if (!isObject(current) || !isObject(result))
+			return current
+		// eslint-disable-next-line fp/no-unused-expression
+		Object.keys(current).forEach((key) => {
+			if (Array.isArray(result[key]) && Array.isArray(current[key])) {
+				// eslint-disable-next-line fp/no-mutation
+				result[key] = (options?.mergeArrays ?? false)
+					? Array.from(new Set((result[key] as unknown[]).concat(current[key])))
+					: current[key]
+			}
+			else if (isObject(result[key]) && isObject(current[key])) {
+				// eslint-disable-next-line fp/no-mutation
+				result[key] = mergeDeep(options)(result[key] as IObject, current[key] as IObject)
+			}
+			else {
+				if ((options?.undefinedOverwrites ?? false) || typeof current[key] !== "undefined")
+					result[key] = current[key]
+			}
+		})
+		return result
+	}, {}) as TUnionToIntersection<T[number]>
+)*/
 
-/*
-export function mergeAndCompare<T extends object, Tn extends object[]>(compareFn: (prop1: any, prop2: any, propName: string | symbol) => any, origin: T, ...newComers: Tn): O.Compact<T, Tn, 'deep'> {
-	return newComers.reduce((result, newComer) => {
-		return mergeRecursively(result, newComer, compareFn)
-	}, origin)
-}
-export function mergeAndConcat<T extends object, Tn extends object[]>(origin: T, ...newComers: Tn): O.Compact<T, Tn, 'deep'> {
-	return newComers.reduce((result, newComer) => {
-		return mergeRecursively(result, newComer, concatArrays)
-	}, origin)
-}
-*/
-/*export interface ObjectMergeOptions {
-	arrayMerge?(target: unknown[], source: unknown[], options?: ObjectMergeOptions): any[];
-	clone?: boolean;
-	customMerge?: (key: string, options?: ObjectMergeOptions) => ((x: any, y: any) => any) | undefined;
-	isMergeableObject?(value: unknown): boolean;
-}
-*/
-// function merge<X>(target: X, source: Partial<X> | undefined | null): X
-// function merge<X>(target: Partial<X> | undefined | null, source: X): X
-// function merge<X>(target: X, source: undefined | null): X
-// function merge<X>(target: undefined | null, source: X): X
-// function merge<X, Y>(target: X, source: Y): X & Y
+export const mergeDeep = (options?: { mergeArrays: boolean, undefinedOverwrites: boolean }) => <T extends IObject[]>(...objects: T) => objects.reduce((result, current) => {
+	Object.keys(current).forEach((key) => {
+		if (Array.isArray(result[key]) && Array.isArray(current[key])) {
+			result[key] = (options?.mergeArrays ?? false)
+				? Array.from(new Set((result[key] as unknown[]).concat(current[key])))
+				: current[key]
+		}
+		else if (isObject(result[key]) && isObject(current[key])) {
+			result[key] = mergeDeep(options)(result[key] as IObject, current[key] as IObject)
+		}
+		else {
+			if ((options?.undefinedOverwrites ?? false) || typeof current[key] !== "undefined")
+				result[key] = current[key]
+		}
+	})
 
-// export function deepMerge<T1>(args: [T1], options?: ObjectMergeOptions): T1
-// export function deepMerge<T1, T2>(args: [T1, T2], options?: ObjectMergeOptions): T1 & T2
-// export function deepMerge<T1, T2, T3>(args: [T1, T2, T3], options?: ObjectMergeOptions): T1 & T2 & T3
-// export function deepMerge<T1, T2, T3, T4>(args: [T1, T2, T3, T4], options?: ObjectMergeOptions): T1 & T2 & T3 & T4
+	return result
+}, {}) as TUnionToIntersection<T[number]>
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface IObject { [key: string]: any; length?: never; }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TUnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+

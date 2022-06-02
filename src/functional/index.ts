@@ -3,10 +3,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable fp/no-rest-parameters */
 /* eslint-disable brace-style */
-import { Obj } from "../utility"
+import { Obj, ArgsType } from "../utility"
 
 /** Return -1 if a is smaller than b; 0 if a & b are equal, and 1 if a is bigger than b */
-export type Ranker<X = unknown> = (a: X, b: X) => number
+export type Ranker<X = unknown> = (a: X, b: X) => -1 | 0 | 1
 export type RankerAsync<X = unknown> = (a: X, b: X) => Promise<number>
 
 /** Return true if a and b are equal, otherwise returns false */
@@ -26,103 +26,21 @@ export type PredicateAsync<X = unknown, I = unknown> = (value: X, index: I) => P
 export type Reducer<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: X, index: I) => Y
 export type ReducerAsync<X = unknown, Y = unknown, I = unknown> = (prev: Y, current: X, index: I) => Promise<Y>
 
-
-export function getRanker<T>(args: { projector: Projector<T, unknown, void>, tryNumeric?: boolean/*=false*/, tryDate?: boolean/*=false*/, reverse?: boolean/*=false*/ }): Ranker<T> {
-	//console.log(`generating comparer, try numeric is ${tryNumeric}, reversed is ${reverse} `)
-	return (x: T, y: T) => {
-		return compare(x, y, args.projector, args.tryNumeric, args.tryDate) * (args.reverse === true ? -1 : 1)
-	}
-}
-export function getComparer<T>(projector: Projector<T, unknown, void>, tryNumeric = false, tryDate?: boolean/*=false* reverse = false*/): Comparer<T> {
-	//console.log(`generating comparer, try numeric is ${tryNumeric}, reversed is ${reverse} `)
-	return (x: T, y: T) => {
-		return compare(x, y, projector, tryNumeric, tryDate) === 0
-	}
-}
-/** Compares 2 values and sort them, possibly parsing it as date or number beforehand.
- * If the 2 compared values have a different type, the string type will always be ranked last, unless the user choses (through 'tryNumeric') to convert number-likes strings into numbers for comparison.
- * @param larger One value to compare
- * @param smaller The other value to compare
- * @param projector A projector used to find the values to compare, if the passed values are objects
- * @param tryNumeric If any or both of the two values are strings, an attempt will be made to parse them as number before doing to comparison
- * @param tryDateAsNumeric If both values are strings corresponding to dates, they will be parsed as Dates and compared as such.
- */
-export function compare<T>(larger: T, smaller: T, projector?: Projector<T, unknown, void>, tryNumeric = false, tryDateAsNumeric = false): -1 | 0 | 1 {
-	const _larger: unknown = projector ? projector(larger) : larger
-	const _smaller: unknown = projector ? projector(smaller) : smaller
-
-	const sign = (n: number) => Math.sign(n) as -1 | 0 | 1
-
-	if (typeof _larger === "string" && typeof _smaller === "string") {
-		if (tryDateAsNumeric === true) {
-			const __x = new Date(_larger)
-			const __y = new Date(_smaller)
-			if (__x > __y)
-				return 1
-			else if (__x === __y)
-				return 0
-			else
-				return -1
-		}
-		if (tryNumeric === true) {
-			const __x = parseFloat(_larger)
-			const __y = parseFloat(_smaller)
-			if ((!Number.isNaN(__x)) && (!Number.isNaN(__y))) {
-				return sign(__x - __y)
-			}
-		}
-
-		return sign(new Intl.Collator().compare(_larger || "", _smaller || ""))
-	}
-	else if (typeof _larger === "number" && typeof _smaller === "number") {
-		return sign((_larger || 0) - (_smaller || 0))
-	}
-	else if (_larger instanceof Date && _smaller instanceof Date) {
-		const largerDate = _larger || new Date()
-		const smallerDate = _smaller || new Date()
-		if (largerDate > smallerDate)
-			return 1
-		else if (largerDate === smallerDate)
-			return 0
-		else
-			return -1
-	}
-	else if (typeof _larger !== typeof _smaller) { // When both values have different types
-		if (tryNumeric) {
-			const _largerNum = typeof _larger === "number"
-				? _larger
-				: typeof _larger === "string"
-					? parseFloat(_larger)
-					: 0
-			const _smallerNum = typeof _smaller === "number"
-				? _smaller
-				: typeof _smaller === "string"
-					? parseFloat(_smaller)
-					: 0
-			// If both types could succesfully be turned into numbers, we compare it numerically
-			if (!isNaN(_smallerNum) && !isNaN(_largerNum)) {
-				return sign(_largerNum - _smallerNum)
-			}
-		}
-		return typeof _larger === "string" ? 1 : -1 // Strings will appear last
-	}
-	else {
-		return _larger === _smaller ? 0 : 1
-
-	}
-}
-
+/** A function that does nothing */
 export function noop() { }
 
+/** Identity function which returns the exact same argument it was passed */
 export function identity<T>(val: T) { return val }
 
-export function negate<X = any, I = void>(predicate: Predicate<X, I>) { return (x: X, i: I) => !predicate(x, i) }
-
-
-//#region Combinators
+/** Returns a function thats always returns the input value */
 export const constant = <T>(val: T) => () => val
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+/** Returns a function that is the negation of the input predicate function */
+export function negate<X = any, I = void>(predicate: Predicate<X, I>): Predicate<X, I> { return (x: X, i: I) => !predicate(x, i) }
+
+/** Transforms input function into one that runs only once. 
+ * Subsequent invocations after the first one do nothing and return undefined 
+ */
 export function once<R, A extends any[]>(fn?: (...a: A) => R) {
 	// eslint-disable-next-line fp/no-let
 	let hasRun = false
@@ -141,9 +59,14 @@ export function once<R, A extends any[]>(fn?: (...a: A) => R) {
 		: undefined
 }
 
+/** Transforms input function into one that expects the original arguments in reverse order */
+export function flip<A, B, Ret>(f: (a: A, b: B) => Ret): (b: B, a: A) => Ret {
+	return (b: B, a: A) => f(a, b)
+}
+
 /** Transforms a function into a partially applied one.
  * The transformed function takes the same arguments as the original function
- * except for the first one, and returns a function that only takes the original functions first argument.
+ * except for the first one, and returns a function that only takes the original function's first argument.
  */
 export function partial<A, B, Rest extends unknown[]>(fun: (a: A, ...rest: Rest) => B): (...rest: Rest) => (a: A) => B {
 	return (...rest: Rest) => (a: A): B => {
@@ -151,10 +74,125 @@ export function partial<A, B, Rest extends unknown[]>(fun: (a: A, ...rest: Rest)
 	}
 }
 
-/** Transforms a function into one that expects the original arguments in reverse order */
-export function flip<A, B, Ret>(f: (a: A, b: B) => Ret): (b: B, a: A) => Ret {
-	return (b: B, a: A) => f(a, b)
+/** Returns the curried form of input function */
+export function curry<A, R>(fn: (a: A) => R): (a: A) => R
+export function curry<A, B, R>(fn: (a: A, b: B) => R): (a: A) => (b: B) => R
+export function curry<A, B, C, R>(fn: (a: A, b: B, c: C) => R): (a: A) => (b: B) => (c: C) => R
+export function curry<A, B, C, D, R>(fn: (a: A, b: B, c: C, d: D) => R): (a: A) => (b: B) => (c: C) => (d: D) => R
+export function curry(fn: (...args: any[]) => unknown) {
+	return function curried(...args: any[]) {
+		if (args.length >= fn.length) {
+			const x = fn(...args)
+			return x
+		}
+		return curry(fn.bind(null, ...args))
+	}
 }
+
+
+export function objectCurry<F extends (...x: any[]) => any>(fn: F) {
+	type X = ArgsType<F>[0]
+	type Y = ReturnType<F>
+	return <P extends Partial<X>>(part: P) => (x: Omit<X, keyof P>): Y => {
+		return fn({ ...x, ...part } as X)
+	}
+}
+
+/** Transforms input projector function into a ranker function (that determines which of two values is greater)
+ * @param tryNumeric (default: false) Output ranker function will attempt to compare string arguments as numbers
+ * @param tryDate (default: false) Output ranker function will attempt to compare arguments as dates.
+ */
+export function createRanker<T, Y = unknown>(projector: Projector<T, Y, void>, args?:
+	{
+		tryNumeric?: boolean, tryDate?: boolean, reverse?: boolean
+	}): Ranker<T> {
+	return (x: T, y: T) => {
+		return compare(x, y, projector, args?.tryNumeric, args?.tryDate) * (args?.reverse === true ? -1 : 1) as -1 | 0 | 1
+	}
+}
+/** Transforms input projector function into a comparer function (that determines whether two values are equal)
+ * @param tryNumeric (default: false) Output ranker function will attempt to compare string arguments as numbers
+ * @param tryDate (default: false) Output ranker function will attempt to compare arguments as dates.
+ */
+export function createComparer<T, Y = unknown>(projector: Projector<T, Y, void>, tryNumeric = false, tryDate = false): Comparer<T> {
+	return (x: T, y: T) => {
+		return compare(x, y, projector, tryNumeric, tryDate) === 0
+	}
+}
+/** Compares 2 values for sorting, possibly parsing them as date or number beforehand.
+ * If the values have different types, string values will always be ranked last, 
+ * unless the caller chooses (through 'tryNumeric' or 'tryDate') to convert them into numbers or dates for comparison.
+ * @param a One value to compare
+ * @param b The other value to compare
+ * @param projector A projector used to find the values to compare, if the passed values are objects
+ * @param tryNumeric If any or both of the two values are strings, attempt to parse them as number before doing comparison
+ * @param tryDate If both values are strings corresponding to dates, they will be parsed as Dates and compared as such.
+ */
+export function compare<T, Y = unknown>(a: T, b: T, projector?: Projector<T, Y, void>, tryNumeric = false, tryDate = false): -1 | 0 | 1 {
+	const _a: unknown = projector ? projector(a) : a
+	const _b: unknown = projector ? projector(b) : b
+
+	const sign = (n: number) => Math.sign(n) as -1 | 0 | 1
+
+	if (typeof _a === "string" && typeof _b === "string") {
+		if (tryDate === true) {
+			const __x = new Date(_a)
+			const __y = new Date(_b)
+			if (__x > __y)
+				return 1
+			else if (__x === __y)
+				return 0
+			else
+				return -1
+		}
+		if (tryNumeric === true) {
+			const __x = parseFloat(_a)
+			const __y = parseFloat(_b)
+			if ((!Number.isNaN(__x)) && (!Number.isNaN(__y))) {
+				return sign(__x - __y)
+			}
+		}
+
+		return sign(new Intl.Collator().compare(_a || "", _b || ""))
+	}
+	else if (typeof _a === "number" && typeof _b === "number") {
+		return sign((_a || 0) - (_b || 0))
+	}
+	else if (_a instanceof Date && _b instanceof Date) {
+		const largerDate = _a || new Date()
+		const smallerDate = _b || new Date()
+		if (largerDate > smallerDate)
+			return 1
+		else if (largerDate === smallerDate)
+			return 0
+		else
+			return -1
+	}
+	else if (typeof _a !== typeof _b) { // When both values have different types
+		if (tryNumeric) {
+			const _aa = typeof _a === "number"
+				? _a
+				: typeof _a === "string"
+					? parseFloat(_a)
+					: 0
+			const _bb = typeof _b === "number"
+				? _b
+				: typeof _b === "string"
+					? parseFloat(_b)
+					: 0
+			// If both types could succesfully be turned into numbers, we compare it numerically
+			if (!isNaN(_bb) && !isNaN(_aa)) {
+				return sign(_aa - _bb)
+			}
+		}
+		return typeof _a === "string" ? 1 : -1 // Strings will appear last
+	}
+	else {
+		return _a === _b ? 0 : 1
+
+	}
+}
+
 
 /* https://github.com/caderek/arrows/blob/master/packages/composition/src/curry.ts */
 /* export function curry(fn: (...x: any[]) => any, args: any[] = []) {
@@ -181,27 +219,3 @@ export function flip<A, B, Ret>(f: (a: A, b: B) => Ret): (b: B, a: A) => Ret {
 		default: throw new Error(`Its highly suggested that you do not write functions with more than 5 parameters.`);
 	}
 }*/
-
-/* https://github.com/kolodny/cury/blob/master/index.ts */
-export function curry<A, R>(fn: (a: A) => R): (a: A) => R
-export function curry<A, B, R>(fn: (a: A, b: B) => R): (a: A) => (b: B) => R
-export function curry<A, B, C, R>(fn: (a: A, b: B, c: C) => R): (a: A) => (b: B) => (c: C) => R
-export function curry<A, B, C, D, R>(fn: (a: A, b: B, c: C, d: D) => R): (a: A) => (b: B) => (c: C) => (d: D) => R
-export function curry(fn: (...args: any[]) => unknown) {
-	return function curried(...args: any[]) {
-		if (args.length >= fn.length) {
-			const x = fn(...args)
-			return x
-		}
-		return curry(fn.bind(null, ...args))
-	}
-}
-
-export function objectCurry<X extends Obj, Y>(fn: (x: X) => Y) {
-	return <P extends Partial<X>>(part: P) => (x: Omit<X, keyof P>): Y => {
-		return fn({ ...x, ...part } as X)
-	}
-}
-
-
-//#endregion

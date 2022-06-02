@@ -1,77 +1,65 @@
-/* eslint-disable fp/no-mutating-methods */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable fp/no-unused-expression */
 // /* eslint-disable fp/no-unused-expression */
 
 // import mocha from "mocha"
 import * as assert from "assert"
-import { compare, getRanker } from '../dist/functional/index.js'
+import { compare, createRanker } from '../dist/functional/index.js'
 
 
 describe('compare()', () => {
 	it(`should return negative number when comparing two numbers, first greater than the second one`, () => {
 		const x = 2
 		const y = 3
-		assert.equal(compare(x, y) < 0, true)
+		assert.strictEqual(compare(x, y) < 0, true)
 	})
 	it(`should return zero when comparing two variables with the same value`, () => {
 		const x = 2
 		const y = 2
-		assert.equal(compare(x, y) === 0, true)
+		assert.strictEqual(compare(x, y) === 0, true)
 	})
 	it(`should return a positive number when comparing two variables passed as string with the 'tryNumber' parameter enabled`, () => {
 		const x = "4"
 		const y = "3"
-		assert.equal(compare(x, y, undefined, true) > 0, true)
+		assert.strictEqual(compare(x, y, undefined, true) > 0, true)
 	})
 	it(`should return a negative number when comparing 2 strings, the first alphabetically first than the second one`, () => {
 		const x = "abc"
 		const y = "xyz"
-		assert.equal(compare(x, y) < 0, true)
+		assert.strictEqual(compare(x, y) < 0, true)
 	})
 	it(`should return a negative number when comparing dates formated as strings, with the 'tryDate' parameter enabled`, () => {
 		const x = "2012-05-06 11:20:30"
 		const y = "2012-05-06 11:20:32"
-		assert.equal(compare(x, y, undefined, false, true) < 0, true)
+		assert.strictEqual(compare(x, y, undefined, false, true) < 0, true)
 	})
 })
 
 describe('getRanker()', () => {
 	it(`should rank numbers correctly`, () => {
 		const series = [7, 7, 7, 2, 5, 3, 4, 5, 5, 6]
-		const sortedSeries = series.sort(
-			getRanker({
-				projector: v => v
-			})
-		)
+		// eslint-disable-next-line fp/no-mutating-methods
+		const sortedSeries = series.sort(createRanker(v => v))
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify([2, 3, 4, 5, 5, 5, 6, 7, 7, 7]))
 	})
 	it(`should rank text correctly`, () => {
 		const series = ["banana", "apple", "lemon", "apple", "citrus"]
-		const sortedSeries = series.sort(
-			getRanker({
-				projector: v => v
-			})
-		)
+		// eslint-disable-next-line fp/no-mutating-methods
+		const sortedSeries = series.sort(createRanker(v => v))
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify(["apple", "apple", "banana", "citrus", "lemon",]))
 	})
 	it(`should rank number and text separately`, () => {
 		const series = ["Blue", "Blue", 2, 5, 3, "Blue", 4, "Green", 5, 5, 6, 7, 7, 7, "Green"]
-		const sortedSeries = series.sort(
-			getRanker({
-				projector: v => v
-			})
-		)
+		// eslint-disable-next-line fp/no-mutating-methods
+		const sortedSeries = series.sort(createRanker(v => v))
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify([2, 3, 4, 5, 5, 5, 6, 7, 7, 7, "Blue", "Blue", "Blue", "Green", "Green"]))
 	})
-	it(`should rank number and text correctly as text, if no option is precised`, () => {
+	it(`should rank number and text correctly as text, if no option is passed`, () => {
 		const mixedseries = ["Blue", "Blue", 2, 5, 3, "Blue", 4, "Green", 5, 5, 6, 7, 7, 7, "Green"]
 		const textSeries = ["Blue", "Blue", "2", "5", "3", "Blue", "4", "Green", "5", "5", "6", "7", "7", "7", "Green"]
-		const ranker = getRanker({
-			projector: v => v
-		})
-		const sortedMixedSeries = mixedseries.sort(ranker)
-		const sortedTextSeries = textSeries.sort(ranker)
+		const _ranker = createRanker(v => v)
+		const sortedMixedSeries = mixedseries.sort(_ranker)
+		const sortedTextSeries = textSeries.sort(_ranker)
 
 		assert.strictEqual(JSON.stringify(sortedMixedSeries), JSON.stringify(sortedTextSeries.map(v => parseInt(v) || v)))
 	})
@@ -79,10 +67,7 @@ describe('getRanker()', () => {
 		const series = ["Blue", "0", 2, 5, 3, "15", 4, "Green", 5, 5, 6, 7, 7, 7, "Green"]
 		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(
-			getRanker({
-				projector: v => v,
-				tryNumeric: true
-			})
+			createRanker(v => v, { tryNumeric: true })
 		)
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify(["0", 2, 3, 4, 5, 5, 5, 6, 7, 7, 7, "15", "Blue", "Green", "Green"]))
 	})
@@ -90,10 +75,7 @@ describe('getRanker()', () => {
 		const series = ["December 1 1991", "December 1 1991", "December 2 1991", "December 5 1991", "April 5, 2001"]
 		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(
-			getRanker({
-				projector: v => v,
-				tryDate: true
-			})
+			createRanker(v => v, { tryDate: true })
 		)
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify(["December 1 1991", "December 1 1991", "December 2 1991", "December 5 1991", "April 5, 2001"]))
 	})
@@ -101,13 +83,12 @@ describe('getRanker()', () => {
 		const series = ["December 1 1991", "December 1 1991", "December 2 1991", "December 5 1991", "April 5, 2001", "December 5 1995"]
 		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(
-			getRanker({
-				projector: v => v
-			})
+			createRanker(v => v)
 		)
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify(["April 5, 2001", "December 1 1991", "December 1 1991", "December 2 1991", "December 5 1991", "December 5 1995"]))
 	})
 })
+
 
 // /** https://github.com/kolodny/cury/blob/master/test.ts */
 // describe('curry', () => {

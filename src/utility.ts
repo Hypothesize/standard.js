@@ -8,13 +8,14 @@
 /* eslint-disable brace-style */
 
 
-type IsAnyOld<T> = (T extends {} ? 1 : 0) extends (0 | 1)
+/*type IsAnyOld<T> = (T extends {} ? 1 : 0) extends (0 | 1)
 	? (0 | 1) extends (T extends {} ? 1 : 0)
 	? undefined extends T
 	? "false"
 	: "true"
 	: "false"
 	: "false"
+*/
 
 /** Tests for whether a type is exactly <any>. Fails for types that are extended by <unknown> */
 type IsAny<T> = ((Exclude<any, T> extends (never) ? 1 : 0) extends (0 | 1)
@@ -55,6 +56,7 @@ export type Fx<Ret, Args extends any[]> = (...args: Args) => Ret
 export type ArgsType<F extends (...x: any[]) => any> = F extends (...x: infer A) => any ? A : never
 export type Primitive = number | string | bigint | boolean | symbol
 export type Obj<TValue = unknown, TKey extends string | number = string> = { [key in TKey]: TValue }
+export type ValueOf<O> = O[keyof O]
 export type RecursivePartial<T> = { [P in keyof T]?: T[P] extends Record<string, unknown> ? RecursivePartial<T[P]> : T[P] }
 export type RecursiveRequired<T> = { [P in keyof T]-?: Required<T[P]> }
 export type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
@@ -75,12 +77,24 @@ export const Tuple = class <X, Y>  {
 	constructor(x: X, y: Y) { return [x, y] as Tuple<X, Y> }
 } as { new <X, Y>(x: X, y: Y): [X, Y] }
 
+export type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+export type DigitNonZero = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+// export type Collection<T> = Iterable<T> | Generator<T>
+// export type CollectionAsync<T> = AsyncIterable<T> | AsyncGenerator<T> | Iterable<T> | Generator<T>
+
 /** Type of tail of array */
 export type Tail<L extends ReadonlyArray<any>> = ((...t: L) => any) extends ((head: any, ...tail: infer LTail) => any) ? LTail : never
+export type Head<L extends ReadonlyArray<any>> = L extends [...(infer head), infer tail] ? head : never
+
 /** Type of last element of array */
 export type Last<Arr extends Array<any>> = Arr[Tail<Arr>["length"]]
 /** Type of first element of array */
 export type First<Arr extends Array<any>> = Arr[0]
+
+export type ToCamel<S extends string> = S extends `${infer head}_${infer tail}` ? `${head}${Capitalize<ToCamel<tail>>}` : S;
+export type Concat<A extends string, B extends string> = `${A}${B}`
+const test_concat: TypeAssert<Concat<"auth.com/:cat/api", "/:app/verify">, "auth.com/:cat/api/:app/verify"> = "true"
 
 export type Merge<A, B> = (
 	undefined extends A
@@ -109,8 +123,9 @@ export type Merge5<A, B, C, D, E> = Merge<A, Merge<B, Merge<C, Merge<D, E>>>>
 // type M<a extends ReadonlyArray<any>> = Unwrap<MergeReduce<a>>
 // type test = M<[1, 2]>
 
+
 /** Determines if input argument has a value */
-export function hasValue<T>(value?: T): value is T {
+export function hasValue<T>(value?: T | null | undefined): value is T {
 	switch (typeof value) {
 		case "function":
 		case "boolean":
@@ -121,7 +136,7 @@ export function hasValue<T>(value?: T): value is T {
 		case "undefined":
 			return false
 		case "number":
-			return (value !== null && !isNaN(value) && !Number.isNaN(value) && value !== Number.NaN)
+			return (value !== null && !isNaN(value) && !Number.isNaN(value) /*&& value !== Number.NaN*/)
 		case "string":
 			return value !== undefined && value !== null && value.trim().length > 0 && !/^\s*$/.test(value)
 		/*if(str.replace(/\s/g,"") == "") return false*/
@@ -170,8 +185,20 @@ export function isNull(payload: any): payload is null {
  * @returns {payload is {[key: string]: any}}
  */
 export function isObject(payload: any): payload is { [key: string]: any } {
-	if (getType(payload) !== 'Object') return false
-	return payload.constructor === Object && Object.getPrototypeOf(payload) === Object.prototype
+	//if (getType(payload) !== 'Object') return false
+	//return payload.constructor === Object && Object.getPrototypeOf(payload) === Object.prototype
+
+	// eslint-disable-next-line no-unreachable
+	if (typeof payload === "object" && payload !== null) {
+		if (typeof Object.getPrototypeOf === "function") {
+			const prototype = Object.getPrototypeOf(payload)
+			return prototype === Object.prototype || prototype === null
+		}
+
+		return Object.prototype.toString.call(payload) === "[object Object]"
+	}
+	return false
+
 }
 
 /** Returns whether the payload is a an empty object (excluding special classes or objects with other prototypes)
@@ -198,6 +225,51 @@ export function isObjectLike<T extends Object>(payload: any): payload is T {
  */
 export function isFunction(payload: any): payload is Function {
 	return getType(payload) === 'Function'
+}
+
+// type Iter<X> = Iterable<X> | AsyncIterable<X>
+
+/** Iterable (or async iterable) type guard */
+export function isIterable<T>(value: T): value is T extends Iterable<any> | AsyncIterable<any> ? T : never {
+	try {
+		return isAsyncIterable(value) || (typeof (value as any)[Symbol.iterator] === 'function')
+	}
+	catch {
+		return false
+	}
+}
+
+/** AsyncIterable type guard */
+export function isAsyncIterable<T>(val: T): val is T extends AsyncIterable<any> ? T : never {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	try {
+		return typeof (val as any)[Symbol.asyncIterator] === "function"
+	}
+	catch {
+		return false
+	}
+}
+
+/** Generator type guard */
+export function isGenerator<T>(val: T): val is T extends Generator<any> | AsyncGenerator<any> ? T : never {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	try {
+		return isAsyncGenerator(val) || ((isIterable(val) && "next" in val && typeof (val as any).next === "function"))
+	}
+	catch {
+		return false
+	}
+}
+
+/** AsyncIterable type guard */
+export function isAsyncGenerator<T>(val: T): val is T extends AsyncGenerator<any> ? T : never {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	try {
+		return isAsyncIterable(val) && ("next" in val) && (typeof (val as any).next === "function")
+	}
+	catch {
+		return false
+	}
 }
 
 /** Returns whether the payload is an array
@@ -406,4 +478,4 @@ export function isType<T extends Function>(payload: any, type: T): payload is T 
 	return getType(payload) === name || Boolean(payload && payload.constructor === type)
 }
 
-
+export const stringify = (x: unknown) => JSON.stringify(x, (_, val) => typeof val === "function" ? `[Function ${val.name}]` : val, 2)
