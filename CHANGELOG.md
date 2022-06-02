@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.33.0](https://www.github.com/Hypothesize/standard.js/compare/v2.32.0...v2.33.0) (2022-06-02)
+
+
+### Features
+
+* Revamp and simplify architecture (106) ([638981d](https://www.github.com/Hypothesize/standard.js/commit/638981da1f9b8b43cd83857661a24c88391e846d))
+
 ## [2.32.0](https://www.github.com/Hypothesize/standard.js/compare/v2.31.0...v2.32.0) (2022-03-29)
 
 
