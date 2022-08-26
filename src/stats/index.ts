@@ -124,11 +124,13 @@ export function median<T>(vector: Array<T>): T | undefined {
 	}
 }
 
+/** Vector will be sorted alphabetically by default */
 export function firstQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
 	const sortedList = sort(vector, ranker)
 	return sortedList[Math.floor(0.25 * sortedList.length)]
 }
 
+/** Vector will be sorted alphabetically by default */
 export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
 	const sortedList = sort(vector, ranker)
 	return sortedList[Math.ceil(0.75 * sortedList.length) - 1]
