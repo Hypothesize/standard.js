@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.33.1](https://www.github.com/Hypothesize/standard.js/compare/v2.33.0...v2.33.1) (2022-09-06)
+
+
+### Bug Fixes
+
+* (118) Fix the return type of function "keys" ([6dd2ff1](https://www.github.com/Hypothesize/standard.js/commit/6dd2ff162e4701988d1ed3ff5e1e40e11c8a77d4)), closes [#118](https://www.github.com/Hypothesize/standard.js/issues/118)
+
 ## [2.33.0](https://www.github.com/Hypothesize/standard.js/compare/v2.32.0...v2.33.0) (2022-06-02)
 
 
