@@ -9,10 +9,9 @@
 import { Tuple, Obj, Merge, isObject, isSymbol } from "../utility"
 
 export function keys<T extends Obj>(obj: T): (keyof T)[]
-export function keys<K extends string | number | symbol, V>(obj: Record<K, V>): K[]
+export function keys<K extends string | number | symbol, V>(obj: Record<K, V>): string[]
 export function keys(obj: any) {
-	// if (typeof obj === "object") throw new Error
-	return Object.keys(obj)
+    return Object.keys(obj)
 }
 
 export function objectFromTuples<T, K extends string = string>(keyValues: Tuple<K, T>[]) {
