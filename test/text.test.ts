@@ -4,7 +4,7 @@
 
 import * as assert from "assert"
 import {
-	String, isWhitespace, isEmptyOrWhitespace,
+	StdString, isWhitespace, isEmptyOrWhitespace,
 	toCamelCase, toSnakeCase, toDashCase, toTitleCase,
 	plural, trimLeft, trimRight
 } from "../dist/text/string.js"
@@ -60,67 +60,67 @@ describe("plural", () => {
 describe("isUrl()", () => {
 	it(`should return true for valid URLs that start with 'www'`, () => {
 		const expected = true
-		const actual = new String("www.data.com/table.csv").isURL()
+		const actual = new StdString("www.data.com/table.csv").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return true for valid URLs that start with neither 'http', 'https' or 'www' `, () => {
 		const expected = true
-		const actual = new String("gist.github.com").isURL()
+		const actual = new StdString("gist.github.com").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return true for valid URLs that start with 'http'`, () => {
 		const expected = true
-		const actual = new String("http://gist.github.com").isURL()
+		const actual = new StdString("http://gist.github.com").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return false for invalid URLs that start with 'https'`, () => {
 		const expected = false
-		const actual = new String("https:/gist.github.com").isURL()
+		const actual = new StdString("https:/gist.github.com").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return false for invalid URLs that start with 'http'`, () => {
 		const expected = false
-		const actual = new String("http//gist.github.com").isURL()
+		const actual = new StdString("http//gist.github.com").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return false for invalid URLs that have no domain extension`, () => {
 		const expected = false
-		const actual = new String("http://test").isURL()
+		const actual = new StdString("http://test").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return false for empty URLs`, () => {
 		const expected = false
-		const actual = new String("").isURL()
+		const actual = new StdString("").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return false for invalid URLs that start with special characters`, () => {
 		const expected = false
-		const actual = new String("http://www.*test.com").isURL()
+		const actual = new StdString("http://www.*test.com").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return true for urls that contain a * character in the query after the domain name`, () => {
 		const expected = true
-		const actual = new String("https://en.wikipedia.org/w/api.php?format=json&origin=*&titles=P-value").isURL()
+		const actual = new StdString("https://en.wikipedia.org/w/api.php?format=json&origin=*&titles=P-value").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return true for urls that contain parentheses in the query after the domain name`, () => {
 		const expected = true
-		const actual = new String("https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=Mode_(statistics)").isURL()
+		const actual = new StdString("https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=Mode_(statistics)").isURL()
 		assert.equal(actual, expected)
 	})
 
 	it(`should return true for urls that contain non-alphanumeric characters`, () => {
 		const expected = true
-		const actual = new String("https://docs.google.com/document/d/17fF-U9mMalQiFEzJrsdXYyw7YNCv8ihKGnrIKyz0M-E/edit?ts=6015dedd").isURL()
+		const actual = new StdString("https://docs.google.com/document/d/17fF-U9mMalQiFEzJrsdXYyw7YNCv8ihKGnrIKyz0M-E/edit?ts=6015dedd").isURL()
 		assert.equal(actual, expected)
 	})
 

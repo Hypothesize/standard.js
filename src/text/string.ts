@@ -207,7 +207,7 @@ export const split = (str: string, arg: { [Symbol.split](string: string, limit?:
 
 export const concat = <A extends string, B extends string>(a: A, b: B) => a.concat(b) as Concat<A, B>
 
-export class String<S extends string = string> extends global.String {
+export class StdString<S extends string = string> extends String {
 	constructor(str: S) { super(str) }
 
 	protected wrap<T, A extends any[]>(fn: (str: string, ..._args: A) => T): (..._args: A) => T extends string ? String : T {
