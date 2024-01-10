@@ -1,5 +1,5 @@
 # standard.js
-Standard library for JavaScript/TypeScript
+A standard library for JavaScript/TypeScript
 
 ## Features
 - Lazy iterable combinators such as _map_, _filter_, _reduce_, etc.

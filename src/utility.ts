@@ -8,38 +8,15 @@
 /* eslint-disable brace-style */
 
 
-/*type IsAnyOld<T> = (T extends {} ? 1 : 0) extends (0 | 1)
-	? (0 | 1) extends (T extends {} ? 1 : 0)
-	? undefined extends T
-	? "false"
-	: "true"
-	: "false"
-	: "false"
-*/
-
 /** Tests for whether a type is exactly <any>. Fails for types that are extended by <unknown> */
-type IsAny<T> = ((Exclude<any, T> extends (never) ? 1 : 0) extends (0 | 1)
+export type IsAny<T> = ((Exclude<any, T> extends (never) ? 1 : 0) extends (0 | 1)
 	? (0 | 1) extends (Exclude<any, T> extends never ? 1 : 0)
 	? "false"
 	: "true"
 	: "true"
 )
 
-const test_any_any: IsAny<(any)> = "true"
-const test_any_union: IsAny<(string | undefined)> = "false"
-const test_any_never: IsAny<(never)> = "false"
-const test_any_undefined: IsAny<(undefined)> = "false"
-const test_any_obj: IsAny<({})> = "false"
-const test_any_num: IsAny<(number)> = "false"
-const test_any_arr: IsAny<(Array<any>)> = "false"
-const test_any_tuple: IsAny<[number, Array<any>]> = "false"
-const test_any_tuple_unknown: IsAny<[unknown, any]> = "false"
-
-// Failing
-// const test_any_unknown: IsAny<(unknown)> = "false"
-// const test_any_unknown_union: IsAny<(number | unknown)> = "false"
-
-
+/** Tests for whether a type is the same as another type. Fails for types that are extended by <unknown> */
 export type TypeAssert<T1, T2> = (
 	"true" extends IsAny<T1>
 	? "true" extends IsAny<T2>
@@ -56,8 +33,10 @@ export type Fx<Ret, Args extends any[]> = (...args: Args) => Ret
 export type ArgsType<F extends (...x: any[]) => any> = F extends (...x: infer A) => any ? A : never
 export type Primitive = number | string | bigint | boolean | symbol
 export type Obj<TValue = unknown, TKey extends string | number = string> = { [key in TKey]: TValue }
+export type ObjEmpty = { [k in never]: never }
 export type ValueOf<O> = O[keyof O]
 export type RecursivePartial<T> = { [P in keyof T]?: T[P] extends Record<string, unknown> ? RecursivePartial<T[P]> : T[P] }
+export type ReadonlyRecursive<T> = T extends Object ? Readonly<{ [key in keyof T]: ReadonlyRecursive<T[key]> }> : Readonly<T>
 export type RecursiveRequired<T> = { [P in keyof T]-?: Required<T[P]> }
 export type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
 
@@ -65,6 +44,14 @@ export type OptionalKeys<T> = { [k in keyof T]: undefined extends T[k] ? k : nev
 export type ExtractOptional<T> = { [k in OptionalKeys<T>]?: T[k] }
 export type KeysByType<T, K> = { [k in keyof T]: K extends T[k] ? k : never }[keyof T]
 export type ExtractByType<T, K> = { [k in KeysByType<T, K>]: T[k] }
+
+export type UnwrapArray<T> = T extends Array<infer X> ? X : T
+export type UnwrapArrayRecursive<A> = A extends unknown[] ? UnwrapArrayRecursive<A[number]> : A
+const test_UnwrapArrayRecursive: TypeAssert<UnwrapArrayRecursive<number[][][]>, number> = "true"
+
+export type UnwrapPromise<P> = P extends Promise<infer T> ? T : P
+export type UnwrapPromiseRecursive<P> = P extends Promise<infer T> ? UnwrapPromiseRecursive<T> : P
+const test_UnwrapPromiseRecursive: TypeAssert<UnwrapPromiseRecursive<Promise<Promise<number>>>, number> = "true"
 
 /** Checks and asserts checks that a value is of a type. */
 export type TypeGuard<A, B extends A> = (value: A) => value is B
@@ -77,11 +64,6 @@ export const Tuple = class <X, Y>  {
 	constructor(x: X, y: Y) { return [x, y] as Tuple<X, Y> }
 } as { new <X, Y>(x: X, y: Y): [X, Y] }
 
-export type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-export type DigitNonZero = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
-// export type Collection<T> = Iterable<T> | Generator<T>
-// export type CollectionAsync<T> = AsyncIterable<T> | AsyncGenerator<T> | Iterable<T> | Generator<T>
 
 /** Type of tail of array */
 export type Tail<L extends ReadonlyArray<any>> = ((...t: L) => any) extends ((head: any, ...tail: infer LTail) => any) ? LTail : never
@@ -92,9 +74,6 @@ export type Last<Arr extends Array<any>> = Arr[Tail<Arr>["length"]]
 /** Type of first element of array */
 export type First<Arr extends Array<any>> = Arr[0]
 
-export type ToCamel<S extends string> = S extends `${infer head}_${infer tail}` ? `${head}${Capitalize<ToCamel<tail>>}` : S;
-export type Concat<A extends string, B extends string> = `${A}${B}`
-const test_concat: TypeAssert<Concat<"auth.com/:cat/api", "/:app/verify">, "auth.com/:cat/api/:app/verify"> = "true"
 
 export type Merge<A, B> = (
 	undefined extends A
@@ -111,7 +90,7 @@ export type Merge<A, B> = (
 	? A
 	: _Merge<A, B>
 )
-type _Merge<T, U> = { [K in (keyof T) | (keyof U)]: Merge<K extends keyof T ? T[K] : undefined, K extends keyof U ? U[K] : undefined> };
+type _Merge<T, U> = { [K in (keyof T) | (keyof U)]: Merge<K extends keyof T ? T[K] : undefined, K extends keyof U ? U[K] : undefined> }
 
 export type Merge1<A> = A
 export type Merge2<A, B> = Merge<A, B>
@@ -119,7 +98,6 @@ export type Merge3<A, B, C> = Merge<A, Merge<B, C>>
 export type Merge4<A, B, C, D> = Merge<A, Merge<B, Merge<C, D>>>
 export type Merge5<A, B, C, D, E> = Merge<A, Merge<B, Merge<C, Merge<D, E>>>>
 // export type MergeReduce<A extends ReadonlyArray<any> = any[]> = Array<A["length"] extends 1 ? A[0] : Merge<A[0], MergeReduce<A>>>
-// type Unwrap<p> = p extends Promise<infer T> ? T : p extends Array<infer Y> ? Y : p
 // type M<a extends ReadonlyArray<any>> = Unwrap<MergeReduce<a>>
 // type test = M<[1, 2]>
 
@@ -478,4 +456,10 @@ export function isType<T extends Function>(payload: any, type: T): payload is T 
 	return getType(payload) === name || Boolean(payload && payload.constructor === type)
 }
 
-export const stringify = (x: unknown) => JSON.stringify(x, (_, val) => typeof val === "function" ? `[Function ${val.name}]` : val, 2)
+export const stringify = (x: unknown) => JSON.stringify(x, (_, val) => val === undefined
+	? `<undefined>`
+	: typeof val === "function"
+		? `[Function ${val.name}]`
+		: val,
+	2
+)

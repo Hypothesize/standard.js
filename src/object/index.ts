@@ -6,12 +6,14 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { camelCase, dashCase, KeysToCamelCase, KeysToDashCase, KeysToSnakeCase, snakeCase, TrimEnd, TrimStart } from "../ascii"
 import { Tuple, Obj, Merge, isObject, isSymbol } from "../utility"
 
 export function keys<T extends Obj>(obj: T): (keyof T)[]
 export function keys<K extends string | number | symbol, V>(obj: Record<K, V>): string[]
 export function keys(obj: any) {
-    return Object.keys(obj)
+	// if (typeof obj === "object") throw new Error
+	return Object.keys(obj)
 }
 
 export function objectFromTuples<T, K extends string = string>(keyValues: Tuple<K, T>[]) {
@@ -56,6 +58,50 @@ export function omit<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): O
 	_keys.forEach(k => delete result[k])
 	return result
 }
+
+/** Return input object literal with properties keys converted to camel case */
+export function keysToCamelCase<T extends Obj<any, string>>(obj: T): KeysToCamelCase<T> {
+	return objectFromTuples(entries(obj).map(keyVal =>
+		new Tuple(camelCase(keyVal[0]), keyVal[1]))
+	) as any
+}
+
+/** Return input object literal with properties keys converted to dash case */
+export function keysToDashCase<T extends Obj<any, string>>(obj: T): KeysToDashCase<T> {
+	return objectFromTuples(entries(obj).map(keyVal =>
+		new Tuple(dashCase(keyVal[0]), keyVal[1]))
+	) as any
+}
+/** Return input object literal with properties keys converted to snake case */
+export function keysToSnakeCase<T extends Obj<any, string>>(obj: T): KeysToSnakeCase<T> {
+	return objectFromTuples(entries(obj).map(keyVal =>
+		new Tuple(snakeCase(keyVal[0]), keyVal[1]))
+	) as any
+}
+
+export function prefixKeys<Objct extends Obj<any, string>, Pref extends string>(obj: Objct, prefix: Pref) {
+	return objectFromTuples(entries(obj).map(kv =>
+		new Tuple(`${prefix}${kv[0]}`, kv[1])
+	)) as any as { [key in `${Pref}${StringKeys<Objct>}`]: Objct[TrimStart<key, Pref>] }
+}
+export function suffixKeys<Objct extends Obj<any, string>, Suff extends string>(obj: Objct, suffix: Suff) {
+	return objectFromTuples(entries(obj).map(kv =>
+		new Tuple(`${kv[0]}${suffix}`, kv[1])
+	)) as any as { [key in `${StringKeys<Objct>}${Suff}`]: Objct[TrimEnd<key, Suff>] }
+}
+type StringKeys<O> = keyof O extends string ? keyof O : never
+
+// const pref = prefixKeys({ bool: true, num: 1, str: "" }, "prefix_")
+// const suff = suffixKeys({ bool: true, num: 1, str: "" }, "_suffix")
+
+// type X = StringKeys<{ x: 1, 2: 3 }>
+// const test = camelize({
+// 	S3_CLOUDFRONT_URL: "",
+// 	DEV_EMAIL_ADDRESSES: "",
+// 	APP_NAME: "string",
+// 	NODE_ENV: 1,
+// 	areGood: []
+// })
 
 /** Return a shallow clone of an object literal */
 export function shallowClone<T>(val: T): T {
@@ -183,7 +229,7 @@ export const mergeDeep = (options?: { mergeArrays: boolean, undefinedOverwrites:
 }, {}) as TUnionToIntersection<T[number]>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface IObject { [key: string]: any; length?: never; }
+interface IObject { [key: string]: any; length?: never }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TUnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 

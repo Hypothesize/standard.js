@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable indent */
 /* eslint-disable brace-style */
 /* eslint-disable @typescript-eslint/ban-types */
@@ -12,8 +13,8 @@
 /* eslint-disable fp/no-mutation */
 /* eslint-disable fp/no-loops */
 
-import { Concat, ToCamel } from "../utility"
-import * as char from "./char"
+import { CaseOf, SnakeCase, DashCase, CamelCase, Concat } from "./types.js"
+import { isConsonant, isVowel, isDigit, charFrom, Char } from "./char.js"
 
 const whitespaceChars = ["\n", "\t", "\v", "\r"]
 const wordTokenSeperatorChars = ["-", "_", "+", "^", "%", "=", " ", "	", "\\", "/", "\t", "\n", "*", "$", "#", "@", "&", "(", ")", "!"]
@@ -94,14 +95,43 @@ export const tokenizeWords = function* (str: string, args?:
 	currentWord = ""
 
 }
-export const getCase = (str: string): "upper" | "lower" | undefined => (str.toLowerCase() === str.toUpperCase()) ? undefined : isUpperCase(str) ? "upper" : "lower"
+
+/** Returns the case of input string; if string contains only special characters, undefined is returned */
+export const getCase = <S extends string = string>(str: S): CaseOf<S> => (
+	str.toLowerCase() === str.toUpperCase()
+		? "none"
+		: isUpperCase(str)
+			? "upper"
+			: "lower"
+) as any
+
 export const isUpperCase = (str: string) => str.toUpperCase() === str.valueOf()
 export const isLowerCase = (str: string) => str.toLowerCase() === str.valueOf()
-export const capitalize = (str: string) => str[0].toUpperCase() + str.substring(1).toLowerCase()
-export const toSnakeCase = (str: string) => [...tokenizeWords(str)].map(token => token.toLowerCase()).join("_")
-export const toDashCase = (str: string) => [...tokenizeWords(str)].map(token => token.toLowerCase()).join("-")
-export const toCamelCase = <S extends string = string>(str: S) => [...tokenizeWords(str)].map((word, index) => index > 0 ? capitalize(word) : word.toLowerCase()).join("") as ToCamel<S>
-export const toTitleCase = (str: string) => [...tokenizeWords(str, { sepChars: [" "] })].map(s => capitalize(s)).join(" ")
+
+/** Convert the 1st character of input string to upper case, optionally converting rest of string to lowercase */
+export const initialCaps = (str: string, lowerTail = true) => ((str[0] ?? "").toUpperCase() + (lowerTail
+	? str.substring(1).toLowerCase()
+	: str.substring(1))
+)
+
+export const snakeCase = <S extends string = string>(str: S): SnakeCase<S> => (
+	[...tokenizeWords(str)].map(token => token.toLowerCase()).join("_") as any
+)
+
+export const dashCase = <S extends string = string>(str: S): DashCase<S> => (
+	[...tokenizeWords(str)].map(token => token.toLowerCase()).join("-") as any
+)
+
+export const camelCase = <S extends string = string>(str: S): CamelCase<S> => (
+	[...tokenizeWords(str)].map((word, index) => index > 0
+		? initialCaps(word, true)
+		: word.toLowerCase()).join("") as any
+)
+
+export const titleCase = (str: string) => (
+	[...tokenizeWords(str, { sepChars: [" "] })].map(s => initialCaps(s.toLowerCase())).join(" ")
+)
+
 export const toSpaceCase = (str: string) => [...tokenizeWords(str)].join(" ")
 
 export const isWhitespace = (str: string): boolean => str.replace(/^\s+|\s+$/g, '').length === 0
@@ -125,6 +155,7 @@ export const isURL = (str: string): boolean => new RegExp('^(https?:\\/\\/)?' + 
 	'(\\?[;&a-z\\d%_.~+=\\*()-]*)?' + // query string
 	'(\\#[-a-z\\d_]*)?$', 'i' // fragment locator
 ).test(str)
+
 export const trimLeft = (str: string, ...strings: string[]) => strings.reduce((prev, curr) =>
 	(prev.toUpperCase().startsWith(curr.toUpperCase()))
 		? prev.substring(curr.length)
@@ -174,9 +205,9 @@ export const plural = (str: string) => {
 				return _(2, "ves")
 			case lower.endsWith("lf"):
 				return _(2, "lves")
-			case lower.endsWith("y") && char.isConsonant(char.from(str.charCodeAt(str.length - 2))):
+			case lower.endsWith("y") && isConsonant(charFrom(str.charCodeAt(str.length - 2))):
 				return _(1, "ies")
-			case lower.endsWith("y") && char.isVowel(char.from(str.charCodeAt(str.length - 2))):
+			case lower.endsWith("y") && isVowel(charFrom(str.charCodeAt(str.length - 2))):
 				return _(0, "s")
 			case lower.endsWith("o") && !["photo", "piano", "halo"].includes(str.toString()):
 				return _(0, "es")
@@ -188,7 +219,6 @@ export const plural = (str: string) => {
 
 	})()
 }
-
 export const split = (str: string, arg: { [Symbol.split](string: string, limit?: number): string[]; } | string | RegExp | number) => {
 	if (typeof arg === "object")
 		return str.split(arg)
@@ -204,17 +234,20 @@ export const split = (str: string, arg: { [Symbol.split](string: string, limit?:
 		return chunks
 	}
 }
-
 export const concat = <A extends string, B extends string>(a: A, b: B) => a.concat(b) as Concat<A, B>
 
-export class String<S extends string = string> extends global.String {
-	constructor(str: S) { super(str) }
+export class String<Str extends string = string> extends globalThis.String {
+	constructor(str: string) { super(str) }
 
-	protected wrap<T, A extends any[]>(fn: (str: string, ..._args: A) => T): (..._args: A) => T extends string ? String : T {
+	protected wrap<T, A extends any[]>(fn: <S extends string = string>(str: S, ..._args: A) => T): (..._args: A) => T extends string ? String<T> : T {
 		return (..._args: A) => {
 			const out = fn(this.toString(), ..._args)
 			return (typeof out === "string" ? new String(out) : out) as any
 		}
+	}
+
+	override toString(): Str {
+		return super.toString() as any
 	}
 
 	isWhiteSpace = this.wrap(isWhitespace)
@@ -224,12 +257,10 @@ export class String<S extends string = string> extends global.String {
 	prependSpaceIfNotEmpty = this.wrap(prependSpaceIfNotEmpty)
 	strip = this.wrap(strip)
 
-	/** Returns the case of input string; if string contains only special characters, 'upper' is returned */
-	getCase = this.wrap(getCase)
-
-	toTitleCase = this.wrap(toTitleCase)
-	toSnakeCase = this.wrap(toSnakeCase)
-	toCamelCase = this.wrap(toCamelCase as (s: string) => string)
+	getCase = this.wrap(getCase as (str: string) => "upper" | "lower" | "none")
+	toTitleCase = this.wrap(titleCase)
+	toSnakeCase = this.wrap(snakeCase)
+	toCamelCase = this.wrap(camelCase)
 	toSpace = this.wrap(toSpaceCase)
 
 	/** Truncate this string by removing a specified number of characters from the end */
@@ -248,5 +279,6 @@ export class String<S extends string = string> extends global.String {
 	plural = this.wrap(plural)
 	split = this.wrap(split)
 
-	append = <Str extends string>(str: Str) => concat(this.toString() as S, str)
+	append = <S extends string = string>(str: S) => concat(this.toString(), str)
 }
+

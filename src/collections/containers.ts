@@ -69,12 +69,13 @@ export class Sequence<X> implements Iterable<X> {
 	/** Convert to another iterable container type */
 	to<C extends Iterable<X>>(container: { (items: Iterable<X>): C }) { return container([...this]) }
 
+	toArray() { return [...this] }
+
 	take(n: number) { return this.ctor(take(this, n)) }
 	skip(n: number) { return this.ctor(skip(this, n)) }
 
 	takeWhile(predicate: Predicate<X, number | void>) { return this.ctor(takeWhile(this, predicate)) }
 	skipWhile(predicate: Predicate<X, number | void>) { return this.ctor(skipWhile(this, predicate)) }
-
 
 	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to the elements
@@ -159,6 +160,8 @@ export class SequenceAsync<X> implements AsyncIterable<X> {
 	/** Convert to another iterable container type */
 	to<C extends AsyncIterable<X>>(container: { (items: AsyncIterable<X>): C }) { return container(this) }
 
+	toArrayAsync() { return toArrayAsync(this) }
+
 	takeAsync(n: number) { return this.ctor(takeAsync(this, n)) }
 	skipAsync(n: number) { return this.ctor(skipAsync(this, n)) }
 
@@ -206,25 +209,23 @@ export class Set<X> extends Sequence<X> {
 		super([...elements])
 	}
 	protected _set?: globalThis.Set<X> = undefined
-	protected readonly core = ((me: this) => {
-		return {
-			// eslint-disable-next-line fp/no-get-set
+
+	protected get core() {
+		return ((me: this) => ({
 			get set() {
 				if (me._set === undefined) {
 					// set is created from array for performance reasons
-					// eslint-disable-next-line fp/no-mutation
 					me._set = new globalThis.Set(globalThis.Array.isArray(me._iterable)
 						? me._iterable
 						: [...me._iterable]
 					)
 				}
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				return me._set!
+				return me._set
 			},
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			get iterable() { return me._iterable! },
-		}
-	})(this)
+			get iterable() { return me._iterable },
+		}))(this)
+	}
+
 	protected ctor(iterable: Iterable<X>): this { return new Set(iterable) as this }
 
 	get size(): number { return this.core.set.size }
@@ -276,27 +277,24 @@ export class Array<X> extends Set<X> {
 	ctor(elements: Iterable<X>): this {
 		return new Array(elements) as this
 	}
-	protected readonly core = ((me: this) => {
-		return {
+
+	protected get core() {
+		return ((me: this) => ({
 			...super.core,
 			get map() {
 				if (me._map === undefined) {
-					// eslint-disable-next-line fp/no-mutation
 					me._map = new globalThis.Map([...me._iterable].entries())
 				}
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				return me._map!
+				return me._map
 			},
 			get array() {
 				if (me._array === undefined) {
-					// eslint-disable-next-line fp/no-mutation
 					me._array = globalThis.Array.from([...me._iterable])
 				}
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				return me._array!
+				return me._array
 			}
-		}
-	})(this)
+		}))(this)
+	}
 
 	get length() { return this.core.array.length }
 	get size() { return this.length }
@@ -503,7 +501,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	constructor(source: Iterable<T> | ColumnarData<T>, idVector?: Iterable<number>, rowNumColName = "rowNum") {
 		// eslint-disable-next-line fp/no-mutation, @typescript-eslint/no-explicit-any
 		this._colVectors = isIterable(source)
-			? new Dictionary(DataTable.rowsToColumns(source))
+			? new Dictionary(DataTable.rowsToColumns(source as Iterable<T>))
 			: new Dictionary(source)
 
 		// eslint-disable-next-line fp/no-mutation
@@ -585,7 +583,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 						? originalIdVector
 						: this._colVectors.get(_filter.fieldName as keyof T)
 					if (colVector === undefined) {
-						throw new Error(`Trying to apply a filter on column ${_filter.fieldName}, but no such column in the dataTable`)
+						throw new Error(`Trying to apply a filter on column ${String(_filter.fieldName)}, but no such column in the dataTable`)
 					}
 					const vector: number[] = colVector.filter(v => v !== undefined).map(val => Number.parseFloat(String(val)))
 					const columnMean = mean(vector)
@@ -666,7 +664,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 
 	sort(args: { columnName: /*typeof this.ROW_NUM_COL_NAME |*/ keyof T, order: SortOrder, options?: SortOptions }) {
 		if (args.columnName !== this.ROW_NUM_COL_NAME && this._colVectors.get(args.columnName) === undefined)
-			throw new Error(`Unknown column ${args.columnName}`)
+			throw new Error(`Unknown column ${String(args.columnName)}`)
 
 		const idColumnVectorSorted = [...this._idVector].sort(
 			createRanker<number>(rowNum => args.columnName === this.ROW_NUM_COL_NAME

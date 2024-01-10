@@ -6,10 +6,10 @@
 /* eslint-disable brace-style */
 
 
-import { Ranker, RankerAsync, Reducer, ReducerAsync, Projector, ProjectorAsync, Predicate, PredicateAsync } from "../functional"
+import { Ranker, Reducer, ReducerAsync, Projector, ProjectorAsync, Predicate, PredicateAsync } from "../functional"
 import { Obj, Primitive, Tuple, TypeGuard, ExtractByType, hasValue, isIterable, isAsyncIterable } from "../utility"
 import { entries, objectFromTuples, objectFromTuplesAsync } from "../object"
-import { Zip, ZipAsync, IndexedAccess, Finite, Container } from "./types"
+import { Zip, ZipAsync, IndexedAccess, Finite } from "./types.js"
 
 type UnwrapIterable1<T> = T extends Iterable<infer X> ? X : T
 type UnwrapIterable2<T> = T extends Iterable<infer X> ? UnwrapIterable1<X> : T
@@ -263,9 +263,9 @@ export async function* skipWhileAsync<T>(iterable: Iterable<T> | AsyncIterable<T
 	}
 }
 
+export function map<X, Y>(collection: Iterable<X>, projector: Projector<X, Y, number>): Iterable<Y>
 export function map<X, Y, K extends string = string>(collection: Obj<X, K>, projector: Projector<X, Y, K>): Obj<Y, K>
 export function map<X, Y>(collection: Obj<X>, projector: Projector<X, Y, string>): Obj<Y>
-export function map<X, Y>(collection: Iterable<X>, projector: Projector<X, Y, number>): Iterable<Y>
 export function map<X, Y>(collection: Iterable<X> | Obj<X>, projector: Projector<X, Y, any>) {
 	if (isIterable(collection)) {
 		return (function* () {
