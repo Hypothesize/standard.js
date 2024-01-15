@@ -25,10 +25,15 @@ jobs:
           node-version: ${{ matrix.node-version }}
         
       - name: Install
-        run: pnpm install --prefer-offline
+        run: |
+        npm install --global pnpm 
+        pnpm install --prefer-offline
    
       - name: Check
-        run: run-s lint build test
+        run: |
+        pnpm run lint 
+        pnpm run build
+        pnpm run test
         continue-on-error: true
          
       - name: Annotate
