@@ -26,14 +26,14 @@ jobs:
         
       - name: Install
         run: |
-        npm install --global pnpm 
-        pnpm install --prefer-offline
+          npm install --global pnpm 
+          pnpm install --prefer-offline
    
       - name: Check
         run: |
-        pnpm run lint 
-        pnpm run build
-        pnpm run test
+          pnpm run lint 
+          pnpm run build
+          pnpm run test
         continue-on-error: true
          
       - name: Annotate
