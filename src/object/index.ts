@@ -2,7 +2,6 @@
 /* eslint-disable fp/no-mutation */
 /* eslint-disable indent */
 /* eslint-disable brace-style */
-/* eslint-disable fp/no-rest-parameters */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

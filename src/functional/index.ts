@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable fp/no-rest-parameters */
 /* eslint-disable brace-style */
 import { Obj, ArgsType } from "../utility.js"
 
