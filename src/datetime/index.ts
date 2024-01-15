@@ -1,4 +1,3 @@
-/* eslint-disable fp/no-let */
 /* eslint-disable indent */
 
 /** Returns a string date represents a given date related to the current date */

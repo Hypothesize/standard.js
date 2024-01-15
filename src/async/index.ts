@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable fp/no-rest-parameters */
 /* eslint-disable brace-style */
 
 export type AsyncFn<T, Args extends any[] = any[]> = (...args: Args) => Promise<T>
