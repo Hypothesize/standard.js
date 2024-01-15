@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.34.0](https://www.github.com/Hypothesize/standard.js/compare/v2.33.1...v2.34.0) (2024-01-15)
+
+
+### Features
+
+* Merge from agyemanjp ([595f9c9](https://www.github.com/Hypothesize/standard.js/commit/595f9c95174987fb96bc5893ab4bef7b4f3abb7f))
+
 ### [2.33.1](https://www.github.com/Hypothesize/standard.js/compare/v2.33.0...v2.33.1) (2022-09-06)
 
 
