@@ -1,103 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable indent */
-/* eslint-disable brace-style */
 /* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable fp/no-mutating-methods */
-/* eslint-disable fp/no-unused-expression */
-/* eslint-disable fp/no-let */
-/* eslint-disable fp/no-class */
-/* eslint-disable no-unused-expressions */
-/* eslint-disable fp/no-rest-parameters */
-/* eslint-disable camelcase */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable fp/no-mutation */
-/* eslint-disable fp/no-loops */
-
-import { CaseOf, SnakeCase, DashCase, CamelCase, Concat } from "./types.js"
-import { isConsonant, isVowel, isDigit, charFrom, Char } from "./char.js"
+import { SnakeCase, DashCase, CamelCase, Concat } from "./types.js"
+import { isConsonant, isVowel, charFrom } from "./char.js"
 
 const whitespaceChars = ["\n", "\t", "\v", "\r"]
-const wordTokenSeperatorChars = ["-", "_", "+", "^", "%", "=", " ", "	", "\\", "/", "\t", "\n", "*", "$", "#", "@", "&", "(", ")", "!"]
-const singulars = ["sheep", "series", "species", "deer", "ox", "child", "goose", "man", "woman", "tooth", "foot", "mouse", "person"]
-const plurals = ["sheep", "series", "species", "deer", "oxen", "children", "geese", "men", "women", "teeth", "feet", "mice", "people"]
-
-
-export const tokenizeWords = function* (str: string, args?:
-	{
-		/** Case changes to consider as separators; Default is upper */
-		sepCaseChange?:
-		| "upper" /* Lower to upper case change */
-		| "lower" /* Upper to lower case change */
-		| "all"   /* All case changes */
-		| "none", /* No case change */
-
-		/** Array of separator characters, if any */
-		sepChars?: string[],
-
-	}): Iterable<string> {
-
-
-	//console.log(`starting tokenizeWords for "${this.valueOf()}"`)
-	const separatorCaseChange = args?.sepCaseChange ?? "upper"
-	const seperatorChars = args?.sepChars ?? wordTokenSeperatorChars
-
-	let currentWord = ""
-	let lastChar = str[0]
-
-	const chars = [...str]
-	// console.log(`chars array: ${JSON.stringify(chars)}`)
-
-	for (const ch of chars) {
-		console.assert(ch !== undefined, `String.tokenizeWords(): ch is undefined`)
-		//console.log(`testing char "${ch.valueOf()}"`)
-
-		if (seperatorChars.includes(ch.valueOf())) {
-			//console.log(`separators include char tested, will push ${currentWord} to words`)
-			if (currentWord.length > 0) yield currentWord
-			currentWord = ""
-		}
-		else {
-			//console.log(`separators do not include char tested, testing for case boundary`)
-			const nowCase = getCase(ch)
-			const lastCase = getCase(lastChar)
-
-			const test = (
-				(separatorCaseChange === "none") ||
-				(seperatorChars.includes(lastChar)) ||
-				(lastCase === undefined) ||
-				(nowCase === undefined) ||
-				(nowCase !== separatorCaseChange) ||
-				(nowCase === lastCase)
-			)
-
-			if (test === false) {
-				//console.log(`case boundary test is true, pushing `)
-				if (currentWord.length > 0)
-					yield currentWord
-				currentWord = ch.valueOf()
-			}
-			else {
-				//console.log(`case boundary test is false, concatenating char to currentWord`)
-				currentWord = currentWord.concat(ch.valueOf())
-				//console.log(`currentWord concatenated to ${currentWord}`)
-			}
-		}
-		// TTLoUKmidiForm
-		// TTL-o-UK-midi-F-orm
-		lastChar = ch.valueOf()
-		//console.log(`lastChar set to ${lastChar}`)
-	}
-
-	//console.log(`Outer loop, pushing currentWord "${currentWord}" to words`)
-
-	if (currentWord.length > 0)
-		yield currentWord
-	currentWord = ""
-
-}
+/* const wordTokenSeperatorChars: string[] = [
+	"-", "_", "+", "^", "%", "=", " ", "	", "\\", "/", "\t", "\n", "*", "$", "#", "@", "&", "(", ")", "!"
+]*/
 
 /** Returns the case of input string; if string contains only special characters, undefined is returned */
-export const getCase = <S extends string = string>(str: S): CaseOf<S> => (
+export const getCase = <S extends string = string>(str: S): "none" | "upper" | "lower" => (
 	str.toLowerCase() === str.toUpperCase()
 		? "none"
 		: isUpperCase(str)
@@ -108,31 +19,88 @@ export const getCase = <S extends string = string>(str: S): CaseOf<S> => (
 export const isUpperCase = (str: string) => str.toUpperCase() === str.valueOf()
 export const isLowerCase = (str: string) => str.toLowerCase() === str.valueOf()
 
+export const tokenizeWords = (str: string, args?:
+	{
+		sepCaseChanges?: | "upper" | "lower" | "all" | "none", // default is "upper"
+		sepChars?: Array<string>, // default is whitespace
+	}): string[] => {
+
+	const seperatorChars = new Set(args?.sepChars ?? [" ", "	", "\t", "\n"])
+	const sepCaseChanges = args?.sepCaseChanges ?? "upper"
+
+	const caseChanged = (_ch: string, _lastChar: string) => {
+		const nowCase = getCase(_ch)
+		const lastCase = getCase(_lastChar)
+		return (
+			(sepCaseChanges !== "none") && // we are considering case changes
+			(!seperatorChars.has(_lastChar)) && // previous char is not a separator
+			(lastCase !== undefined) && (lastCase !== "none") &&
+			(nowCase !== undefined) && (nowCase !== "none") &&
+			(nowCase === sepCaseChanges || sepCaseChanges === "all") &&
+			(nowCase !== lastCase)
+		)
+	}
+	const result: string[] = []
+	let word = ""
+
+	const strLength = str.length
+	for (let i = 0; i < strLength; i++) {
+		const ch = str[i]
+		const lastChar = (i > 0) ? str[i - 1] : str[0]
+
+		if (seperatorChars.has(ch) && word.length > 0) {
+			result.push(word)
+			word = ""
+		}
+		else if (caseChanged(ch, lastChar) && word.length > 0) {
+			result.push(word)
+			word = ch
+		}
+		else if (!seperatorChars.has(ch)) {
+			word += ch
+		}
+	}
+
+	if (word.length > 0) {
+		result.push(word)
+	}
+
+	return result
+}
+
+export function snakeCase<S extends string = string>(str: S): SnakeCase<S> {
+	return ([...tokenizeWords(str, { sepChars })].map(function (token) {
+		return token.toLowerCase()
+	}).join("_") as any)
+}
+
+export function dashCase<S extends string = string>(str: S): DashCase<S> {
+	return tokenizeWords(str, { sepChars }).map(function (token) {
+		return token.toLowerCase()
+	}).join("-") as any
+}
+
+export function camelCase<S extends string = string>(str: S): CamelCase<S> {
+	return tokenizeWords(str, { sepChars }).map(function (w, i) {
+		return i > 0 ? initialCaps(w, true) : w.toLowerCase()
+	}).join("") as any
+}
+
+export function titleCase(str: string) {
+	return tokenizeWords(str, { sepChars }).map(function (s) {
+		return initialCaps(s.toLowerCase())
+	}).join(" ")
+}
+
+export function spaceCase(str: string) {
+	return [...tokenizeWords(str, { sepChars })].join(" ")
+}
+
 /** Convert the 1st character of input string to upper case, optionally converting rest of string to lowercase */
 export const initialCaps = (str: string, lowerTail = true) => ((str[0] ?? "").toUpperCase() + (lowerTail
 	? str.substring(1).toLowerCase()
 	: str.substring(1))
 )
-
-export const snakeCase = <S extends string = string>(str: S): SnakeCase<S> => (
-	[...tokenizeWords(str)].map(token => token.toLowerCase()).join("_") as any
-)
-
-export const dashCase = <S extends string = string>(str: S): DashCase<S> => (
-	[...tokenizeWords(str)].map(token => token.toLowerCase()).join("-") as any
-)
-
-export const camelCase = <S extends string = string>(str: S): CamelCase<S> => (
-	[...tokenizeWords(str)].map((word, index) => index > 0
-		? initialCaps(word, true)
-		: word.toLowerCase()).join("") as any
-)
-
-export const titleCase = (str: string) => (
-	[...tokenizeWords(str, { sepChars: [" "] })].map(s => initialCaps(s.toLowerCase())).join(" ")
-)
-
-export const toSpaceCase = (str: string) => [...tokenizeWords(str)].join(" ")
 
 export const isWhitespace = (str: string): boolean => str.replace(/^\s+|\s+$/g, '').length === 0
 export const isEmptyOrWhitespace = (str: string) => strip(str, [" ", ...whitespaceChars]).length === 0
@@ -144,7 +112,6 @@ export const cleanWhitespace = (str: string, chars?: string[]) => ([...str].map(
 )
 export const prependSpaceIfNotEmpty = (str: string) => isEmptyOrWhitespace(str) ? "" : " " + str
 export const strip = (str: string, chars: string[]) => [...str].filter(ch => chars.indexOf(ch) < 0).join("")
-
 /** Truncate this string by removing a specified number of characters from the end */
 export const truncate = (str: string, numChars: number) => str.substr(0, str.length - numChars)
 
@@ -169,6 +136,9 @@ export const trimRight = (str: string, ...strings: string[]) => strings.reduce((
 	str // initial value
 )
 export const plural = (str: string) => {
+	const singulars = ["sheep", "series", "species", "deer", "ox", "child", "goose", "man", "woman", "tooth", "foot", "mouse", "person"]
+	const plurals = ["sheep", "series", "species", "deer", "oxen", "children", "geese", "men", "women", "teeth", "feet", "mice", "people"]
+
 	const match = singulars.indexOf(str.toString().toLowerCase())
 	if (match >= 0) {
 		const chars = [...str]
@@ -219,7 +189,7 @@ export const plural = (str: string) => {
 
 	})()
 }
-export const split = (str: string, arg: { [Symbol.split](string: string, limit?: number): string[]; } | string | RegExp | number) => {
+export const split = (str: string, arg: { [Symbol.split](string: string, limit?: number): string[] } | string | RegExp | number) => {
 	if (typeof arg === "object")
 		return str.split(arg)
 	else if (typeof arg !== "number") {
@@ -236,8 +206,11 @@ export const split = (str: string, arg: { [Symbol.split](string: string, limit?:
 }
 export const concat = <A extends string, B extends string>(a: A, b: B) => a.concat(b) as Concat<A, B>
 
+
 export class String<Str extends string = string> extends globalThis.String {
-	constructor(str: string) { super(str) }
+	constructor(str: string) {
+		super(str)
+	}
 
 	protected wrap<T, A extends any[]>(fn: <S extends string = string>(str: S, ..._args: A) => T): (..._args: A) => T extends string ? String<T> : T {
 		return (..._args: A) => {
@@ -261,7 +234,7 @@ export class String<Str extends string = string> extends globalThis.String {
 	toTitleCase = this.wrap(titleCase)
 	toSnakeCase = this.wrap(snakeCase)
 	toCamelCase = this.wrap(camelCase)
-	toSpace = this.wrap(toSpaceCase)
+	toSpace = this.wrap(spaceCase)
 
 	/** Truncate this string by removing a specified number of characters from the end */
 	truncate = this.wrap(truncate)
@@ -282,3 +255,6 @@ export class String<Str extends string = string> extends globalThis.String {
 	append = <S extends string = string>(str: S) => concat(this.toString(), str)
 }
 
+const sepChars = [
+	"-", "_", "+", "^", "%", "=", " ", "	", "\\", "/", "\t", "\n", "*", "$", "#", "@", "&", "(", ")", "!"
+]
