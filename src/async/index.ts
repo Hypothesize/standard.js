@@ -9,11 +9,9 @@ export function promisify<T, A extends any[]>(fn: (...args: A) => T): AsyncFn<T,
 	return (...args: A) => {
 		return new Promise<T>((resolve, reject) => {
 			try {
-				// eslint-disable-next-line fp/no-unused-expression
 				resolve(fn(...args))
 			}
 			catch (e) {
-				// eslint-disable-next-line fp/no-unused-expression
 				reject(e)
 			}
 		})

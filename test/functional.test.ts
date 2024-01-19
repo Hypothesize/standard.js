@@ -38,19 +38,16 @@ describe('compare()', () => {
 describe('getRanker()', () => {
 	it(`should rank numbers correctly`, () => {
 		const series = [7, 7, 7, 2, 5, 3, 4, 5, 5, 6]
-		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(createRanker(v => v))
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify([2, 3, 4, 5, 5, 5, 6, 7, 7, 7]))
 	})
 	it(`should rank text correctly`, () => {
 		const series = ["banana", "apple", "lemon", "apple", "citrus"]
-		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(createRanker(v => v))
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify(["apple", "apple", "banana", "citrus", "lemon",]))
 	})
 	it(`should rank number and text separately`, () => {
 		const series = ["Blue", "Blue", 2, 5, 3, "Blue", 4, "Green", 5, 5, 6, 7, 7, 7, "Green"]
-		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(createRanker(v => v))
 		assert.strictEqual(JSON.stringify(sortedSeries), JSON.stringify([2, 3, 4, 5, 5, 5, 6, 7, 7, 7, "Blue", "Blue", "Blue", "Green", "Green"]))
 	})
@@ -65,7 +62,6 @@ describe('getRanker()', () => {
 	})
 	it(`should rank strings as number, if tryNumeric is set`, () => {
 		const series = ["Blue", "0", 2, 5, 3, "15", 4, "Green", 5, 5, 6, 7, 7, 7, "Green"]
-		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(
 			createRanker(v => v, { tryNumeric: true })
 		)
@@ -73,7 +69,6 @@ describe('getRanker()', () => {
 	})
 	it(`should rank dates as number, if tryDate is set`, () => {
 		const series = ["December 1 1991", "December 1 1991", "December 2 1991", "December 5 1991", "April 5, 2001"]
-		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(
 			createRanker(v => v, { tryDate: true })
 		)
@@ -81,7 +76,6 @@ describe('getRanker()', () => {
 	})
 	it(`should rank dates as strings, if tryDate is not set`, () => {
 		const series = ["December 1 1991", "December 1 1991", "December 2 1991", "December 5 1991", "April 5, 2001", "December 5 1995"]
-		// eslint-disable-next-line fp/no-mutating-methods
 		const sortedSeries = series.sort(
 			createRanker(v => v)
 		)

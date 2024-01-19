@@ -1,7 +1,7 @@
+/* eslint-disable mocha/max-top-level-suites */
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable fp/no-unused-expression */
 
 // import mocha from "mocha"
 import * as assert from "assert"
@@ -207,7 +207,7 @@ describe('median', function () {
 })
 
 describe('mode()', function () {
-	it('should return undefined when passing an empty array', () => {
+	it('should return undefined when passing an empty array', function() {
 		const actual = mode([])
 		const expected = undefined
 		assert.deepStrictEqual(actual, expected)
@@ -257,7 +257,7 @@ describe('mode()', function () {
 })
 
 describe('multiMode()', function () {
-	it('should return an empty array when passing an empty vector', () => {
+	it('should return an empty array when passing an empty vector', function() {
 		const actual = multiMode([])
 		const expected = [] as string[]
 		assert.deepStrictEqual(actual, expected)

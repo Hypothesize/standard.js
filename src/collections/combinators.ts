@@ -1,8 +1,3 @@
-/* eslint-disable fp/no-rest-parameters */
-/* eslint-disable fp/no-let */
-/* eslint-disable fp/no-mutation */
-/* eslint-disable fp/no-loops */
-/* eslint-disable fp/no-unused-expression */
 /* eslint-disable brace-style */
 
 
@@ -19,11 +14,8 @@ export type UnwrapNestedIterable<T> = T extends Iterable<infer X> ? UnwrapIterab
 
 /** Generate a sequence of integers */
 export function* integers(args: { from: number, to: number } | { from: number, direction: "upwards" | "downwards" }) {
-	// eslint-disable-next-line fp/no-let
 	let num = args.from
-	// eslint-disable-next-line fp/no-loops
 	do {
-		// eslint-disable-next-line fp/no-mutation
 		yield ("to" in args ? args.to >= args.from : args.direction === "upwards") ? num++ : num--
 	}
 	while ("direction" in args || args.from !== args.to)
@@ -47,9 +39,7 @@ export function* range(from: number, to: number, opts?: { mode: "width", width: 
 
 	const length = Math.floor(diff / delta) + 1
 
-	// eslint-disable-next-line fp/no-let, fp/no-loops, fp/no-mutation
 	for (let i = 0; i < length; i++) {
-		// eslint-disable-next-line fp/no-mutating-methods
 		yield (from + (i * delta))
 	}
 }
@@ -61,15 +51,13 @@ export function zip<T extends readonly Iterable<unknown>[]>(...iterables: T): It
 	console.assert(iterables.every(iter => typeof iter[Symbol.iterator] === "function"))
 
 	const iterators = iterables.map(i => i[Symbol.iterator]() as Iterator<unknown>)
-	// eslint-disable-next-line fp/no-let
 	let done = false
 	return {
 		[Symbol.iterator]() { return this },
 		next() {
 			if (!done) {
 				const items = iterators.map(i => i.next())
-				// eslint-disable-next-line fp/no-mutation
-				done = items.some(item => item.done)
+						done = items.some(item => item.done)
 				if (!done) {
 					return { value: items.map(i => i.value) as unknown as Zip<T>, done: false }
 				}
@@ -124,15 +112,13 @@ export async function* zipAsync<T extends readonly (AsyncIterable<unknown> | Ite
 			if (!done && typeof iter.return === 'function') await iter.return()
 		}
 	}
-	// eslint-disable-next-line fp/no-let
 	/*let done = false
 	return {
 		[Symbol.asyncIterator]() { return this },
 		async next() {
 			if (!done) {
 				const items = await Promise.all(iterators.map(i => i.next()))
-				// eslint-disable-next-line fp/no-mutation
-				done = items.some(item => item.done)
+						done = items.some(item => item.done)
 				if (!done) {
 					return { value: items.map(i => i.value) as unknown as Zip<T>, done: false }
 				}
@@ -374,10 +360,8 @@ export function* unique<T>(iterable: Iterable<T>, projector?: Projector<T, Primi
 		if (seen.has(elt))
 			continue outer
 		else {
-			// eslint-disable-next-line fp/no-unused-expression
-			seen.add(elt)
+				seen.add(elt)
 		}
-		// eslint-disable-next-line fp/no-unused-expression
 		yield element
 
 	}
@@ -391,10 +375,8 @@ export async function* uniqueAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, 
 		if (seen.has(elt))
 			continue outer
 		else {
-			// eslint-disable-next-line fp/no-unused-expression
-			seen.add(elt)
+				seen.add(elt)
 		}
-		// eslint-disable-next-line fp/no-unused-expression
 		yield element
 
 	}
@@ -409,9 +391,7 @@ export function* chunk<T>(iter: Iterable<T>, chunkSize: number): Iterable<T[]> {
 
 	if (batch.length > 0) {
 		// console.log(`\n\tYielding batch of length ${batch.length}`)
-		// eslint-disable-next-line fp/no-unused-expression
 		yield batch
-		// eslint-disable-next-line fp/no-unused-expression
 		yield* chunk(skip(iter, chunkSize), chunkSize)
 	}
 }
@@ -445,7 +425,6 @@ export function* flatten<X>(nestedIterable: Iterable<X>): Iterable<UnwrapNestedI
 
 export function forEach<T>(iterable: Iterable<T>, action: Projector<T>) {
 	for (const tuple of indexed(iterable)) {
-		// eslint-disable-next-line fp/no-unused-expression
 		action(tuple[1], tuple[0])
 	}
 }
@@ -453,7 +432,6 @@ export async function forEachAsync<T>(items: Iterable<T> | Generator<T> | AsyncI
 export async function forEachAsync<T>(items: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, action: ProjectorAsync<T>): Promise<void>
 export async function forEachAsync<T>(iterable: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, action: Projector<T> | ProjectorAsync<T>) {
 	for await (const tuple of indexedAsync(iterable)) {
-		// eslint-disable-next-line fp/no-unused-expression
 		action(tuple[1], tuple[0])
 	}
 }
@@ -538,7 +516,6 @@ export function last<T>(data: Iterable<T> | (IndexedAccess<T> & Finite), predica
 	}
 	else {
 		console.assert(isIterable(data))
-		// eslint-disable-next-line fp/no-let
 		let _found = false
 		let _last = undefined
 		for (const element of (predicate === undefined ? data : filter(data, predicate))) {
@@ -583,7 +560,6 @@ export async function lastAsync<T>(data: AsyncIterable<T> | Iterable<T> | (Index
 	}
 	else {
 		// console.assert(isIterable(data))
-		// eslint-disable-next-line fp/no-let
 		let _found = false
 		let _last = undefined
 		for await (const element of (predicate === undefined ? data : filterAsync(data, predicate))) {
@@ -695,7 +671,6 @@ export function* repeat(val: unknown, count?: number) {
 export async function toArrayAsync<T>(iterable: Iterable<T> | AsyncIterable<T>) {
 	const arr = [] as Array<T>
 	for await (const element of iterable) {
-		// eslint-disable-next-line fp/no-mutating-methods
 		arr.push(element)
 	}
 	return arr

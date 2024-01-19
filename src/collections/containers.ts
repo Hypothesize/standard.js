@@ -1,16 +1,10 @@
-/* eslint-disable fp/no-rest-parameters */
-/* eslint-disable fp/no-mutating-methods */
 /* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable brace-style */
-/* eslint-disable fp/no-unused-expression */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable fp/no-class */
 
-/* eslint-disable fp/no-mutation */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable indent */
-/* eslint-disable fp/no-loops */
 /* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable brace-style */
 
@@ -60,7 +54,6 @@ import {
 /** Lazy collection of elements accessed sequentially, not known in advance */
 export class Sequence<X> implements Iterable<X> {
 	protected _iterable: Iterable<X>
-	// eslint-disable-next-line fp/no-nil, fp/no-mutation
 	constructor(iterable: Iterable<X>) { this._iterable = iterable }
 	protected ctor(iterable: Iterable<X>): this { return new Sequence(iterable) as this }
 
@@ -111,12 +104,9 @@ export class Sequence<X> implements Iterable<X> {
 	/** Generate sequence of integers including 'from' and 'to' values if provided */
 	static integers(args: { from: number, to: number } | { from: number, direction: "upwards" | "downwards" }) {
 		return new Sequence((function* () {
-			// eslint-disable-next-line fp/no-let
 			let num = args.from
-			// eslint-disable-next-line fp/no-loops
-			while ("direction" in args || num !== (args.to >= args.from ? args.to + 1 : args.to - 1)) {
-				// eslint-disable-next-line fp/no-mutation
-				yield ("to" in args ? args.to >= args.from : args.direction === "upwards") ? num++ : num--
+					while ("direction" in args || num !== (args.to >= args.from ? args.to + 1 : args.to - 1)) {
+						yield ("to" in args ? args.to >= args.from : args.direction === "upwards") ? num++ : num--
 			}
 		})())
 	}
@@ -138,10 +128,8 @@ export class Sequence<X> implements Iterable<X> {
 		const length = Math.floor(diff / delta) + 1
 
 		return new Sequence((function* () {
-			// eslint-disable-next-line fp/no-let, fp/no-loops, fp/no-mutation
 			for (let index = 0; index < length; index++) {
-				// eslint-disable-next-line fp/no-mutating-methods
-				yield (from + (index * delta))
+						yield (from + (index * delta))
 			}
 		})())
 	}
@@ -149,7 +137,6 @@ export class Sequence<X> implements Iterable<X> {
 
 export class SequenceAsync<X> implements AsyncIterable<X> {
 	protected _iterable: AsyncIterable<X>
-	// eslint-disable-next-line fp/no-nil, fp/no-mutation
 	constructor(iterable: AsyncIterable<X> | Iterable<X>) {
 		this._iterable = isAsyncIterable(iterable) ? iterable : (async function* () { yield* iterable })()
 	}
@@ -205,7 +192,6 @@ export class SequenceAsync<X> implements AsyncIterable<X> {
 /** Set of unique elements, known in advance, without any specific order */
 export class Set<X> extends Sequence<X> {
 	constructor(elements: Iterable<X>/*, protected opts?: { comparer?: Comparer<X>, ranker?: Ranker<X> }*/) {
-		// eslint-disable-next-line fp/no-unused-expression
 		super([...elements])
 	}
 	protected _set?: globalThis.Set<X> = undefined
@@ -259,16 +245,13 @@ export class Set<X> extends Sequence<X> {
 		return new Array(collections).skip(1).every(st => new Set(st).equals(firstSet))
 	}
 
-	// eslint-disable-next-line fp/no-mutating-methods
 	sort(comparer?: Ranker<X>) { return this.ctor([...this].sort(comparer)) }
-	// eslint-disable-next-line fp/no-mutating-methods
 	sortDescending(comparer?: Ranker<X>) { return new Array([...this].sort(comparer).reverse()) }
 }
 
 /** Eager, ordered, material collection */
 export class Array<X> extends Set<X> {
 	constructor(elements: Iterable<X>) {
-		// eslint-disable-next-line fp/no-unused-expression
 		super(elements)
 	}
 	private _array?: globalThis.Array<X> = undefined
@@ -308,8 +291,7 @@ export class Array<X> extends Set<X> {
 			return this.core.array[selection] as X
 		}
 		else {
-			// eslint-disable-next-line fp/no-unused-expression
-			console.warn(`Array get() selection arg type: ${typeof selection}`)
+				console.warn(`Array get() selection arg type: ${typeof selection}`)
 			return [...selection].map(index => this.get(index))
 		}
 	}
@@ -335,7 +317,6 @@ export class Array<X> extends Set<X> {
 	unique() { return this.ctor(unique(this)) }
 
 	/** Returns new array containing this array's elements in reverse order */
-	// eslint-disable-next-line fp/no-mutating-methods
 	reverse() { return this.ctor([...this].reverse()) }
 
 	/** Array-specific implementation of map() */
@@ -345,11 +326,9 @@ export class Array<X> extends Set<X> {
 	max(ranker: Ranker<X>) { return max([...this], ranker) }
 
 	removeSliceCounted(index: number, count: number) {
-		// eslint-disable-next-line fp/no-mutating-methods
 		return this.ctor([...this].splice(index, count))
 	}
 	removeSliceDelimited(fromIndex: number, toIndex: number) {
-		// eslint-disable-next-line fp/no-mutating-methods
 		return this.ctor([...this].splice(fromIndex, toIndex - fromIndex + 1))
 	}
 
@@ -378,13 +357,11 @@ export class ArrayNumeric extends Array<number> {
 	map(projector: Projector<number, number>): ArrayNumeric
 	map<Y>(projector: Projector<number, Y>): Array<Y>
 	map<Y>(projector: Projector<number, number> | Projector<number, Y>): ArrayNumeric | Array<Y> {
-		// eslint-disable-next-line fp/no-let
 		let notNumeric = false
 		const newArr = map<number, number | Y>(this, (val, index) => {
 			const newVal = projector(val, index)
 			if (typeof newVal !== "number" && typeof newVal !== "bigint")
-				// eslint-disable-next-line fp/no-mutation
-				notNumeric = true
+						notNumeric = true
 			return newVal
 		})
 
@@ -398,12 +375,10 @@ export class ArrayNumeric extends Array<number> {
 export class Dictionary<T extends Record<string, unknown>> implements Iterable<Tuple<keyof T, T[keyof T]>> {
 	private readonly obj: Readonly<T>
 	// eslint-disable-next-line brace-style
-	// eslint-disable-next-line fp/no-mutation
 	constructor(obj: T) { this.obj = Object.freeze({ ...obj }) }
 
 	static fromKeyValues<K extends string, V>(keyValues: Iterable<Tuple<K, V>>) {
 		const obj = {} as Record<K, V>
-		// eslint-disable-next-line fp/no-mutation, fp/no-loops
 		for (const kv of keyValues) obj[kv[0]] = kv[1]
 		return new Dictionary(obj)
 	}
@@ -435,14 +410,12 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 
 	pick<K extends keyof T>(keys: K[]) {
 		const result = {} as Pick<T, K>
-		// eslint-disable-next-line fp/no-unused-expression, fp/no-mutation
-		keys.forEach(k => result[k] = this.obj[k])
+			keys.forEach(k => result[k] = this.obj[k])
 
 		return new Dictionary(result)
 	}
 	omit<K extends keyof T>(keys: K[]) {
 		const result = this.asObject()
-		// eslint-disable-next-line fp/no-unused-expression, fp/no-delete
 		keys.forEach(k => delete result[k])
 		return new Dictionary(result as Omit<T, K>)
 	}
@@ -499,19 +472,16 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	 * @param idVector Optional vector of row indexes indicating which which rows are part of this data table
 	 */
 	constructor(source: Iterable<T> | ColumnarData<T>, idVector?: Iterable<number>, rowNumColName = "rowNum") {
-		// eslint-disable-next-line fp/no-mutation, @typescript-eslint/no-explicit-any
 		this._colVectors = isIterable(source)
 			? new Dictionary(DataTable.rowsToColumns(source as Iterable<T>))
 			: new Dictionary(source)
 
-		// eslint-disable-next-line fp/no-mutation
 		this._idVector = idVector
 			? [...idVector]
 			: this._colVectors.size > 0
 				? [...globalThis.Array([...this._colVectors][0][1].length).keys()]
 				: []
 
-		// eslint-disable-next-line fp/no-unused-expression
 		// console.log(`\nDataTable took ${new Date().getTime() - start}ms to instantiate`)
 		this.ROW_NUM_COL_NAME = rowNumColName
 	}
@@ -575,8 +545,7 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 				}
 			}
 			else if ("fieldName" in _filter) {
-				// eslint-disable-next-line fp/no-let
-				let averageAndDev: { average: number, std: number } = { average: 0, std: 0 }
+						let averageAndDev: { average: number, std: number } = { average: 0, std: 0 }
 				if (_filter.operator === "is_outlier_by") {
 					const originalIdVector = this.idVector
 					const colVector: unknown[] | undefined = _filter.fieldName === "rowId"
@@ -696,17 +665,13 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	static rowsToColumns = <X extends Obj = Obj>(rows: Iterable<X>): ColumnarData<X> => {
 		const srcArray = [...rows as Iterable<X>]
 		const columnVectors = {} as ColumnarData<X>
-		// eslint-disable-next-line fp/no-unused-expression
 		srcArray.forEach((row, index) => {
 			const rowKeys = new Dictionary(row).keys()
 			if (rowKeys.some(key => hasValue(row[key]))) { // ensure row is not empty
-				// eslint-disable-next-line fp/no-unused-expression
 				rowKeys.forEach(colName => {
 					if (!columnVectors[colName])
-						// eslint-disable-next-line fp/no-mutation
-						columnVectors[colName] = new globalThis.Array(srcArray.length).fill(undefined)
-					// eslint-disable-next-line fp/no-mutation
-					columnVectors[colName][index] = row[colName]
+										columnVectors[colName] = new globalThis.Array(srcArray.length).fill(undefined)
+								columnVectors[colName][index] = row[colName]
 				})
 			}
 		})
