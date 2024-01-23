@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Digit, DigitNonZero, DecrementNonZero } from "../numeric/index.js"
 import { Obj, TypeAssert } from "../utility.js"

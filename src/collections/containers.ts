@@ -24,9 +24,9 @@ import {
 	reduce, reduceAsync,
 	forEach, forEachAsync,
 	intersection,
-	every, everyAsync,
+	every,
 	union,
-	some, someAsync,
+	some,
 	except,
 	complement,
 	toArrayAsync

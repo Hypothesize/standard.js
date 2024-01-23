@@ -14,7 +14,7 @@ export const getCase = <S extends string = string>(str: S): "none" | "upper" | "
 		: isUpperCase(str)
 			? "upper"
 			: "lower"
-) as any
+)
 
 export const isUpperCase = (str: string) => str.toUpperCase() === str.valueOf()
 export const isLowerCase = (str: string) => str.toLowerCase() === str.valueOf()
@@ -71,19 +71,19 @@ export const tokenizeWords = (str: string, args?:
 export function snakeCase<S extends string = string>(str: S): SnakeCase<S> {
 	return ([...tokenizeWords(str, { sepChars })].map(function (token) {
 		return token.toLowerCase()
-	}).join("_") as any)
+	}).join("_") as SnakeCase<S>)
 }
 
 export function dashCase<S extends string = string>(str: S): DashCase<S> {
 	return tokenizeWords(str, { sepChars }).map(function (token) {
 		return token.toLowerCase()
-	}).join("-") as any
+	}).join("-") as DashCase<S>
 }
 
 export function camelCase<S extends string = string>(str: S): CamelCase<S> {
 	return tokenizeWords(str, { sepChars }).map(function (w, i) {
 		return i > 0 ? initialCaps(w, true) : w.toLowerCase()
-	}).join("") as any
+	}).join("") as CamelCase<S>
 }
 
 export function titleCase(str: string) {
@@ -212,15 +212,15 @@ export class String<Str extends string = string> extends globalThis.String {
 		super(str)
 	}
 
-	protected wrap<T, A extends any[]>(fn: <S extends string = string>(str: S, ..._args: A) => T): (..._args: A) => T extends string ? String<T> : T {
+	protected wrap<T, A extends unknown[]>(fn: <S extends string = string>(str: S, ..._args: A) => T): (..._args: A) => T extends string ? String<T> : T {
 		return (..._args: A) => {
 			const out = fn(this.toString(), ..._args)
-			return (typeof out === "string" ? new String(out) : out) as any
+			return (typeof out === "string" ? new String(out) : out) as T extends string ? String<T> : T
 		}
 	}
 
 	override toString(): Str {
-		return super.toString() as any
+		return super.toString() as Str
 	}
 
 	isWhiteSpace = this.wrap(isWhitespace)

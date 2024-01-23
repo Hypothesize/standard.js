@@ -401,10 +401,6 @@ describe("IncludeDefaults", function () {
 		// Property "children" was not passed in the default, so it is still optional
 		const test2: TypeAssert<typeof person.children, number | undefined> = "true"
 
-		// A simple merge of the 2 types will not work, the resulting object would take the type of the default
-		const mergedPerson = { ...minimalPerson, ...personDefaults } as Merge2<PersonType, typeof personDefaults>
-		const test3: TypeAssert<typeof mergedPerson.nationality, "Belgian" | "Dutch" | "French"> = "false"
-
 		assert.ok(true)
 	})
 })

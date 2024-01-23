@@ -17,7 +17,7 @@ export function min<T>(vector: Iterable<T> | Iterable<number>, ranker?: Ranker<u
 	return min
 }
 
-export function max<T>(vector: Iterable<number>): number | undefined
+export function max(vector: Iterable<number>): number | undefined
 export function max<T>(vector: Iterable<T>, ranker: Ranker<T>): T | undefined
 export function max(vector: Iterable<unknown>, ranker?: Ranker<unknown>) {
 	if (ranker) {

@@ -1,5 +1,5 @@
 /* eslint-disable brace-style */
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Ranker, Reducer, ReducerAsync, Projector, ProjectorAsync, Predicate, PredicateAsync } from "../functional"
 import { Obj, Primitive, Tuple, TypeGuard, ExtractByType, hasValue, isIterable, isAsyncIterable } from "../utility"
@@ -57,7 +57,7 @@ export function zip<T extends readonly Iterable<unknown>[]>(...iterables: T): It
 		next() {
 			if (!done) {
 				const items = iterators.map(i => i.next())
-						done = items.some(item => item.done)
+				done = items.some(item => item.done)
 				if (!done) {
 					return { value: items.map(i => i.value) as unknown as Zip<T>, done: false }
 				}
@@ -360,7 +360,7 @@ export function* unique<T>(iterable: Iterable<T>, projector?: Projector<T, Primi
 		if (seen.has(elt))
 			continue outer
 		else {
-				seen.add(elt)
+			seen.add(elt)
 		}
 		yield element
 
@@ -375,7 +375,7 @@ export async function* uniqueAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, 
 		if (seen.has(elt))
 			continue outer
 		else {
-				seen.add(elt)
+			seen.add(elt)
 		}
 		yield element
 
@@ -636,7 +636,8 @@ export function union<T>(collections: Iterable<Iterable<T>>): Iterable<T> {
 }
 
 /** All items that are present in all the input collections */
-export function intersection<T>(collections: (Iterable<T> & Finite)[]): Iterable<T> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function intersection<T>(_collections: (Iterable<T> & Finite)[]): Iterable<T> {
 	throw new Error(`Not Implemented`)
 }
 
