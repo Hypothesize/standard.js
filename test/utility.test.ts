@@ -376,30 +376,27 @@ describe("ExtractOptional", function () {
 })
 
 describe("IncludeDefaults", function () {
-	it("should consider optional properties of an object as non-nullable when they are given in the default", function () {
+	it("should consider optional properties of an object as non-nullable when they are defined in the default object", function () {
 		type PersonType = {
 			name: string
 			age: number
 			nationality?: "Belgian" | "Dutch" | "French"
 			children?: number
+			style?: {
+				color?: "Red" | "Blue"
+			}
 		}
-
-		const personDefaults = {
-			nationality: "Belgian",
-		} satisfies Partial<PersonType>
-
-		const minimalPerson: PersonType = {
-			name: "John",
-			age: 42
-		}
-
-		const person = { ...minimalPerson, ...personDefaults } as IncludeDefaults<PersonType, typeof personDefaults>
 
 		// The nationality is not nullable, and can be one of the 3 values, not just the one passed as default
-		const test1: TypeAssert<typeof person.nationality, "Belgian" | "Dutch" | "French"> = "true"
+		const test1: TypeAssert<IncludeDefaults<PersonType, { nationality: "Belgian" }>["nationality"], "Belgian" | "Dutch" | "French"> = "true"
 
 		// Property "children" was not passed in the default, so it is still optional
-		const test2: TypeAssert<typeof person.children, number | undefined> = "true"
+		const test2: TypeAssert<IncludeDefaults<PersonType, { nationality: "Belgian" }>["children"], number | undefined> = "true"
+
+		// It should work recursively
+		const test3: TypeAssert<IncludeDefaults<PersonType, { style: { color: "Red"} }>["style"]["color"], "Red" | "Blue"> = "true"
+
+		const test4: TypeAssert<Merge2<PersonType, { nationality: "Belgian" }>["nationality"], "Belgian" | "Dutch" | "French"> = "false"
 
 		assert.ok(true)
 	})

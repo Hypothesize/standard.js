@@ -43,9 +43,9 @@ export type OptionalKeys<T> = { [k in keyof T]: undefined extends T[k] ? k : nev
 export type ExtractOptional<T> = { [k in OptionalKeys<T>]?: T[k] }
 export type KeysByType<T, K> = { [k in keyof T]: K extends T[k] ? k : never }[keyof T]
 export type ExtractByType<T, K> = { [k in KeysByType<T, K>]: T[k] }
-export type IncludeDefaults<O extends object, D extends Partial<O>> = O & {
+export type IncludeDefaults<O extends object, D extends RecursivePartial<O>> = O & {
 	[k in keyof D]: k extends keyof O
-	? Required<O>[k]
+	? Required<O>[k] extends object ? IncludeDefaults<Required<O>[k], D[k] extends object ? D[k] : never> : Required<O>[k]
 	: never
 };
 
