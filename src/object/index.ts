@@ -1,5 +1,3 @@
-/* eslint-disable fp/no-unused-expression */
-/* eslint-disable fp/no-mutation */
 /* eslint-disable indent */
 /* eslint-disable brace-style */
 /* eslint-disable @typescript-eslint/ban-types */
@@ -17,18 +15,18 @@ export function keys(obj: any) {
 
 export function objectFromTuples<T, K extends string = string>(keyValues: Tuple<K, T>[]) {
 	const obj = {} as Record<K, T>
-	// eslint-disable-next-line fp/no-unused-expression
+
 	keyValues.forEach(kvp => {
-		// eslint-disable-next-line fp/no-mutation
+
 		obj[kvp[0]] = kvp[1]
 	})
 	return obj
 }
 export async function objectFromTuplesAsync<T, K extends string = string>(keyValues: Iterable<Tuple<K, T>> | AsyncIterable<Tuple<K, T>>) {
 	const obj = {} as Obj<T, K>
-	// eslint-disable-next-line fp/no-loops
+
 	for await (const kv of keyValues) {
-		// eslint-disable-next-line fp/no-mutation
+
 		obj[kv[0]] = kv[1]
 	}
 	return obj
@@ -45,7 +43,6 @@ export function entries(obj: Obj) { return keys(obj).map(key => new Tuple(key, o
 /** Return object consisting of only certain properties from onput object certain properties excluded */
 export function pick<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): Record<K, T[K]> {
 	const result = {} as Pick<T, K>
-	// eslint-disable-next-line fp/no-unused-expression, fp/no-mutation
 	_keys.forEach(k => result[k] = obj[k])
 	return result
 }
@@ -53,7 +50,7 @@ export function pick<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): R
 /** Return input object literal with certain properties excluded */
 export function omit<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): Omit<T, K> {
 	const result = obj
-	// eslint-disable-next-line fp/no-unused-expression, fp/no-mutation, fp/no-delete
+
 	_keys.forEach(k => delete result[k])
 	return result
 }
@@ -127,10 +124,9 @@ export function deepMerge<T1, T2, T3, T4, T5, T6>(a1: T1, a2: T2, a3: T3, a4: T4
 export function deepMerge(...args: any[]) {
 	function assignProp(carry: Obj, key: string, newVal: any, originalObject: Obj): void {
 		const propType = {}.propertyIsEnumerable.call(originalObject, key) ? 'enumerable' : 'nonenumerable'
-		// eslint-disable-next-line fp/no-mutation
+
 		if (propType === 'enumerable') carry[key] = newVal
 		if (propType === 'nonenumerable') {
-			// eslint-disable-next-line fp/no-unused-expression, fp/no-mutating-methods
 			Object.defineProperty(carry, key, { value: newVal, enumerable: false, writable: true, configurable: true })
 		}
 	}
@@ -139,19 +135,19 @@ export function deepMerge(...args: any[]) {
 		if (!isObject(newComer)) return newComer
 
 		// define newObject to merge all values upon
-		// eslint-disable-next-line fp/no-let
+
 		let newObject = {} as (T1 & T2) | T2
 		if (isObject(origin)) {
 			const props = Object.getOwnPropertyNames(origin)
 			const symbols = Object.getOwnPropertySymbols(origin)
-			// eslint-disable-next-line fp/no-mutation
+
 			newObject = [...props, ...symbols].reduce((carry, key) => {
 				const targetVal = origin[key as string]
 				if (
 					(!isSymbol(key) && !Object.getOwnPropertyNames(newComer).includes(key)) ||
 					(isSymbol(key) && !Object.getOwnPropertySymbols(newComer).includes(key))
 				) {
-					// eslint-disable-next-line fp/no-unused-expression
+
 					assignProp(carry as Obj, key as string, targetVal, origin)
 				}
 				return carry
@@ -162,16 +158,16 @@ export function deepMerge(...args: any[]) {
 		const symbols = Object.getOwnPropertySymbols(newComer)
 		const result = [...props, ...symbols].reduce((carry, key) => {
 			// re-define the origin and newComer as targetVal and newVal
-			// eslint-disable-next-line fp/no-let
+
 			let newVal = newComer[key as string]
 			const targetVal = isObject(origin) ? origin[key as string] : undefined
 			// When newVal is an object do the merge recursively
 			if (targetVal !== undefined && isObject(newVal)) {
-				// eslint-disable-next-line fp/no-mutation
+
 				newVal = mergeRecursively(targetVal, newVal, compareFn)
 			}
 			const propToAssign = compareFn ? compareFn(targetVal, newVal, key as string) : newVal
-			// eslint-disable-next-line fp/no-unused-expression
+
 			assignProp(carry as Obj, key as string, propToAssign, newComer)
 			return carry
 		}, newObject)
@@ -187,16 +183,16 @@ export function deepMerge(...args: any[]) {
 	<T extends any[]>(...objects: T) => objects.reduce((result, current) => {
 		if (!isObject(current) || !isObject(result))
 			return current
-		// eslint-disable-next-line fp/no-unused-expression
+		
 		Object.keys(current).forEach((key) => {
 			if (Array.isArray(result[key]) && Array.isArray(current[key])) {
-				// eslint-disable-next-line fp/no-mutation
+				
 				result[key] = (options?.mergeArrays ?? false)
 					? Array.from(new Set((result[key] as unknown[]).concat(current[key])))
 					: current[key]
 			}
 			else if (isObject(result[key]) && isObject(current[key])) {
-				// eslint-disable-next-line fp/no-mutation
+				
 				result[key] = mergeDeep(options)(result[key] as IObject, current[key] as IObject)
 			}
 			else {

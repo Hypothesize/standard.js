@@ -8,9 +8,9 @@ import { Ranker } from "../functional"
 export function min(vector: Iterable<number>): number | undefined
 export function min<T>(vector: Iterable<T>, ranker: Ranker<T>): T | undefined
 export function min<T>(vector: Iterable<T> | Iterable<number>, ranker?: Ranker<unknown>) {
-	// eslint-disable-next-line fp/no-let
+
 	let min = undefined as T | number | undefined
-	// eslint-disable-next-line fp/no-loops
+
 	for (const x of vector) {
 		if (min === undefined || (ranker && ranker(x, (min as T | number)) < 0) || (!ranker && x < (min as T | number)))
 			min = x
@@ -106,7 +106,7 @@ export function deviation(vector: number[], opts?:
 
 /** Returns the median of an array, alphabetically by default */
 export function median<T>(vector: Array<T>): T | undefined {
-	// eslint-disable-next-line fp/no-mutating-methods
+
 	const _ordered = vector.sort()
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
@@ -163,7 +163,7 @@ export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
 export function mode<T>(vector: Array<T>): T | undefined {
 	if (vector.length === 0) return undefined
 
-	// eslint-disable-next-line fp/no-mutating-methods
+
 	const modes = multiMode(vector).sort()
 	const index = modes.length % 2 === 0
 		? (modes.length / 2) - 1
@@ -193,7 +193,7 @@ export function multiMode<T>(vector: Array<T>): T[] {
 }
 
 export function interQuartileRange(vector: number[]) {
-	// eslint-disable-next-line fp/no-mutating-methods
+
 	const percentile25 = firstQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
 	const percentile75 = thirdQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
 	return percentile25 && percentile75 ? percentile75 - percentile25 : undefined
@@ -201,9 +201,9 @@ export function interQuartileRange(vector: number[]) {
 
 export function frequencies<T>(vector: Array<T>): globalThis.Map<T, number> {
 	const freqs = new globalThis.Map<T, number>(); //semi-colon required at end of this statement
-	// eslint-disable-next-line fp/no-unused-expression
+
 	[...vector].forEach(item => {
-		// eslint-disable-next-line fp/no-unused-expression
+
 		freqs.set(item, (freqs.get(item) || 0) + 1)
 	})
 	return freqs

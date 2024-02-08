@@ -41,13 +41,13 @@ export function negate<X = any, I = void>(predicate: Predicate<X, I>): Predicate
  * Subsequent invocations after the first one do nothing and return undefined 
  */
 export function once<R, A extends any[]>(fn?: (...a: A) => R) {
-	// eslint-disable-next-line fp/no-let
+
 	let hasRun = false
 	return fn
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		? function xyz(...args: A) {
 			if (!hasRun) {
-				// eslint-disable-next-line fp/no-mutation
+
 				hasRun = true
 				return fn(...args)
 			}
