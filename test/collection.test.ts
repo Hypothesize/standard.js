@@ -1,12 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable fp/no-let */
-/* eslint-disable fp/no-mutation */
-/* eslint-disable fp/no-loops */
-/* eslint-disable brace-style */
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable fp/no-unused-expression */
 
 // import mocha from "mocha"
 import * as assert from "assert"
@@ -44,28 +35,23 @@ describe('flatten()', function () {
 	})
 
 	it('should be able to handle null or undefined elements inside input iterables', function () {
-		// eslint-disable-next-line fp/no-let, init-declarations
-		let actual: unknown
 		assert.doesNotThrow(() => {
-			// eslint-disable-next-line fp/no-mutation
-			actual = [...flatten([["annotation"], [undefined, 1, null, [undefined]], ["simplicity"]])]
+			const actual = [...flatten([["annotation"], [undefined, 1, null, [undefined]], ["simplicity"]])]
+			const expected = ["annotation", undefined, 1, null, undefined, "simplicity"]
+			assert.deepStrictEqual(actual, expected)
 		})
-		const expected = ["annotation", undefined, 1, null, undefined, "simplicity"]
-		assert.deepStrictEqual(actual, expected)
 	})
 
 	it('should be able to handle null or undefined elements among other input iterables', function () {
-		// eslint-disable-next-line fp/no-let, init-declarations
-		let actual: unknown
 		assert.doesNotThrow(() => {
-			// eslint-disable-next-line fp/no-mutation
-			actual = [...flatten([["annotation"], null, undefined, ["simplicity"]])]
+			const actual = [...flatten([["annotation"], null, undefined, ["simplicity"]])]
+			const expected = ["annotation", null, undefined, "simplicity"]
+			assert.deepStrictEqual(actual, expected)
 		})
-		const expected = ["annotation", null, undefined, "simplicity"]
-		assert.deepStrictEqual(actual, expected)
 	})
 })
 
+// eslint-disable-next-line mocha/max-top-level-suites
 describe('take()', function () {
 	it('should return array with length equal to the smaller of input array length and take count', function () {
 		assert.deepStrictEqual([...take([10, 20, 30, 40], 7)], [10, 20, 30, 40])
