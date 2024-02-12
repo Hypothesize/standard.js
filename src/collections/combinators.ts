@@ -14,8 +14,11 @@ export type UnwrapNestedIterable<T> = T extends Iterable<infer X> ? UnwrapIterab
 
 /** Generate a sequence of integers */
 export function* integers(args: { from: number, to: number } | { from: number, direction: "upwards" | "downwards" }) {
+
 	let num = args.from
+
 	do {
+
 		yield ("to" in args ? args.to >= args.from : args.direction === "upwards") ? num++ : num--
 	}
 	while ("direction" in args || args.from !== args.to)
@@ -38,7 +41,6 @@ export function* range(from: number, to: number, opts?: { mode: "width", width: 
 
 
 	const length = Math.floor(diff / delta) + 1
-
 	for (let i = 0; i < length; i++) {
 		yield (from + (i * delta))
 	}
@@ -118,7 +120,8 @@ export async function* zipAsync<T extends readonly (AsyncIterable<unknown> | Ite
 		async next() {
 			if (!done) {
 				const items = await Promise.all(iterators.map(i => i.next()))
-						done = items.some(item => item.done)
+				
+				done = items.some(item => item.done)
 				if (!done) {
 					return { value: items.map(i => i.value) as unknown as Zip<T>, done: false }
 				}
@@ -360,8 +363,10 @@ export function* unique<T>(iterable: Iterable<T>, projector?: Projector<T, Primi
 		if (seen.has(elt))
 			continue outer
 		else {
+
 			seen.add(elt)
 		}
+
 		yield element
 
 	}
@@ -375,8 +380,10 @@ export async function* uniqueAsync<T>(iterable: Iterable<T> | AsyncIterable<T>, 
 		if (seen.has(elt))
 			continue outer
 		else {
+
 			seen.add(elt)
 		}
+
 		yield element
 
 	}
@@ -391,7 +398,9 @@ export function* chunk<T>(iter: Iterable<T>, chunkSize: number): Iterable<T[]> {
 
 	if (batch.length > 0) {
 		// console.log(`\n\tYielding batch of length ${batch.length}`)
+
 		yield batch
+
 		yield* chunk(skip(iter, chunkSize), chunkSize)
 	}
 }

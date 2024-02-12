@@ -1,14 +1,8 @@
-/* eslint-disable mocha/max-top-level-suites */
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable brace-style */
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 // import mocha from "mocha"
 import * as assert from "assert"
-import { map, flatten, chunk, take, skip, first, firstAsync, last, reduce, reduceAsync, indexed, toArrayAsync } from "../dist/collections"
-import { noop, identity, constant, negate, flip, Projector } from "../dist/functional"
+import { map, flatten, chunk, take, skip, first, firstAsync, last, reduce, reduceAsync } from "../dist/collections"
+import { negate } from "../dist/functional"
 
 describe('flatten()', function () {
 	it('should return a result that excludes empty arrays', function () {
@@ -41,24 +35,23 @@ describe('flatten()', function () {
 	})
 
 	it('should be able to handle null or undefined elements inside input iterables', function () {
-		let actual: unknown
 		assert.doesNotThrow(() => {
-			actual = [...flatten([["annotation"], [undefined, 1, null, [undefined]], ["simplicity"]])]
+			const actual = [...flatten([["annotation"], [undefined, 1, null, [undefined]], ["simplicity"]])]
+			const expected = ["annotation", undefined, 1, null, undefined, "simplicity"]
+			assert.deepStrictEqual(actual, expected)
 		})
-		const expected = ["annotation", undefined, 1, null, undefined, "simplicity"]
-		assert.deepStrictEqual(actual, expected)
 	})
 
 	it('should be able to handle null or undefined elements among other input iterables', function () {
-		let actual: unknown
 		assert.doesNotThrow(() => {
-			actual = [...flatten([["annotation"], null, undefined, ["simplicity"]])]
+			const actual = [...flatten([["annotation"], null, undefined, ["simplicity"]])]
+			const expected = ["annotation", null, undefined, "simplicity"]
+			assert.deepStrictEqual(actual, expected)
 		})
-		const expected = ["annotation", null, undefined, "simplicity"]
-		assert.deepStrictEqual(actual, expected)
 	})
 })
 
+// eslint-disable-next-line mocha/max-top-level-suites
 describe('take()', function () {
 	it('should return array with length equal to the smaller of input array length and take count', function () {
 		assert.deepStrictEqual([...take([10, 20, 30, 40], 7)], [10, 20, 30, 40])

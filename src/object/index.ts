@@ -15,14 +15,18 @@ export function keys(obj: any) {
 
 export function objectFromTuples<T, K extends string = string>(keyValues: Tuple<K, T>[]) {
 	const obj = {} as Record<K, T>
+
 	keyValues.forEach(kvp => {
+
 		obj[kvp[0]] = kvp[1]
 	})
 	return obj
 }
 export async function objectFromTuplesAsync<T, K extends string = string>(keyValues: Iterable<Tuple<K, T>> | AsyncIterable<Tuple<K, T>>) {
 	const obj = {} as Obj<T, K>
+
 	for await (const kv of keyValues) {
+
 		obj[kv[0]] = kv[1]
 	}
 	return obj
@@ -133,12 +137,15 @@ export function deepMerge(...args: any[]) {
 		if (isObject(origin)) {
 			const props = Object.getOwnPropertyNames(origin)
 			const symbols = Object.getOwnPropertySymbols(origin)
-				newObject = [...props, ...symbols].reduce((carry, key) => {
+
+			newObject = [...props, ...symbols].reduce((carry, key) => {
 				const targetVal = origin[key as string]
 				if (
 					(!isSymbol(key) && !Object.getOwnPropertyNames(newComer).includes(key)) ||
 					(isSymbol(key) && !Object.getOwnPropertySymbols(newComer).includes(key))
-				) {					assignProp(carry as Obj, key as string, targetVal, origin)
+				) {
+
+					assignProp(carry as Obj, key as string, targetVal, origin)
 				}
 				return carry
 			}, {} as (T1 & T2) | T2)
@@ -152,9 +159,11 @@ export function deepMerge(...args: any[]) {
 			const targetVal = isObject(origin) ? origin[key as string] : undefined
 			// When newVal is an object do the merge recursively
 			if (targetVal !== undefined && isObject(newVal)) {
-						newVal = mergeRecursively(targetVal, newVal, compareFn)
+
+				newVal = mergeRecursively(targetVal, newVal, compareFn)
 			}
 			const propToAssign = compareFn ? compareFn(targetVal, newVal, key as string) : newVal
+
 			assignProp(carry as Obj, key as string, propToAssign, newComer)
 			return carry
 		}, newObject)
@@ -170,14 +179,17 @@ export function deepMerge(...args: any[]) {
 	<T extends any[]>(...objects: T) => objects.reduce((result, current) => {
 		if (!isObject(current) || !isObject(result))
 			return current
+		
 		Object.keys(current).forEach((key) => {
 			if (Array.isArray(result[key]) && Array.isArray(current[key])) {
-						result[key] = (options?.mergeArrays ?? false)
+				
+				result[key] = (options?.mergeArrays ?? false)
 					? Array.from(new Set((result[key] as unknown[]).concat(current[key])))
 					: current[key]
 			}
 			else if (isObject(result[key]) && isObject(current[key])) {
-						result[key] = mergeDeep(options)(result[key] as IObject, current[key] as IObject)
+				
+				result[key] = mergeDeep(options)(result[key] as IObject, current[key] as IObject)
 			}
 			else {
 				if ((options?.undefinedOverwrites ?? false) || typeof current[key] !== "undefined")

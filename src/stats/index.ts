@@ -8,7 +8,9 @@ import { Ranker } from "../functional"
 export function min(vector: Iterable<number>): number | undefined
 export function min<T>(vector: Iterable<T>, ranker: Ranker<T>): T | undefined
 export function min<T>(vector: Iterable<T> | Iterable<number>, ranker?: Ranker<unknown>) {
+
 	let min = undefined as T | number | undefined
+
 	for (const x of vector) {
 		if (min === undefined || (ranker && ranker(x, (min as T | number)) < 0) || (!ranker && x < (min as T | number)))
 			min = x
@@ -196,7 +198,9 @@ export function interQuartileRange(vector: number[]) {
 
 export function frequencies<T>(vector: Array<T>): globalThis.Map<T, number> {
 	const freqs = new globalThis.Map<T, number>(); //semi-colon required at end of this statement
+
 	[...vector].forEach(item => {
+
 		freqs.set(item, (freqs.get(item) || 0) + 1)
 	})
 	return freqs

@@ -1,13 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable brace-style */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable indent */
-/* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable brace-style */
-
 import {
 	zip,
 	unique,
@@ -104,9 +94,12 @@ export class Sequence<X> implements Iterable<X> {
 	/** Generate sequence of integers including 'from' and 'to' values if provided */
 	static integers(args: { from: number, to: number } | { from: number, direction: "upwards" | "downwards" }) {
 		return new Sequence((function* () {
+
 			let num = args.from
-					while ("direction" in args || num !== (args.to >= args.from ? args.to + 1 : args.to - 1)) {
-						yield ("to" in args ? args.to >= args.from : args.direction === "upwards") ? num++ : num--
+
+			while ("direction" in args || num !== (args.to >= args.from ? args.to + 1 : args.to - 1)) {
+
+				yield ("to" in args ? args.to >= args.from : args.direction === "upwards") ? num++ : num--
 			}
 		})())
 	}
@@ -129,7 +122,8 @@ export class Sequence<X> implements Iterable<X> {
 
 		return new Sequence((function* () {
 			for (let index = 0; index < length; index++) {
-						yield (from + (index * delta))
+
+				yield (from + (index * delta))
 			}
 		})())
 	}
@@ -245,7 +239,9 @@ export class Set<X> extends Sequence<X> {
 		return new Array(collections).skip(1).every(st => new Set(st).equals(firstSet))
 	}
 
+
 	sort(comparer?: Ranker<X>) { return this.ctor([...this].sort(comparer)) }
+
 	sortDescending(comparer?: Ranker<X>) { return new Array([...this].sort(comparer).reverse()) }
 }
 
@@ -291,7 +287,8 @@ export class Array<X> extends Set<X> {
 			return this.core.array[selection] as X
 		}
 		else {
-				console.warn(`Array get() selection arg type: ${typeof selection}`)
+
+			console.warn(`Array get() selection arg type: ${typeof selection}`)
 			return [...selection].map(index => this.get(index))
 		}
 	}
@@ -326,9 +323,11 @@ export class Array<X> extends Set<X> {
 	max(ranker: Ranker<X>) { return max([...this], ranker) }
 
 	removeSliceCounted(index: number, count: number) {
+
 		return this.ctor([...this].splice(index, count))
 	}
 	removeSliceDelimited(fromIndex: number, toIndex: number) {
+
 		return this.ctor([...this].splice(fromIndex, toIndex - fromIndex + 1))
 	}
 
@@ -361,7 +360,8 @@ export class ArrayNumeric extends Array<number> {
 		const newArr = map<number, number | Y>(this, (val, index) => {
 			const newVal = projector(val, index)
 			if (typeof newVal !== "number" && typeof newVal !== "bigint")
-						notNumeric = true
+
+				notNumeric = true
 			return newVal
 		})
 
@@ -410,7 +410,8 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 
 	pick<K extends keyof T>(keys: K[]) {
 		const result = {} as Pick<T, K>
-			keys.forEach(k => result[k] = this.obj[k])
+
+		keys.forEach(k => result[k] = this.obj[k])
 
 		return new Dictionary(result)
 	}
@@ -545,7 +546,8 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 				}
 			}
 			else if ("fieldName" in _filter) {
-						let averageAndDev: { average: number, std: number } = { average: 0, std: 0 }
+
+				let averageAndDev: { average: number, std: number } = { average: 0, std: 0 }
 				if (_filter.operator === "is_outlier_by") {
 					const originalIdVector = this.idVector
 					const colVector: unknown[] | undefined = _filter.fieldName === "rowId"
@@ -665,13 +667,17 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	static rowsToColumns = <X extends Obj = Obj>(rows: Iterable<X>): ColumnarData<X> => {
 		const srcArray = [...rows as Iterable<X>]
 		const columnVectors = {} as ColumnarData<X>
+
 		srcArray.forEach((row, index) => {
 			const rowKeys = new Dictionary(row).keys()
 			if (rowKeys.some(key => hasValue(row[key]))) { // ensure row is not empty
+
 				rowKeys.forEach(colName => {
 					if (!columnVectors[colName])
-										columnVectors[colName] = new globalThis.Array(srcArray.length).fill(undefined)
-								columnVectors[colName][index] = row[colName]
+
+						columnVectors[colName] = new globalThis.Array(srcArray.length).fill(undefined)
+
+					columnVectors[colName][index] = row[colName]
 				})
 			}
 		})

@@ -3,15 +3,18 @@
  * @param fn The input (possibly async) function
  */
 /*export function notConcurrent<X extends any[], Y>(fn: (...args: X) => PromiseLike<Y>): (...args: X) => Promise<Y> {
+	
 	let inFlight: Promise<Y> | false = false
 	return (...args: X) => {
 		if (!inFlight) {
-				inFlight = (async () => {
+			
+			inFlight = (async () => {
 				try {
 					return await fn(...args)
 				}
 				finally {
-								inFlight = false
+					
+					inFlight = false
 				}
 			})()
 		}
@@ -27,6 +30,7 @@
 		// eslint-disable-next-line @typescript-eslint/no-empty-function, fp/no-let
 		let begin: (unlock: () => void) => void = unlock => { }
 
+		
 		this.mutex = this.mutex.then(() => new Promise(begin))
 
 		return new Promise(res => { begin = res })

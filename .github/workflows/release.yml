@@ -1,8 +1,10 @@
+ name: Release
+ 
  on:
    push:
      branches:
        - master
- name: release-please
+ 
  jobs:
    release-please:
      runs-on: ubuntu-latest
@@ -14,16 +16,27 @@
            release-type: node
            package-name: standard
            pull-request-title-pattern: "PR${scope}: release${component} ${version}"
+
        - uses: actions/checkout@v2
          if: ${{ steps.release.outputs.release_created }}
+
        - uses: actions/setup-node@v1
          with:
-           node-version: 12
+           node-version: 16
            registry-url: 'https://registry.npmjs.org'
          if: ${{ steps.release.outputs.release_created }}
-       - run: npm ci
+
+       - run: |
+          npm install -g pnpm
+          pnpm deps
          if: ${{ steps.release.outputs.release_created }}
-       - run: npm run build && cp package.json README.md LICENSE dist && cd dist && npm publish
+         
+       - run: |
+          pnpm lint
+          pnpm build
+          pnpm pubstage
+          cd dist
+          npm publish
          env:
            NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
          if: ${{ steps.release.outputs.release_created }}
