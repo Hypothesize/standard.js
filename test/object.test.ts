@@ -38,7 +38,6 @@ describe('keys', () => {
 		/** @type { Array<1 | 'a' | 'b' | 'c'| symbol>} */
 		const objKeys = keys(obj)
 		// typeAssert<>(objKeys)
-		// eslint-disable-next-line fp/no-mutating-methods
 		assert.deepEqual(objKeys.sort(), ['1', 'a', 'b', 'c'])
 	})
 

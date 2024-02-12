@@ -1,5 +1,5 @@
 /* eslint-disable brace-style */
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Ranker, Reducer, ReducerAsync, Projector, ProjectorAsync, Predicate, PredicateAsync } from "../functional"
 import { Obj, Primitive, Tuple, TypeGuard, ExtractByType, hasValue, isIterable, isAsyncIterable } from "../utility"
@@ -53,14 +53,12 @@ export function zip<T extends readonly Iterable<unknown>[]>(...iterables: T): It
 	console.assert(iterables.every(iter => typeof iter[Symbol.iterator] === "function"))
 
 	const iterators = iterables.map(i => i[Symbol.iterator]() as Iterator<unknown>)
-
 	let done = false
 	return {
 		[Symbol.iterator]() { return this },
 		next() {
 			if (!done) {
 				const items = iterators.map(i => i.next())
-
 				done = items.some(item => item.done)
 				if (!done) {
 					return { value: items.map(i => i.value) as unknown as Zip<T>, done: false }
@@ -116,7 +114,6 @@ export async function* zipAsync<T extends readonly (AsyncIterable<unknown> | Ite
 			if (!done && typeof iter.return === 'function') await iter.return()
 		}
 	}
-
 	/*let done = false
 	return {
 		[Symbol.asyncIterator]() { return this },
@@ -437,7 +434,6 @@ export function* flatten<X>(nestedIterable: Iterable<X>): Iterable<UnwrapNestedI
 
 export function forEach<T>(iterable: Iterable<T>, action: Projector<T>) {
 	for (const tuple of indexed(iterable)) {
-
 		action(tuple[1], tuple[0])
 	}
 }
@@ -445,7 +441,6 @@ export async function forEachAsync<T>(items: Iterable<T> | Generator<T> | AsyncI
 export async function forEachAsync<T>(items: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, action: ProjectorAsync<T>): Promise<void>
 export async function forEachAsync<T>(iterable: Iterable<T> | Generator<T> | AsyncIterable<T> | AsyncGenerator<T>, action: Projector<T> | ProjectorAsync<T>) {
 	for await (const tuple of indexedAsync(iterable)) {
-
 		action(tuple[1], tuple[0])
 	}
 }
@@ -530,7 +525,6 @@ export function last<T>(data: Iterable<T> | (IndexedAccess<T> & Finite), predica
 	}
 	else {
 		console.assert(isIterable(data))
-
 		let _found = false
 		let _last = undefined
 		for (const element of (predicate === undefined ? data : filter(data, predicate))) {
@@ -575,7 +569,6 @@ export async function lastAsync<T>(data: AsyncIterable<T> | Iterable<T> | (Index
 	}
 	else {
 		// console.assert(isIterable(data))
-
 		let _found = false
 		let _last = undefined
 		for await (const element of (predicate === undefined ? data : filterAsync(data, predicate))) {
@@ -652,7 +645,8 @@ export function union<T>(collections: Iterable<Iterable<T>>): Iterable<T> {
 }
 
 /** All items that are present in all the input collections */
-export function intersection<T>(collections: (Iterable<T> & Finite)[]): Iterable<T> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function intersection<T>(_collections: (Iterable<T> & Finite)[]): Iterable<T> {
 	throw new Error(`Not Implemented`)
 }
 
@@ -687,7 +681,6 @@ export function* repeat(val: unknown, count?: number) {
 export async function toArrayAsync<T>(iterable: Iterable<T> | AsyncIterable<T>) {
 	const arr = [] as Array<T>
 	for await (const element of iterable) {
-
 		arr.push(element)
 	}
 	return arr

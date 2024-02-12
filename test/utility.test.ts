@@ -1,13 +1,14 @@
+/* eslint-disable mocha/no-setup-in-describe */
 /* eslint-disable brace-style */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable fp/no-unused-expression */
+/* eslint-disable mocha/max-top-level-suites */
 
 import * as assert from "assert"
-import { ExtractByType, TypeAssert, IsAny, Merge1, Merge2, Merge3, hasValue, isArray, isIterable } from "../dist/utility.js"
+import { ExtractByType, TypeAssert, IsAny, Merge1, Merge2, IncludeDefaults, hasValue, isArray, isIterable, ExtractOptional } from "../dist/utility.js"
 
 
 describe('hasValue', function () {
@@ -55,8 +56,8 @@ describe('hasValue', function () {
 	})
 })
 
-describe("isArray", () => {
-	it("should work for a union of an array and a primitive", () => {
+describe("isArray", function () {
+	it("should work for a union of an array and a primitive", function () {
 		// eslint-disable-next-line no-constant-condition
 		const val = true ? [1, 2, 3] : ""
 		if (isArray(val)) {
@@ -68,8 +69,7 @@ describe("isArray", () => {
 		}
 	})
 
-
-	it("should work for a union of an array and a primitive", () => {
+	it("should work for a union of 2 arrays", function () {
 		// eslint-disable-next-line no-constant-condition
 		const val = true ? [1, 2, 3] : [""]
 		if (isArray(val)) {
@@ -83,8 +83,8 @@ describe("isArray", () => {
 
 })
 
-describe("isIterable", () => {
-	it("should return false for an object", () => {
+describe("isIterable", function () {
+	it("should return false for an object", function () {
 		assert.strictEqual(isIterable({
 			"/": (x: number) => true,
 			"/splash": (x: number) => x > 0,
@@ -92,12 +92,12 @@ describe("isIterable", () => {
 		}), false)
 	})
 
-	it("should return true for an array", () => {
+	it("should return true for an array", function () {
 		assert.strictEqual(isIterable([1, 4, 2]), true)
 
 	})
 
-	it("should return true for a generator", () => {
+	it("should return true for a generator", function () {
 		assert.strictEqual(isIterable((function* () { yield 1; yield 2 })()), true)
 	})
 })
@@ -213,8 +213,8 @@ describe('clone()', () => {
 
 
 //#region Type tests
-describe("IsAny", () => {
-	it("should reliably check for whether a type is any", () => {
+describe("IsAny", function () {
+	it("should reliably check for whether a type is any", function () {
 		// type IsAny<T> = ((Exclude<any, T> extends (never) ? 1 : 0) extends (0 | 1)
 		// 	? (0 | 1) extends (Exclude<any, T> extends never ? 1 : 0)
 		// 	? "false"
@@ -240,38 +240,38 @@ describe("IsAny", () => {
 
 })
 
-describe("TypeAssert", () => {
-	it("should return 'true' for identical union types", () => {
+describe("TypeAssert", function () {
+	it("should return 'true' for identical union types", function () {
 		const test_1: TypeAssert<string | bigint, string | bigint> = "true"
 		const test_2: TypeAssert<string | {} | bigint, {} | string | bigint> = "true"
 		assert.ok(true)
 	})
-	it("should return 'false' for non-identical union types", () => {
+	it("should return 'false' for non-identical union types", function () {
 		const test: TypeAssert<string | bigint, string | boolean> = "false"
 		const test1: TypeAssert<string | undefined, boolean | undefined> = "false"
 		assert.ok(true)
 	})
-	it("should return 'false' when comparing a non-union type with a union type", () => {
+	it("should return 'false' when comparing a non-union type with a union type", function () {
 		const test: TypeAssert<string, string | bigint> = "false"
 		assert.ok(true)
 	})
-	it("should return 'true' when both types are <any>", () => {
+	it("should return 'true' when both types are <any>", function () {
 		const test: TypeAssert<any, any> = "true"
 		assert.ok(true)
 	})
-	it("should return 'true' when both types are <unknown>", () => {
+	it("should return 'true' when both types are <unknown>", function () {
 		const test: TypeAssert<unknown, unknown> = "true"
 		assert.ok(true)
 	})
-	it("should return 'true' when both types are <never>", () => {
+	it("should return 'true' when both types are <never>", function () {
 		const test: TypeAssert<never, never> = "true"
 		assert.ok(true)
 	})
-	it("should return 'false' when one type extends the other but they are not identical", () => {
+	it("should return 'false' when one type extends the other but they are not identical", function () {
 		const test: TypeAssert<Array<any>, Iterable<any>> = "false"
 		assert.ok(true)
 	})
-	it("should return 'false' when comparing <any> to another (non-union) type", () => {
+	it("should return 'false' when comparing <any> to another (non-union) type", function () {
 		const test: TypeAssert<any, { str: "" }> = "false"
 		const test_0: TypeAssert<any, RegExp> = "false"
 		const test_5: TypeAssert<any, Array<any>> = "false"
@@ -283,7 +283,7 @@ describe("TypeAssert", () => {
 
 		assert.ok(true)
 	})
-	it("should return 'false' when comparing <any> to another union type", () => {
+	it("should return 'false' when comparing <any> to another union type", function () {
 
 		const test_1: TypeAssert<string | number, any> = "false"
 		const test_2: TypeAssert<number[] | undefined, any> = "false"
@@ -295,7 +295,7 @@ describe("TypeAssert", () => {
 
 		assert.ok(true)
 	})
-	it("should return 'false' when comparing <never> to another type", () => {
+	it("should return 'false' when comparing <never> to another type", function () {
 		const test: TypeAssert<never, {}> = "false"
 		const test_1: TypeAssert<never, unknown> = "false"
 		const test_2: TypeAssert<never, string> = "false"
@@ -305,8 +305,8 @@ describe("TypeAssert", () => {
 	})
 })
 
-describe("ExtractByType", () => {
-	it("should return only those properties that have the desired type", () => {
+describe("ExtractByType", function () {
+	it("should return only those properties that have the desired type", function () {
 		const obj = { str: "", num: 1, b: true, arr: [1, 2, 3], o: { x: null } }
 		const test_1: TypeAssert<ExtractByType<typeof obj, string>, { str: string }> = "true"
 		const test_2: TypeAssert<ExtractByType<typeof obj, number>, { str: "" }> = "false"
@@ -314,31 +314,31 @@ describe("ExtractByType", () => {
 
 		assert.ok(true)
 	})
-	it("should return all properties if extracted property type is <any>", () => {
+	it("should return all properties if extracted property type is <any>", function () {
 		const obj = { str: "", num: 1, b: true, arr: [1, 2, 3], o: { x: null } }
 		const test_1: TypeAssert<ExtractByType<typeof obj, any>, typeof obj> = "true"
 		assert.ok(true)
 	})
-	it("should return an empty object if extracted property type is <unknown>", () => {
+	it("should return an empty object if extracted property type is <unknown>", function () {
 		const obj = { str: "", num: 1, b: true, arr: [1, 2, 3], o: { x: null } }
 		const test: TypeAssert<ExtractByType<typeof obj, unknown>, {}> = "true"
 		assert.ok(true)
 	})
-	it("should return only properties that have the desired string literal type", () => {
+	it("should return only properties that have the desired string literal type", function () {
 		const obj = { str: "" as const, num: 1, b: true, arr: [1, 2, 3], o: { x: null } }
 		const test: TypeAssert<ExtractByType<typeof obj, "">, { str: "" }> = "true"
 
 		assert.ok(true)
 	})
-	it("should return only properties that have the desired numeric literal type", () => {
+	it("should return only properties that have the desired numeric literal type", function () {
 		const obj = { str: "" as const, num: 1 as const, b: true, arr: [1, 2, 3], o: { x: null } }
 		const test: TypeAssert<ExtractByType<typeof obj, 1>, { num: 1 }> = "true"
 		assert.ok(true)
 	})
 })
 
-describe("Merge", () => {
-	it("should return the argument value if passed a single argument", () => {
+describe("Merge", function () {
+	it("should return the argument value if passed a single argument", function () {
 		const test: TypeAssert<Merge1<{ str: "str", num: 3 }>, { str: "str", num: 3 }> = "true"
 		const test_1: TypeAssert<Merge1<string>, string> = "true"
 		const test_2: TypeAssert<Merge1<any>, any> = "true"
@@ -346,11 +346,11 @@ describe("Merge", () => {
 
 		assert.ok(true)
 	})
-	it("should overwrite undefined properties upstream", () => {
+	it("should overwrite undefined properties upstream", function () {
 		const test: TypeAssert<Merge2<{ str: "str", num: undefined }, { str: "abc", num: 3 }>, { str: "abc", num: 3 }> = "true"
 		assert.ok(true)
 	})
-	it("should overwrite first argument is any of the arguments are primitive", () => {
+	it("should overwrite first argument is any of the arguments are primitive", function () {
 		// const test_1: TypeAssert<Merge2<{ str: "str", num: undefined }, 2>, 2> = "true"
 		// const test_2: TypeAssert<Merge3<"abc", { str: "str", num: undefined }, 2>, 2> = "true"
 
@@ -358,8 +358,52 @@ describe("Merge", () => {
 	})
 })
 
-describe("IsIterable", () => {
-	// eslint-disable-next-line init-declarations, fp/no-let
+describe("ExtractOptional", function () {
+	it("should consider optional properties of an object as non-nullable when they are given in the default", function () {
+		type PersonType = {
+			name: string
+			age: number
+			nationality?: string
+			children?: PersonType[]
+		}
+		const personDefaults: Required<ExtractOptional<PersonType>> = {
+			nationality: "Belgian",
+			children: []
+		}
+
+		assert.ok(true)
+	})
+})
+
+describe("IncludeDefaults", function () {
+	it("should consider optional properties of an object as non-nullable when they are defined in the default object", function () {
+		type PersonType = {
+			name: string
+			age: number
+			nationality?: "Belgian" | "Dutch" | "French"
+			children?: number
+			style?: {
+				color?: "Red" | "Blue"
+			}
+		}
+
+		// The nationality is not nullable, and can be one of the 3 values, not just the one passed as default
+		const test1: TypeAssert<IncludeDefaults<PersonType, { nationality: "Belgian" }>["nationality"], "Belgian" | "Dutch" | "French"> = "true"
+
+		// Property "children" was not passed in the default, so it is still optional
+		const test2: TypeAssert<IncludeDefaults<PersonType, { nationality: "Belgian" }>["children"], number | undefined> = "true"
+
+		// It should work recursively
+		const test3: TypeAssert<IncludeDefaults<PersonType, { style: { color: "Red"} }>["style"]["color"], "Red" | "Blue"> = "true"
+
+		const test4: TypeAssert<Merge2<PersonType, { nationality: "Belgian" }>["nationality"], "Belgian" | "Dutch" | "French"> = "false"
+
+		assert.ok(true)
+	})
+})
+
+describe("IsIterable", function () {
+	// eslint-disable-next-line init-declarations
 	let union: (
 		| never
 		| null

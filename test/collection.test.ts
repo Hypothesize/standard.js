@@ -1,8 +1,8 @@
 
 // import mocha from "mocha"
 import * as assert from "assert"
-import { map, flatten, chunk, take, skip, first, firstAsync, last, reduce, reduceAsync, indexed, toArrayAsync } from "../dist/collections"
-import { noop, identity, constant, negate, flip, Projector } from "../dist/functional"
+import { map, flatten, chunk, take, skip, first, firstAsync, last, reduce, reduceAsync } from "../dist/collections"
+import { negate } from "../dist/functional"
 
 describe('flatten()', function () {
 	it('should return a result that excludes empty arrays', function () {

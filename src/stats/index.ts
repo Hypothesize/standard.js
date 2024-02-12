@@ -19,7 +19,7 @@ export function min<T>(vector: Iterable<T> | Iterable<number>, ranker?: Ranker<u
 	return min
 }
 
-export function max<T>(vector: Iterable<number>): number | undefined
+export function max(vector: Iterable<number>): number | undefined
 export function max<T>(vector: Iterable<T>, ranker: Ranker<T>): T | undefined
 export function max(vector: Iterable<unknown>, ranker?: Ranker<unknown>) {
 	if (ranker) {
@@ -106,7 +106,6 @@ export function deviation(vector: number[], opts?:
 
 /** Returns the median of an array, alphabetically by default */
 export function median<T>(vector: Array<T>): T | undefined {
-
 	const _ordered = vector.sort()
 	if (_ordered.length % 2 === 1) {
 		return _ordered[Math.floor(vector.length / 2)]
@@ -163,7 +162,6 @@ export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
 export function mode<T>(vector: Array<T>): T | undefined {
 	if (vector.length === 0) return undefined
 
-
 	const modes = multiMode(vector).sort()
 	const index = modes.length % 2 === 0
 		? (modes.length / 2) - 1
@@ -193,7 +191,6 @@ export function multiMode<T>(vector: Array<T>): T[] {
 }
 
 export function interQuartileRange(vector: number[]) {
-
 	const percentile25 = firstQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
 	const percentile75 = thirdQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
 	return percentile25 && percentile75 ? percentile75 - percentile25 : undefined

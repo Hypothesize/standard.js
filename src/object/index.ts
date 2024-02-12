@@ -50,7 +50,6 @@ export function pick<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): R
 /** Return input object literal with certain properties excluded */
 export function omit<T extends Obj, K extends keyof T>(obj: T, ..._keys: K[]): Omit<T, K> {
 	const result = obj
-
 	_keys.forEach(k => delete result[k])
 	return result
 }
@@ -124,7 +123,6 @@ export function deepMerge<T1, T2, T3, T4, T5, T6>(a1: T1, a2: T2, a3: T3, a4: T4
 export function deepMerge(...args: any[]) {
 	function assignProp(carry: Obj, key: string, newVal: any, originalObject: Obj): void {
 		const propType = {}.propertyIsEnumerable.call(originalObject, key) ? 'enumerable' : 'nonenumerable'
-
 		if (propType === 'enumerable') carry[key] = newVal
 		if (propType === 'nonenumerable') {
 			Object.defineProperty(carry, key, { value: newVal, enumerable: false, writable: true, configurable: true })
@@ -135,7 +133,6 @@ export function deepMerge(...args: any[]) {
 		if (!isObject(newComer)) return newComer
 
 		// define newObject to merge all values upon
-
 		let newObject = {} as (T1 & T2) | T2
 		if (isObject(origin)) {
 			const props = Object.getOwnPropertyNames(origin)
@@ -158,7 +155,6 @@ export function deepMerge(...args: any[]) {
 		const symbols = Object.getOwnPropertySymbols(newComer)
 		const result = [...props, ...symbols].reduce((carry, key) => {
 			// re-define the origin and newComer as targetVal and newVal
-
 			let newVal = newComer[key as string]
 			const targetVal = isObject(origin) ? origin[key as string] : undefined
 			// When newVal is an object do the merge recursively

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable brace-style */
-import { Obj, ArgsType } from "../utility.js"
+import { ArgsType } from "../utility.js"
 
 /** Return -1 if a is smaller than b; 0 if a & b are equal, and 1 if a is bigger than b */
 export type Ranker<X = unknown> = (a: X, b: X) => -1 | 0 | 1
@@ -41,7 +41,6 @@ export function negate<X = any, I = void>(predicate: Predicate<X, I>): Predicate
  * Subsequent invocations after the first one do nothing and return undefined 
  */
 export function once<R, A extends any[]>(fn?: (...a: A) => R) {
-
 	let hasRun = false
 	return fn
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any

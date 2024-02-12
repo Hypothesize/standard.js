@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
 	zip,
 	unique,
@@ -14,9 +16,9 @@ import {
 	reduce, reduceAsync,
 	forEach, forEachAsync,
 	intersection,
-	every, everyAsync,
+	every,
 	union,
-	some, someAsync,
+	some,
 	except,
 	complement,
 	toArrayAsync
@@ -44,7 +46,6 @@ import {
 /** Lazy collection of elements accessed sequentially, not known in advance */
 export class Sequence<X> implements Iterable<X> {
 	protected _iterable: Iterable<X>
-
 	constructor(iterable: Iterable<X>) { this._iterable = iterable }
 	protected ctor(iterable: Iterable<X>): this { return new Sequence(iterable) as this }
 
@@ -132,7 +133,6 @@ export class Sequence<X> implements Iterable<X> {
 
 export class SequenceAsync<X> implements AsyncIterable<X> {
 	protected _iterable: AsyncIterable<X>
-
 	constructor(iterable: AsyncIterable<X> | Iterable<X>) {
 		this._iterable = isAsyncIterable(iterable) ? iterable : (async function* () { yield* iterable })()
 	}
@@ -188,7 +188,6 @@ export class SequenceAsync<X> implements AsyncIterable<X> {
 /** Set of unique elements, known in advance, without any specific order */
 export class Set<X> extends Sequence<X> {
 	constructor(elements: Iterable<X>/*, protected opts?: { comparer?: Comparer<X>, ranker?: Ranker<X> }*/) {
-
 		super([...elements])
 	}
 	protected _set?: globalThis.Set<X> = undefined
@@ -251,7 +250,6 @@ export class Set<X> extends Sequence<X> {
 /** Eager, ordered, material collection */
 export class Array<X> extends Set<X> {
 	constructor(elements: Iterable<X>) {
-
 		super(elements)
 	}
 	private _array?: globalThis.Array<X> = undefined
@@ -318,7 +316,6 @@ export class Array<X> extends Set<X> {
 	unique() { return this.ctor(unique(this)) }
 
 	/** Returns new array containing this array's elements in reverse order */
-
 	reverse() { return this.ctor([...this].reverse()) }
 
 	/** Array-specific implementation of map() */
@@ -361,7 +358,6 @@ export class ArrayNumeric extends Array<number> {
 	map(projector: Projector<number, number>): ArrayNumeric
 	map<Y>(projector: Projector<number, Y>): Array<Y>
 	map<Y>(projector: Projector<number, number> | Projector<number, Y>): ArrayNumeric | Array<Y> {
-
 		let notNumeric = false
 		const newArr = map<number, number | Y>(this, (val, index) => {
 			const newVal = projector(val, index)
@@ -381,7 +377,6 @@ export class ArrayNumeric extends Array<number> {
 export class Dictionary<T extends Record<string, unknown>> implements Iterable<Tuple<keyof T, T[keyof T]>> {
 	private readonly obj: Readonly<T>
 	// eslint-disable-next-line brace-style
-
 	constructor(obj: T) { this.obj = Object.freeze({ ...obj }) }
 
 	static fromKeyValues<K extends string, V>(keyValues: Iterable<Tuple<K, V>>) {
@@ -484,13 +479,11 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 			? new Dictionary(DataTable.rowsToColumns(source as Iterable<T>))
 			: new Dictionary(source)
 
-
 		this._idVector = idVector
 			? [...idVector]
 			: this._colVectors.size > 0
 				? [...globalThis.Array([...this._colVectors][0][1].length).keys()]
 				: []
-
 
 		// console.log(`\nDataTable took ${new Date().getTime() - start}ms to instantiate`)
 		this.ROW_NUM_COL_NAME = rowNumColName
