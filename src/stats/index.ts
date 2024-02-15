@@ -150,7 +150,7 @@ export function mode<T>(vector: Array<T>): T | undefined {
 
 /** Computes the mode of a sorted array of values. It returns an array of all the modes found 
  * @param vector A sorted array
- * @returns A sorted array of the modes of the input array
+ * @returns A sorted array of the modes
 */
 export function multiMode<T>(vector: Array<T>): T[] {
 	if (vector.length === 0) {
