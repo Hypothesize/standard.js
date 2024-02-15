@@ -2,7 +2,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable brace-style */
 import { Tuple, isNumber } from "../utility"
-import { reduce, lastOrDefault, filter, map, sort } from "../collections/combinators"
+import { reduce, lastOrDefault, filter, map } from "../collections/combinators"
 import { Ranker } from "../functional"
 
 export function min(vector: Iterable<number>): number | undefined
@@ -104,18 +104,19 @@ export function deviation(vector: number[], opts?:
 	return _variance !== undefined ? Math.sqrt(_variance) : undefined
 }
 
-/** Returns the median of an array, alphabetically by default */
+/** Returns the median of an array, alphabetically by default 
+ * @param vector A sorted array
+ * @returns The median value of the input array
+*/
 export function median<T>(vector: Array<T>): T | undefined {
-
-	const _ordered = vector.sort()
-	if (_ordered.length % 2 === 1) {
-		return _ordered[Math.floor(vector.length / 2)]
+	if (vector.length % 2 === 1) {
+		return vector[Math.floor(vector.length / 2)]
 	}
 	else {
 		// eslint-disable-next-line no-shadow, @typescript-eslint/no-non-null-assertion
-		const first = _ordered[Math.floor(_ordered.length / 2) - 1]
+		const first = vector[Math.floor(vector.length / 2) - 1]
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const second = _ordered[Math.floor(_ordered.length / 2)]
+		const second = vector[Math.floor(vector.length / 2)]
 		return (typeof first === "number" && typeof second === "number")
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			? ((first + second) / 2) as any as T
@@ -123,46 +124,21 @@ export function median<T>(vector: Array<T>): T | undefined {
 	}
 }
 
-export function firstQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
-	const sortedList = sort(vector, ranker)
-	return sortedList[Math.floor(0.25 * sortedList.length)]
+export function firstQuartile<T>(vector: Array<T>) {
+	return vector[Math.floor(0.25 * vector.length)]
 }
 
-export function thirdQuartile<T>(vector: Array<T>, ranker?: Ranker<T>) {
-	const sortedList = sort(vector, ranker)
-	return sortedList[Math.ceil(0.75 * sortedList.length) - 1]
+export function thirdQuartile<T>(vector: Array<T>) {
+	return vector[Math.ceil(0.75 * vector.length) - 1]
 }
-
-/*export function mode<T>(vector: Array<T>): T[] | undefined {
-	if (vector.length === 0) return undefined
-	return (vector.reduce((accu, curr) => {
-		const freqsMap = accu.freqsMap
-		freqsMap.set(curr, (freqsMap.get(curr) || 0) + 1)
-
-		const maxCount = freqsMap.get(curr)! > accu.maxCount
-			? freqsMap.get(curr)!
-			: accu.maxCount
-		const modes = freqsMap.get(curr) === accu.maxCount
-			? [...accu.modes, curr]
-			: freqsMap.get(curr)! > accu.maxCount
-				? [curr]
-				: accu.modes
-
-		return { freqsMap, maxCount, modes }
-	}, {
-		freqsMap: new globalThis.Map<T, number>(),
-		maxCount: 1,
-		modes: [] as T[]
-	})).modes
-
-}*/
 
 /** Computes the mode of a set of values. It uses the "multimode" function but instead of
  * returning an array of values, it will pick the middle one after sorting the modes array
+ * @param vector A sorted array of values
+ * @returns The mode of the input array
  */
 export function mode<T>(vector: Array<T>): T | undefined {
 	if (vector.length === 0) return undefined
-
 
 	const modes = multiMode(vector).sort()
 	const index = modes.length % 2 === 0
@@ -171,31 +147,53 @@ export function mode<T>(vector: Array<T>): T | undefined {
 
 	return modes[index]
 }
-/** Computes the mode of a set of values. It returns an array of all the modes found */
+
+/** Computes the mode of a sorted array of values. It returns an array of all the modes found 
+ * @param vector A sorted array
+ * @returns A sorted array of the modes of the input array
+*/
 export function multiMode<T>(vector: Array<T>): T[] {
-	if (vector.length === 0) return []
+	if (vector.length === 0) {
+		return [] // Return an empty array for an empty input array
+	}
+	let modes: Array<T> = []
+	let currentMode = vector[0]
+	let currentCount = 1
+	let maxCount = 1
 
-	return (vector.reduce((accu, curr) => {
-		const freqsMap = accu.freqsMap
-		freqsMap.set(curr, (freqsMap.get(curr) || 0) + 1)
+	for (let i = 1; i < vector.length; i++) {
+		if (vector[i] === vector[i - 1]) {
+			currentCount++
+		} else {
+			if (currentCount > maxCount) {
+				modes = [currentMode]
+				maxCount = currentCount
+			} else if (currentCount === maxCount) {
+				modes.push(currentMode)
+			}
+			currentMode = vector[i]
+			currentCount = 1
+		}
+	}
 
-		const maxCount = freqsMap.get(curr)! > accu.maxCount
-			? freqsMap.get(curr)!
-			: accu.maxCount
-		const modes = freqsMap.get(curr) === accu.maxCount
-			? [...accu.modes, curr]
-			: freqsMap.get(curr)! > accu.maxCount
-				? [curr]
-				: accu.modes
+	// Check the last element
+	if (currentCount > maxCount) {
+		modes = [currentMode]
+	} else if (currentCount === maxCount) {
+		modes.push(currentMode)
+	}
 
-		return { freqsMap, maxCount, modes }
-	}, { freqsMap: new globalThis.Map<T, number>(), maxCount: 1, modes: [] as T[] })).modes
+	return modes
 }
-
+/**
+ * Computes the interquartile range of an array
+ * @param vector A sorted array
+ * @returns The interquartile range of the input array
+ */
 export function interQuartileRange(vector: number[]) {
 
-	const percentile25 = firstQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
-	const percentile75 = thirdQuartile(vector, (a, b) => { return a > b ? 1 : -1 })
+	const percentile25 = firstQuartile(vector)
+	const percentile75 = thirdQuartile(vector)
 	return percentile25 && percentile75 ? percentile75 - percentile25 : undefined
 }
 
