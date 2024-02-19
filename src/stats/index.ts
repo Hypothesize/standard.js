@@ -156,34 +156,25 @@ export function multiMode<T>(vector: Array<T>): T[] {
 	if (vector.length === 0) {
 		return [] // Return an empty array for an empty input array
 	}
-	let modes: Array<T> = []
-	let currentMode = vector[0]
-	let currentCount = 1
-	let maxCount = 1
 
-	for (let i = 1; i < vector.length; i++) {
-		if (vector[i] === vector[i - 1]) {
-			currentCount++
-		} else {
-			if (currentCount > maxCount) {
-				modes = [currentMode]
-				maxCount = currentCount
-			} else if (currentCount === maxCount) {
-				modes.push(currentMode)
-			}
-			currentMode = vector[i]
-			currentCount = 1
+	const modeInfo = vector.reduce((acc, curr, i) => {
+		if (curr === vector[i + 1]) {
+			acc.currentCount++
 		}
-	}
-
-	// Check the last element
-	if (currentCount > maxCount) {
-		modes = [currentMode]
-	} else if (currentCount === maxCount) {
-		modes.push(currentMode)
-	}
-
-	return modes
+		else {
+			if (acc.currentCount > acc.maxCount) {
+				acc.modes = [acc.currentMode]
+				acc.maxCount = acc.currentCount
+			}
+			else if (acc.currentCount === acc.maxCount) {
+				acc.modes = [...acc.modes, acc.currentMode]
+			}
+			acc.currentMode = vector[i + 1]
+			acc.currentCount = 1
+		}
+		return acc
+	}, { modes: [] as Array<T>, currentMode: vector[0], currentCount: 1, maxCount: 1 })
+	return modeInfo.modes
 }
 /**
  * Computes the interquartile range of an array

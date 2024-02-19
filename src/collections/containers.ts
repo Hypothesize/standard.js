@@ -14,9 +14,9 @@ import {
 	reduce, reduceAsync,
 	forEach, forEachAsync,
 	intersection,
-	every, everyAsync,
+	every,
 	union,
-	some, someAsync,
+	some,
 	except,
 	complement,
 	toArrayAsync
@@ -38,7 +38,7 @@ import {
 	Filter, FilterGroup, SortOrder,
 	ColumnarData
 } from "./types"
-
+import { objectFromTuples } from "../object"
 
 
 /** Lazy collection of elements accessed sequentially, not known in advance */
@@ -541,6 +541,31 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 	/** Return a new data table that excludes data disallowed by the passed filters */
 	filter(args: { filter?: Predicate<T, void> | Filter<T> | FilterGroup<T>, options?: FilterOptions }): DataTable<T> {
 
+		const columnsWithOutlierFilter = args.filter !== undefined && typeof (args.filter) !== "function" ? this.columnsWithOutlierFilter(args.filter) : []
+		const averageAndDev = objectFromTuples(columnsWithOutlierFilter.map(colName => [colName, (() => {
+			const colVector: unknown[] | undefined = colName === "rowId"
+				? this.idVector
+				: this._colVectors.get(colName as keyof T)
+			if (colVector === undefined) {
+				throw new Error(`Trying to apply a filter on column ${colName}, but no such column in the dataTable`)
+			}
+			const vector: number[] = colVector.filter(v => v !== undefined).map(val => Number.parseFloat(String(val)))
+			const columnMean = mean(vector)
+			const stdv = deviation(vector, { mean: columnMean, forSample: true })
+			if (columnMean === undefined) {
+				throw new Error("Undefined mean, cannot filter by standard deviation")
+			}
+			if (stdv === undefined) {
+				throw new Error("Undefined std dev, cannot filter by standard deviation")
+			}
+
+			return {
+				average: columnMean,
+				std: stdv
+			}
+		})()]))
+
+
 		const shouldRetain = (row: T, _filter: Predicate<T, void> | Filter<T> | FilterGroup<T>): boolean => {
 			if ("filters" in _filter) {
 				switch (_filter.combinator) {
@@ -556,29 +581,9 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 			}
 			else if ("fieldName" in _filter) {
 
-				let averageAndDev: { average: number, std: number } = { average: 0, std: 0 }
-				if (_filter.operator === "is_outlier_by") {
-					const originalIdVector = this.idVector
-					const colVector: unknown[] | undefined = _filter.fieldName === "rowId"
-						? originalIdVector
-						: this._colVectors.get(_filter.fieldName as keyof T)
-					if (colVector === undefined) {
-						throw new Error(`Trying to apply a filter on column ${String(_filter.fieldName)}, but no such column in the dataTable`)
-					}
-					const vector: number[] = colVector.filter(v => v !== undefined).map(val => Number.parseFloat(String(val)))
-					const columnMean = mean(vector)
-					const stdv = deviation(vector, { mean: columnMean, forSample: true })
-					if (columnMean === undefined) { throw new Error("Undefined mean, cannot filter by standard deviation") }
-					if (stdv === undefined) { throw new Error("Undefined std dev, cannot filter by standard deviation") }
-
-					averageAndDev = {
-						average: columnMean,
-						std: stdv
-					}
-				}
-
 				const _test = "negated" in _filter && _filter.negated ? false : true
 				const _val = row[_filter.fieldName as keyof T]
+				const _colName = _filter.fieldName as string
 
 				switch (_filter.operator) {
 					case "equals":
@@ -598,8 +603,8 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						return (parseFloat(String(_val)) <= parseFloat(_filter.value as any)) === _test
 					case "is_outlier_by": {
-						const belowMin = parseFloat(String(_val)) < averageAndDev.average - parseFloat(_filter.value as any) * averageAndDev.std
-						const aboveMax = parseFloat(String(_val)) > averageAndDev.average + parseFloat(_filter.value as any) * averageAndDev.std
+						const belowMin = parseFloat(String(_val)) < averageAndDev[_colName].average - parseFloat(_filter.value.toString()) * averageAndDev[_colName].std
+						const aboveMax = parseFloat(String(_val)) > averageAndDev[_colName].average + parseFloat(_filter.value.toString()) * averageAndDev[_colName].std
 						return (belowMin || aboveMax) === _test
 					}
 					case "contains":
@@ -691,6 +696,25 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 			}
 		})
 		return columnVectors
+	}
+
+	/** Recursively checks if a FilterGroup includes "is_outlier_by" filter */
+	columnsWithOutlierFilter = (filters: Filter<T> | FilterGroup<T>): string[] => {
+		const columnNames = "filters" in filters
+			? filters.filters.reduce((acc, f) => {
+				return [
+					...acc,
+					..."filters" in f
+						? this.columnsWithOutlierFilter(f)
+						: f.operator === "is_outlier_by"
+							? [f.fieldName as string]
+							: []
+				]
+			}, [] as string[])
+			: filters.operator === "is_outlier_by"
+				? [filters.fieldName as string]
+				: []
+		return columnNames
 	}
 }
 
