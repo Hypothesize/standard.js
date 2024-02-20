@@ -1,7 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-
 import * as assert from "assert"
 import {
 	min, max, sum, mean,
@@ -180,14 +176,14 @@ describe('Stats', function () {
 			assert.deepStrictEqual(actual, expected)
 		})
 
-		it('should return 1 when passing an array of 3 zeros and 4 ones', function () {
+		it('should return 1 when passing an array two repeated values', function () {
 			const actual = mode([0, 0, 0, 1, 1, 1, 1])
 			const expected = 1
 
 			assert.deepStrictEqual(actual, expected)
 		})
 
-		it('should return 5 when passing an array of different values but with the value "5" with more occurrences', function () {
+		it('should return 5 when passing an array of different repeated values but with the value "5" with the most occurrences', function () {
 			const actual = mode([2, 3, 3, 4, 5, 5, 5, 6, 6, 7, 7, 13, 13, 14, 23, 43, 45, 45])
 			const expected = 5
 

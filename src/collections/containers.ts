@@ -45,52 +45,86 @@ import { objectFromTuples } from "../object"
 export class Sequence<X> implements Iterable<X> {
 	protected _iterable: Iterable<X>
 
-	constructor(iterable: Iterable<X>) { this._iterable = iterable }
-	protected ctor(iterable: Iterable<X>): this { return new Sequence(iterable) as this }
+	constructor(iterable: Iterable<X>) {
+		this._iterable = iterable 
+	}
+	protected ctor(iterable: Iterable<X>): this {
+		return new Sequence(iterable) as this 
+	}
 
-	[Symbol.iterator](): Iterator<X> { return this._iterable[Symbol.iterator]() }
+	[Symbol.iterator](): Iterator<X> {
+		return this._iterable[Symbol.iterator]() 
+	}
 
 	/** Convert to another iterable container type */
-	to<C extends Iterable<X>>(container: { (items: Iterable<X>): C }) { return container([...this]) }
+	to<C extends Iterable<X>>(container: { (items: Iterable<X>): C }) {
+		return container([...this]) 
+	}
 
-	toArray() { return [...this] }
+	toArray() {
+		return [...this] 
+	}
 
-	take(n: number) { return this.ctor(take(this, n)) }
-	skip(n: number) { return this.ctor(skip(this, n)) }
+	take(n: number) {
+		return this.ctor(take(this, n)) 
+	}
+	skip(n: number) {
+		return this.ctor(skip(this, n)) 
+	}
 
-	takeWhile(predicate: Predicate<X, number | void>) { return this.ctor(takeWhile(this, predicate)) }
-	skipWhile(predicate: Predicate<X, number | void>) { return this.ctor(skipWhile(this, predicate)) }
+	takeWhile(predicate: Predicate<X, number | void>) {
+		return this.ctor(takeWhile(this, predicate)) 
+	}
+	skipWhile(predicate: Predicate<X, number | void>) {
+		return this.ctor(skipWhile(this, predicate)) 
+	}
 
 	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to the elements
 	 * @returns First element (as defined above) of this sequence
 	 * @throws An error if such a first element cannot found
 	 */
-	first(predicate?: Predicate<X>) { return first(this, predicate) }
+	first(predicate?: Predicate<X>) {
+		return first(this, predicate) 
+	}
 	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to elements
 	 * @param defaultValue Optional default value to return if first element is not found (defaults to <undefined>)
 	 * @returns First element (as defined above) of this sequence, or the defaultValue argument, if not found
 	 */
-	firstOrDefault(predicate?: Predicate<X>, defaultValue?: X) { return firstOrDefault(this, { predicate, defaultValue }) }
+	firstOrDefault(predicate?: Predicate<X>, defaultValue?: X) {
+		return firstOrDefault(this, { predicate, defaultValue }) 
+	}
 
 	/** Get last element (or last element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to elements
 	 * @returns Last element (as defined above) of this sequence 
 	 * @throws An error if such a last element cannot found
 	 */
-	last(predicate?: Predicate<X>) { return last(this, predicate) }
+	last(predicate?: Predicate<X>) {
+		return last(this, predicate) 
+	}
 	/** Get last element (or last element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to elements
 	 * @param defaultValue Optional default value to return if last element is not found (defaults to <undefined>)
 	 * @returns Last element (as defined above) of this sequence, or the defaultValue argument, if not found
 	 */
-	lastOrDefault(predicate?: Predicate<X>, defaultValue?: X) { return lastOrDefault(this, { predicate, defaultValue }) }
+	lastOrDefault(predicate?: Predicate<X>, defaultValue?: X) {
+		return lastOrDefault(this, { predicate, defaultValue }) 
+	}
 
-	filter(predicate: Predicate<X>) { return this.ctor(filter(this, predicate)) }
-	map<Y>(projector: Projector<X, Y>) { return new Sequence(map(this, projector)) }
-	reduce<Y>(initial: Y, reducer: Reducer<X, Y>) { return new Sequence(reduce(this, initial, reducer)) }
-	forEach(action: Projector<X>) { return forEach(this, action) }
+	filter(predicate: Predicate<X>) {
+		return this.ctor(filter(this, predicate)) 
+	}
+	map<Y>(projector: Projector<X, Y>) {
+		return new Sequence(map(this, projector)) 
+	}
+	reduce<Y>(initial: Y, reducer: Reducer<X, Y>) {
+		return new Sequence(reduce(this, initial, reducer)) 
+	}
+	forEach(action: Projector<X>) {
+		return forEach(this, action) 
+	}
 
 	/** Generate sequence of integers including 'from' and 'to' values if provided */
 	static integers(args: { from: number, to: number } | { from: number, direction: "upwards" | "downwards" }) {
@@ -134,22 +168,40 @@ export class SequenceAsync<X> implements AsyncIterable<X> {
 	protected _iterable: AsyncIterable<X>
 
 	constructor(iterable: AsyncIterable<X> | Iterable<X>) {
-		this._iterable = isAsyncIterable(iterable) ? iterable : (async function* () { yield* iterable })()
+		this._iterable = isAsyncIterable(iterable) ? iterable : (async function* () {
+			yield* iterable 
+		})()
 	}
-	protected ctor(iterable: AsyncIterable<X>): this { return new SequenceAsync(iterable) as this }
+	protected ctor(iterable: AsyncIterable<X>): this {
+		return new SequenceAsync(iterable) as this 
+	}
 
-	[Symbol.asyncIterator](): AsyncIterator<X> { return this._iterable[Symbol.asyncIterator]() }
+	[Symbol.asyncIterator](): AsyncIterator<X> {
+		return this._iterable[Symbol.asyncIterator]() 
+	}
 
 	/** Convert to another iterable container type */
-	to<C extends AsyncIterable<X>>(container: { (items: AsyncIterable<X>): C }) { return container(this) }
+	to<C extends AsyncIterable<X>>(container: { (items: AsyncIterable<X>): C }) {
+		return container(this) 
+	}
 
-	toArrayAsync() { return toArrayAsync(this) }
+	toArrayAsync() {
+		return toArrayAsync(this) 
+	}
 
-	takeAsync(n: number) { return this.ctor(takeAsync(this, n)) }
-	skipAsync(n: number) { return this.ctor(skipAsync(this, n)) }
+	takeAsync(n: number) {
+		return this.ctor(takeAsync(this, n)) 
+	}
+	skipAsync(n: number) {
+		return this.ctor(skipAsync(this, n)) 
+	}
 
-	takeWhileAsync(predicate: PredicateAsync<X, number | void>) { return this.ctor(takeWhileAsync(this, predicate)) }
-	skipWhileAsync(predicate: PredicateAsync<X, number | void>) { return this.ctor(skipWhileAsync(this, predicate)) }
+	takeWhileAsync(predicate: PredicateAsync<X, number | void>) {
+		return this.ctor(takeWhileAsync(this, predicate)) 
+	}
+	skipWhileAsync(predicate: PredicateAsync<X, number | void>) {
+		return this.ctor(skipWhileAsync(this, predicate)) 
+	}
 
 
 	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
@@ -157,31 +209,47 @@ export class SequenceAsync<X> implements AsyncIterable<X> {
 	 * @returns First element (as defined above) of this sequence
 	 * @throws An error if such a first element cannot found
 	 */
-	firstAsync(predicate?: Predicate<X>) { return firstAsync(this, predicate) }
+	firstAsync(predicate?: Predicate<X>) {
+		return firstAsync(this, predicate) 
+	}
 	/** Get first element (or first element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to elements
 	 * @param defaultValue Optional default value to return if first element is not found (defaults to <undefined>)
 	 * @returns First element (as defined above) of this sequence, or the defaultValue argument, if not found
 	 */
-	firstOrDefaultAsync(predicate?: Predicate<X>, defaultValue?: X) { return firstOrDefaultAsync(this, { predicate, defaultValue }) }
+	firstOrDefaultAsync(predicate?: Predicate<X>, defaultValue?: X) {
+		return firstOrDefaultAsync(this, { predicate, defaultValue }) 
+	}
 
 	/** Get last element (or last element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to elements
 	 * @returns Last element (as defined above) of this sequence 
 	 * @throws An error if such a last element cannot found
 	 */
-	lastAsync(predicate?: Predicate<X>) { return lastAsync(this, predicate) }
+	lastAsync(predicate?: Predicate<X>) {
+		return lastAsync(this, predicate) 
+	}
 	/** Get last element (or last element to satisfy a predicate, if supplied) of this sequence
 	 * @param predicate Optional predicate applied to elements
 	 * @param defaultValue Optional default value to return if last element is not found (defaults to <undefined>)
 	 * @returns Last element (as defined above) of this sequence, or the defaultValue argument, if not found
 	 */
-	lastOrDefaultAsync(predicate?: Predicate<X>, defaultValue?: X) { return lastOrDefaultAsync(this, { predicate, defaultValue }) }
+	lastOrDefaultAsync(predicate?: Predicate<X>, defaultValue?: X) {
+		return lastOrDefaultAsync(this, { predicate, defaultValue }) 
+	}
 
-	filterAsync(predicate: PredicateAsync<X>) { return this.ctor(filterAsync(this, predicate)) }
-	mapAsync<Y>(projector: ProjectorAsync<X, Y>) { return new SequenceAsync(mapAsync(this, projector)) }
-	reduceAsync<Y>(initial: Y, reducer: ReducerAsync<X, Y>) { return new SequenceAsync(reduceAsync(this, initial, reducer)) }
-	forEachAsync(action: Projector<X>) { return forEachAsync(this, action) }
+	filterAsync(predicate: PredicateAsync<X>) {
+		return this.ctor(filterAsync(this, predicate)) 
+	}
+	mapAsync<Y>(projector: ProjectorAsync<X, Y>) {
+		return new SequenceAsync(mapAsync(this, projector)) 
+	}
+	reduceAsync<Y>(initial: Y, reducer: ReducerAsync<X, Y>) {
+		return new SequenceAsync(reduceAsync(this, initial, reducer)) 
+	}
+	forEachAsync(action: Projector<X>) {
+		return forEachAsync(this, action) 
+	}
 
 }
 
@@ -205,47 +273,81 @@ export class Set<X> extends Sequence<X> {
 				}
 				return me._set
 			},
-			get iterable() { return me._iterable },
+			get iterable() {
+				return me._iterable 
+			},
 		}))(this)
 	}
 
-	protected ctor(iterable: Iterable<X>): this { return new Set(iterable) as this }
+	protected ctor(iterable: Iterable<X>): this {
+		return new Set(iterable) as this 
+	}
 
-	get size(): number { return this.core.set.size }
-	get length(): number { return this.size }
+	get size(): number {
+		return this.core.set.size 
+	}
+	get length(): number {
+		return this.size 
+	}
 
 	/** Returns true if this array contains an element equal to value */
-	contains(value: X) { return this.core.set.has(value) }
+	contains(value: X) {
+		return this.core.set.has(value) 
+	}
 	/** Synonym of contains */
-	has(value: X): boolean { return this.contains(value) }
+	has(value: X): boolean {
+		return this.contains(value) 
+	}
 	/** Synonym of contains */
-	includes(value: X) { return this.contains(value) }
+	includes(value: X) {
+		return this.contains(value) 
+	}
 
-	some(predicate: Predicate<X, number>): boolean { return some(this, predicate) }
-	every(predicate: Predicate<X, number>): boolean { return every(this, predicate) }
+	some(predicate: Predicate<X, number>): boolean {
+		return some(this, predicate) 
+	}
+	every(predicate: Predicate<X, number>): boolean {
+		return every(this, predicate) 
+	}
 
-	map<Y>(projector: Projector<X, Y>) { return new Set<Y>(map(this, projector)) }
+	map<Y>(projector: Projector<X, Y>) {
+		return new Set<Y>(map(this, projector)) 
+	}
 
-	union(collections: Iterable<X>[]) { return this.ctor(union([this, ...collections])) }
+	union(collections: Iterable<X>[]) {
+		return this.ctor(union([this, ...collections])) 
+	}
 
-	intersection(others: (Iterable<X> & Finite)[]) { return this.ctor(intersection(others)) }
+	intersection(others: (Iterable<X> & Finite)[]) {
+		return this.ctor(intersection(others)) 
+	}
 
 	/** All items in this set, except those in any of the input arrays */
-	except(...excluded: (Iterable<X> & Finite)[]): Iterable<X> { return this.ctor(except(this, ...excluded)) }
+	except(...excluded: (Iterable<X> & Finite)[]): Iterable<X> {
+		return this.ctor(except(this, ...excluded)) 
+	}
 
 	/** All items in input collection but not in this set */
-	complement(universe: Iterable<X>): Iterable<X> { return complement([...this], universe) }
+	complement(universe: Iterable<X>): Iterable<X> {
+		return complement([...this], universe) 
+	}
 
-	equals(other: Set<X>) { return (this.size === other.size) && this.every(x => other.has(x)) }
+	equals(other: Set<X>) {
+		return (this.size === other.size) && this.every(x => other.has(x)) 
+	}
 	static equals<T>(...collections: (Iterable<T> & Finite)[]) {
 		const firstSet = new Set(collections[0])
 		return new Array(collections).skip(1).every(st => new Set(st).equals(firstSet))
 	}
 
 
-	sort(comparer?: Ranker<X>) { return this.ctor([...this].sort(comparer)) }
+	sort(comparer?: Ranker<X>) {
+		return this.ctor([...this].sort(comparer)) 
+	}
 
-	sortDescending(comparer?: Ranker<X>) { return new Array([...this].sort(comparer).reverse()) }
+	sortDescending(comparer?: Ranker<X>) {
+		return new Array([...this].sort(comparer).reverse()) 
+	}
 }
 
 /** Eager, ordered, material collection */
@@ -279,8 +381,12 @@ export class Array<X> extends Set<X> {
 		}))(this)
 	}
 
-	get length() { return this.core.array.length }
-	get size() { return this.length }
+	get length() {
+		return this.core.array.length 
+	}
+	get size() {
+		return this.length 
+	}
 
 	get(index: number): X
 	get(indices: Iterable<number>): X[]
@@ -297,7 +403,9 @@ export class Array<X> extends Set<X> {
 		}
 	}
 
-	equals(other: Array<X>) { return (this.size === other.size) && this.every((x, index) => x === other.get(index)) }
+	equals(other: Array<X>) {
+		return (this.size === other.size) && this.every((x, index) => x === other.get(index)) 
+	}
 	static equals<T>(...collections: (Iterable<T> & Finite)[]) {
 		const firstArray = new Array(collections[0])
 		return new Array(collections).skip(1).every(collection => new Array(collection).equals(firstArray))
@@ -310,22 +418,34 @@ export class Array<X> extends Set<X> {
 			: this.entries().filter(kv => args.predicate(kv[1], kv[0]) === true).map(kv => kv[0])
 	}
 
-	entries() { return new Array(this.core.array.entries()) }
+	entries() {
+		return new Array(this.core.array.entries()) 
+	}
 
 	/** Get unique items in this array
 	 * ToDo: Implement use of comparer in the include() call
 	 */
-	unique() { return this.ctor(unique(this)) }
+	unique() {
+		return this.ctor(unique(this)) 
+	}
 
 	/** Returns new array containing this array's elements in reverse order */
 
-	reverse() { return this.ctor([...this].reverse()) }
+	reverse() {
+		return this.ctor([...this].reverse()) 
+	}
 
 	/** Array-specific implementation of map() */
-	map<Y>(projector: Projector<X, Y>) { return new Array<Y>(map(this, projector)) }
+	map<Y>(projector: Projector<X, Y>) {
+		return new Array<Y>(map(this, projector)) 
+	}
 
-	min(ranker: Ranker<X>) { return min([...this], ranker) }
-	max(ranker: Ranker<X>) { return max([...this], ranker) }
+	min(ranker: Ranker<X>) {
+		return min([...this], ranker) 
+	}
+	max(ranker: Ranker<X>) {
+		return max([...this], ranker) 
+	}
 
 	removeSliceCounted(index: number, count: number) {
 
@@ -350,13 +470,17 @@ export class Array<X> extends Set<X> {
 
 /** Numeric array with extra methods */
 export class ArrayNumeric extends Array<number> {
-	ctor(iterable: Iterable<number>): this { return new ArrayNumeric(iterable) as this }
+	ctor(iterable: Iterable<number>): this {
+		return new ArrayNumeric(iterable) as this 
+	}
 
 	static fromRange(from: number, to: number, opts?: { mode: "width", width: number } | { mode: "count", count: number }) {
 		return new ArrayNumeric(Sequence.fromRange(from, to, opts))
 	}
 
-	sum() { return sum([...this]) }
+	sum() {
+		return sum([...this]) 
+	}
 
 	map(projector: Projector<number, number>): ArrayNumeric
 	map<Y>(projector: Projector<number, Y>): Array<Y>
@@ -382,7 +506,9 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 	private readonly obj: Readonly<T>
 	// eslint-disable-next-line brace-style
 
-	constructor(obj: T) { this.obj = Object.freeze({ ...obj }) }
+	constructor(obj: T) {
+		this.obj = Object.freeze({ ...obj }) 
+	}
 
 	static fromKeyValues<K extends string, V>(keyValues: Iterable<Tuple<K, V>>) {
 		const obj = {} as Record<K, V>
@@ -393,17 +519,27 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 		return Dictionary.fromKeyValues(arr.map((elt, i) => new Tuple(i.toString(), elt)))
 	}
 
-	[Symbol.iterator]() { return this.entries()[Symbol.iterator]() }
+	[Symbol.iterator]() {
+		return this.entries()[Symbol.iterator]() 
+	}
 
-	asObject() { return { ...this.obj } }
+	asObject() {
+		return { ...this.obj } 
+	}
 
-	get size() { return this.keys().length }
+	get size() {
+		return this.keys().length 
+	}
 
 	/** TODO: Memoize this method? */
-	keys() { return Object.keys(this.obj) as (keyof T)[] }
+	keys() {
+		return Object.keys(this.obj) as (keyof T)[] 
+	}
 
 	/** TODO: Memoize this method? */
-	values() { return Object.values(this.obj) as T[keyof T][] }
+	values() {
+		return Object.values(this.obj) as T[keyof T][] 
+	}
 
 	/** Check whether this dictionary contains a specific key or value */
 	has(arg: { key: keyof T } | { value: T[keyof T] }) {
@@ -413,7 +549,9 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 	}
 
 	/** TODO: Memoize this method? */
-	entries() { return Object.entries(this.obj) as Tuple<keyof T, T[keyof T]>[] }
+	entries() {
+		return Object.entries(this.obj) as Tuple<keyof T, T[keyof T]>[] 
+	}
 
 	pick<K extends keyof T>(keys: K[]) {
 		const result = {} as Pick<T, K>
@@ -442,8 +580,12 @@ export class Dictionary<T extends Record<string, unknown>> implements Iterable<T
 		else
 			return this.obj[selector]
 	}
-	tryGet(selector: keyof T): T[keyof T] | undefined { return this.obj[selector] }
-	getAll(selector: Iterable<keyof T>): Iterable<T[keyof T] | undefined> { return map(selector, index => this.obj[index]) }
+	tryGet(selector: keyof T): T[keyof T] | undefined {
+		return this.obj[selector] 
+	}
+	getAll(selector: Iterable<keyof T>): Iterable<T[keyof T] | undefined> {
+		return map(selector, index => this.obj[index]) 
+	}
 
 	set(key: keyof T, value: T[keyof T]) {
 		return new Dictionary({ ...this.obj, [key]: value })
@@ -503,10 +645,14 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 		return new DataTable(rowObjects, idVector)
 	}
 
-	get idVector() { return this._idVector }
+	get idVector() {
+		return this._idVector 
+	}
 
 	/** Columns vectors excluding row ids vector */
-	get columnVectors() { return this._colVectors }
+	get columnVectors() {
+		return this._colVectors 
+	}
 
 	/** Return data as an iterable of rows that includes a sequential row number property */
 	get rowObjects(): Iterable<T> {
@@ -535,8 +681,12 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 		})(this)
 	}
 
-	get length() { return this._idVector.length }
-	get originalLength() { return this._colVectors.get(this._colVectors.keys()[0])?.length || 0 }
+	get length() {
+		return this._idVector.length 
+	}
+	get originalLength() {
+		return this._colVectors.get(this._colVectors.keys()[0])?.length || 0 
+	}
 
 	/** Return a new data table that excludes data disallowed by the passed filters */
 	filter(args: { filter?: Predicate<T, void> | Filter<T> | FilterGroup<T>, options?: FilterOptions }): DataTable<T> {
@@ -569,14 +719,14 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 		const shouldRetain = (row: T, _filter: Predicate<T, void> | Filter<T> | FilterGroup<T>): boolean => {
 			if ("filters" in _filter) {
 				switch (_filter.combinator) {
-					case undefined:
-					case "AND": return _filter.filters.every(f => shouldRetain(row, f))
-					case "OR": return _filter.filters.some(f => shouldRetain(row, f))
-					default: {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const _: never = _filter.combinator
-						throw new Error(`Unknown filter group combinator: ${_filter.combinator}`)
-					}
+				case undefined:
+				case "AND": return _filter.filters.every(f => shouldRetain(row, f))
+				case "OR": return _filter.filters.some(f => shouldRetain(row, f))
+				default: {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const _: never = _filter.combinator
+					throw new Error(`Unknown filter group combinator: ${_filter.combinator}`)
+				}
 				}
 			}
 			else if ("fieldName" in _filter) {
@@ -586,47 +736,47 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 				const _colName = _filter.fieldName as string
 
 				switch (_filter.operator) {
-					case "equals":
-						return (_val == _filter.value) === _test
-					case "not_equal_to":
-						return (_val != _filter.value) === _test
-					case "greater_than":
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						return (parseFloat(String(_val)) > parseFloat(_filter.value as any)) === _test
-					case "greater_than_or_equals":
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						return (parseFloat(String(_val)) >= parseFloat(_filter.value as any)) === _test
-					case "less_than":
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						return (parseFloat(String(_val)) < parseFloat(_filter.value as any)) === _test
-					case "less_than_or_equals":
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						return (parseFloat(String(_val)) <= parseFloat(_filter.value as any)) === _test
-					case "is_outlier_by": {
-						const belowMin = parseFloat(String(_val)) < averageAndDev[_colName].average - parseFloat(_filter.value.toString()) * averageAndDev[_colName].std
-						const aboveMax = parseFloat(String(_val)) > averageAndDev[_colName].average + parseFloat(_filter.value.toString()) * averageAndDev[_colName].std
-						return (belowMin || aboveMax) === _test
-					}
-					case "contains":
-						return (hasValue(_val) && String(_val).indexOf(_filter.value) >= 0) === _test
-					case "is_contained_in":
-						return (hasValue(_val) && _filter.value.indexOf(String(_val)) >= 0) === _test
-					case "starts_with":
-						return (_val !== undefined && _val !== null && String(_val).startsWith(_filter.value)) === _test
-					case "ends_with":
-						return (_val !== undefined && _val !== null && String(_val).endsWith(_filter.value)) === _test
-					case "is_blank":
-						return _val === undefined || _val === null === _test
+				case "equals":
+					return (_val == _filter.value) === _test
+				case "not_equal_to":
+					return (_val != _filter.value) === _test
+				case "greater_than":
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					return (parseFloat(String(_val)) > parseFloat(_filter.value as any)) === _test
+				case "greater_than_or_equals":
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					return (parseFloat(String(_val)) >= parseFloat(_filter.value as any)) === _test
+				case "less_than":
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					return (parseFloat(String(_val)) < parseFloat(_filter.value as any)) === _test
+				case "less_than_or_equals":
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					return (parseFloat(String(_val)) <= parseFloat(_filter.value as any)) === _test
+				case "is_outlier_by": {
+					const belowMin = parseFloat(String(_val)) < averageAndDev[_colName].average - parseFloat(_filter.value.toString()) * averageAndDev[_colName].std
+					const aboveMax = parseFloat(String(_val)) > averageAndDev[_colName].average + parseFloat(_filter.value.toString()) * averageAndDev[_colName].std
+					return (belowMin || aboveMax) === _test
+				}
+				case "contains":
+					return (hasValue(_val) && String(_val).indexOf(_filter.value) >= 0) === _test
+				case "is_contained_in":
+					return (hasValue(_val) && _filter.value.indexOf(String(_val)) >= 0) === _test
+				case "starts_with":
+					return (_val !== undefined && _val !== null && String(_val).startsWith(_filter.value)) === _test
+				case "ends_with":
+					return (_val !== undefined && _val !== null && String(_val).endsWith(_filter.value)) === _test
+				case "is_blank":
+					return _val === undefined || _val === null === _test
 
-					case "in": return globalThis.Array.isArray(_filter.value)
-						? _filter.value.includes(_val)
-						: _filter.value !== undefined && _filter.value !== null && String(_filter.value).split(",").includes(String(_val))
+				case "in": return globalThis.Array.isArray(_filter.value)
+					? _filter.value.includes(_val)
+					: _filter.value !== undefined && _filter.value !== null && String(_filter.value).split(",").includes(String(_val))
 
-					default: {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						throw new Error(`Unknown filter operator: ${(_filter as any).operator}`)
-					}
+				default: {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					throw new Error(`Unknown filter operator: ${(_filter as any).operator}`)
+				}
 				}
 			}
 			else {
@@ -655,10 +805,10 @@ export class DataTable<T extends Obj = Obj> /*implements Table<T>*/ {
 			createRanker<number>(rowNum => args.columnName === this.ROW_NUM_COL_NAME
 				? rowNum
 				: this._colVectors.get(args.columnName)[rowNum],
-				{
-					tryNumeric: args.options?.tryNumericSort ?? true,
-					reverse: args.order === "descending"
-				}
+			{
+				tryNumeric: args.options?.tryNumericSort ?? true,
+				reverse: args.order === "descending"
+			}
 			)
 		)
 

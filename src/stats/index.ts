@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable no-shadow */
-/* eslint-disable brace-style */
 import { Tuple, isNumber } from "../utility"
 import { reduce, lastOrDefault, filter, map } from "../collections/combinators"
 import { Ranker } from "../functional"
@@ -9,14 +6,14 @@ export function min(vector: Iterable<number>): number | undefined
 export function min<T>(vector: Iterable<T>, ranker: Ranker<T>): T | undefined
 export function min<T>(vector: Iterable<T> | Iterable<number>, ranker?: Ranker<unknown>) {
 
-	let min = undefined as T | number | undefined
+	let minVal = undefined as T | number | undefined
 
 	for (const x of vector) {
-		if (min === undefined || (ranker && ranker(x, (min as T | number)) < 0) || (!ranker && x < (min as T | number)))
-			min = x
+		if (minVal === undefined || (ranker && ranker(x, (minVal as T | number)) < 0) || (!ranker && x < (minVal as T | number)))
+			minVal = x
 	}
 
-	return min
+	return minVal
 }
 
 export function max<T>(vector: Iterable<number>): number | undefined
@@ -123,24 +120,33 @@ export function median<T>(vector: Array<T>): T | undefined {
 			: first
 	}
 }
-
-export function firstQuartile<T>(vector: Array<T>) {
-	return vector[Math.floor(0.25 * vector.length)]
+/**
+ * Calculates the first quartile of an array of values
+ * @param sortedVector A sorted array
+ * @returns the first quartile of the input array
+ */
+export function firstQuartile<T>(sortedVector: Array<T>) {
+	return sortedVector[Math.floor(0.25 * sortedVector.length)]
 }
 
-export function thirdQuartile<T>(vector: Array<T>) {
-	return vector[Math.ceil(0.75 * vector.length) - 1]
+/**
+ * Calculates the third quartile of an array of values
+ * @param sortedVector A sorted array
+ * @returns the third quartile of the input array
+ */
+export function thirdQuartile<T>(sortedVector: Array<T>) {
+	return sortedVector[Math.ceil(0.75 * sortedVector.length) - 1]
 }
 
 /** Computes the mode of a set of values. It uses the "multimode" function but instead of
  * returning an array of values, it will pick the middle one after sorting the modes array
- * @param vector A sorted array of values
+ * @param sortedVector A sorted array of values
  * @returns The mode of the input array
  */
-export function mode<T>(vector: Array<T>): T | undefined {
-	if (vector.length === 0) return undefined
+export function mode<T>(sortedVector: Array<T>): T | undefined {
+	if (sortedVector.length === 0) return undefined
 
-	const modes = multiMode(vector).sort()
+	const modes = multiMode(sortedVector).sort()
 	const index = modes.length % 2 === 0
 		? (modes.length / 2) - 1
 		: Math.floor(modes.length / 2)
@@ -149,16 +155,16 @@ export function mode<T>(vector: Array<T>): T | undefined {
 }
 
 /** Computes the mode of a sorted array of values. It returns an array of all the modes found 
- * @param vector A sorted array
+ * @param sortedVector A sorted array
  * @returns A sorted array of the modes
 */
-export function multiMode<T>(vector: Array<T>): T[] {
-	if (vector.length === 0) {
+export function multiMode<T>(sortedVector: Array<T>): T[] {
+	if (sortedVector.length === 0) {
 		return [] // Return an empty array for an empty input array
 	}
 
-	const modeInfo = vector.reduce((acc, curr, i) => {
-		if (curr === vector[i + 1]) {
+	const modeInfo = sortedVector.reduce((acc, curr, i) => {
+		if (curr === sortedVector[i + 1]) {
 			acc.currentCount++
 		}
 		else {
@@ -169,22 +175,22 @@ export function multiMode<T>(vector: Array<T>): T[] {
 			else if (acc.currentCount === acc.maxCount) {
 				acc.modes = [...acc.modes, acc.currentMode]
 			}
-			acc.currentMode = vector[i + 1]
+			acc.currentMode = sortedVector[i + 1]
 			acc.currentCount = 1
 		}
 		return acc
-	}, { modes: [] as Array<T>, currentMode: vector[0], currentCount: 1, maxCount: 1 })
+	}, { modes: [] as Array<T>, currentMode: sortedVector[0], currentCount: 1, maxCount: 1 })
 	return modeInfo.modes
 }
 /**
  * Computes the interquartile range of an array
- * @param vector A sorted array
+ * @param sortedVector A sorted array
  * @returns The interquartile range of the input array
  */
-export function interQuartileRange(vector: number[]) {
+export function interQuartileRange(sortedVector: number[]) {
 
-	const percentile25 = firstQuartile(vector)
-	const percentile75 = thirdQuartile(vector)
+	const percentile25 = firstQuartile(sortedVector)
+	const percentile75 = thirdQuartile(sortedVector)
 	return percentile25 && percentile75 ? percentile75 - percentile25 : undefined
 }
 
